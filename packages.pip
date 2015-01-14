@@ -1,0 +1,4 @@
+ipgetter==0.6
+pyflare==1.1.0
+PyYAML==3.11
+requests==2.5.1

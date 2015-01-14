@@ -1,0 +1,7 @@
+---
+cf_api_email: 'login_cloudflare@email.com'
+cf_api_key: 'CLOUDFLARE_API_KEY'
+cf_dns_zone: 'mydomain.com'
+cf_dns_host: 'www'
+email_login: 'myemail@gmail.com'
+email_pass: 'mypassword'
