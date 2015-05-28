@@ -9,7 +9,10 @@ class SelfMailer:
         self.config = yaml.load(stream)
         self.login = self.config["email_login"]
         self.password = self.config["email_pass"]
-        self.smtpserver = "smtp.gmail.com:587"
+        if not self.config["email_server"]:
+            self.smtpserver = "smtp.gmail.com:587"
+        else:
+            self.smtpserver = self.config["email_server"]
         self.toAddress = "Gonzalo Alvarez<gonzaloab@gmail.com>"
         self.fromAddress = "Newton Server<newton@gonzaloalvarez.es>"
 
@@ -41,7 +44,7 @@ class DNSUpdater:
         logging.debug('Retrieving cloudflare configuration')
         record = self.getHostRecord()
         if record == None:
-            logging.error('Failed to found host ' + self.config["cf_dns_host"])
+            logging.error('Failed to find host ' + self.config["cf_dns_host"])
             return
         if record["content"] == currentIp:
             logging.info('IP has not changed')
