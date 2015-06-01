@@ -17,4 +17,4 @@ if [ ! -d $ENV_PATH ]; then
     $ENV_PATH/bin/pip install -r packages.pip
 fi
 
-$ENV_PATH/bin/python $(basename "${BASH_SOURCE[0]}").py $@
+$ENV_PATH/bin/python $BASE_PATH/$(basename "${BASH_SOURCE[0]}").py $@

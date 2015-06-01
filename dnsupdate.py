@@ -1,6 +1,6 @@
 # Python DNS update for Cloud Flare
 
-import ipgetter, logging, yaml, smtplib
+import ipgetter, logging, yaml, smtplib, os
 from pyflare import PyflareClient
 
 class SelfMailer:
@@ -76,6 +76,6 @@ class DNSUpdater:
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
-    dnsUpdater = DNSUpdater('config.yaml')
+    dnsUpdater = DNSUpdater(os.path.join(os.path.dirname(os.path.realpath(__file__)),'config.yaml'))
     dnsUpdater.trigger();
 
