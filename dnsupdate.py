@@ -9,10 +9,10 @@ class SelfMailer:
         self.config = yaml.load(stream)
         self.login = self.config["email_login"]
         self.password = self.config["email_pass"]
-        if not self.config["email_server"]:
-            self.smtpserver = "smtp.gmail.com:587"
-        else:
+        if self.config.has_key("email_server"):
             self.smtpserver = self.config["email_server"]
+        else:
+            self.smtpserver = "smtp.gmail.com:587"
         self.toAddress = "Gonzalo Alvarez<gonzaloab@gmail.com>"
         self.fromAddress = "Newton Server<newton@gonzaloalvarez.es>"
 
