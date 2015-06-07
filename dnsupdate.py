@@ -42,7 +42,15 @@ class DNSUpdater:
         currentIp = ipgetter.myip()
         logging.info('Current IP: ' + currentIp)
         logging.debug('Retrieving cloudflare configuration')
-        record = self.getHostRecord()
+        if self.config.has_key("cf_dns_zone"):
+            domain = self.config["cf_dns_zone"]
+        else:
+            domains = self.getDomains()
+            if len(domains) != 1:
+                logging.error("Unkown domain. Update configuration and try again")
+                return
+            domain = domains[0]["display_name"]
+        record = self.getHostRecord(domain)
         if record == None:
             logging.error('Failed to find host ' + self.config["cf_dns_host"])
             return
@@ -56,11 +64,17 @@ class DNSUpdater:
             logging.info('IP Updated successfully')
             result = self.email.mailme('Newton Server IP Updated', 'Greetings,\n\nThe old IP was ' + record["content"] + ' and the new one is: ' + currentIp)
 
-    def getHostRecord(self):
-        records = self.cf.rec_load_all(self.config["cf_dns_zone"])
+    def getDomains(self):
+        domains_obj = self.cf.zone_load_multi()
+        domains = domains_obj["response"]["zones"]["objs"]
+        logging.debug('DNS Zones count: ' + str(len(domains)))
+        return domains
+
+    def getHostRecord(self, domain):
+        records = self.cf.rec_load_all(domain)
         found = False
         for record in records:
-            if record["name"] == (self.config["cf_dns_host"] + "." + self.config["cf_dns_zone"]):
+            if record["name"] == (self.config["cf_dns_host"] + "." + domain):
                 found = True
                 break
         if found:
