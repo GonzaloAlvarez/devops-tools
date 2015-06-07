@@ -2,10 +2,12 @@
 Sysadmin tools used primarly inside my systems, but can become useful for others.
 
 # Use
-Download requirements:
+It is not necessary to download any requirements. Simply use:
 ```
-pip install -r packages.pip
+./dnsupdate
 ```
+
+and you are good to go.
 
 # License
 These tools are available under [the MIT license](http://opensource.org/licenses/MIT)
