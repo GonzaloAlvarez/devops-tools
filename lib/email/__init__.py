@@ -1,1 +1,1 @@
-from .mailer import mailer
+from .gmail import GMail

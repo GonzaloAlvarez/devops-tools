@@ -2,6 +2,7 @@
 
 import ipgetter, logging, yaml, smtplib, os
 from pyflare import PyflareClient
+from lib.email import GMail
 
 class SelfMailer:
     def __init__(self, conffile):
@@ -98,7 +99,7 @@ class DNSUpdater:
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     config = Configuration(__file__, 'config.yaml')
-    print config.email_login
+    gmail = GMail(config.email_login, config.email_pass)
     dnsUpdater = DNSUpdater(os.path.join(os.path.dirname(os.path.realpath(__file__)),'config.yaml'))
     dnsUpdater.trigger();
 
