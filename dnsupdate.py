@@ -58,7 +58,7 @@ class DNSUpdater:
             logging.info('IP has not changed')
         else:
             self.updateHostRecord(record["rec_id"], currentIp)
-            updatedRecord = self.getHostRecord()
+            updatedRecord = self.getHostRecord(domain)
             if updatedRecord == None or updatedRecord["content"] != currentIp:
                 logging.error('Something went wrong when updating the record')
             logging.info('IP Updated successfully')

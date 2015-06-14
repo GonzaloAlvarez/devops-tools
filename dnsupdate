@@ -1,4 +1,5 @@
 #!/bin/bash
-source base.sh
-
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ENV_PATH="$BASE_PATH/.env"
+source $BASE_PATH/base.sh
 $ENV_PATH/bin/python $BASE_PATH/$(basename "${BASH_SOURCE[0]}").py $@
