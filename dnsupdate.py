@@ -30,6 +30,13 @@ class SelfMailer:
         logging.info('Email sent successfully')
         return result
 
+class Configuration:
+    def __init__(self, parentFile, configFileName):
+        self.confFileName = os.path.join(os.path.dirname(os.path.realpath(parentFile)), configFileName)
+        self.streamFile = open(self.confFileName, 'r')
+        self.confDict = yaml.safe_load(self.streamFile)
+        self.__dict__.update(self.confDict)
+
 class DNSUpdater:
     def __init__(self, conffile):
         stream = open(conffile, "r")
@@ -90,6 +97,8 @@ class DNSUpdater:
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
+    config = Configuration(__file__, 'config.yaml')
+    print config.email_login
     dnsUpdater = DNSUpdater(os.path.join(os.path.dirname(os.path.realpath(__file__)),'config.yaml'))
     dnsUpdater.trigger();
 
