@@ -20,7 +20,7 @@ class GMail:
         server = smtplib.SMTP(self.smtpserver)
         server.starttls()
         server.login(self.login, self.password)
-        result = server.sendmail(self.fromAddress, self.toAddress, message)
+        result = server.sendmail(self.fromAddress, toAddress, message)
         server.quit()
         logging.info('Email sent successfully')
         return result
