@@ -13,7 +13,7 @@ class GMail:
 
     def sendEmail(self, toAddress, subject, content):
         header  = 'From: %s\n' % self.fromAddress
-        header += 'To: %s\n' % self.toAddress
+        header += 'To: %s\n' % toAddress
         header += 'Subject: %s\n\n' % subject
         message = header + content
 
