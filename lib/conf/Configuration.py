@@ -7,4 +7,9 @@ class Configuration:
         self.confDict = yaml.safe_load(self.streamFile)
         self.__dict__.update(self.confDict)
 
-
+    def addArguments(self, arguments):
+        for key in arguments:
+            if key.startswith('--') and '<' + key[2:] + '>' in arguments:
+                pass
+            if key.startswith('<') and key.endswith('>'):
+                self.__dict__[key[1:][:-1]] = arguments[key]
