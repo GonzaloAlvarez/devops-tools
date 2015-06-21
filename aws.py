@@ -2,7 +2,7 @@
        aws.py [options] list
        aws.py [options] start <instance-id>
        aws.py [options] stop <instance-id>
-       aws.py (-h | 00help)
+       aws.py (-h | --help)
        aws.py --version
 
 Options:

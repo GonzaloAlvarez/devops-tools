@@ -1,12 +1,21 @@
-# Python DNS update for Cloud Flare
+"""
+Usage: cloudflare.py 
+       cloudflare.py (-h | --help)
+
+Options:
+  -h --help     Show this help
+
+"""
 
 import ipgetter, logging, yaml, smtplib, os
+from docopt import docopt
 from lib.email import GMail
 from lib.conf import Configuration
 from lib.cloud import CloudFlare
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
+    arguments = docopt(__doc__, version='CloudFlare Manager 1.0')
     config = Configuration(__file__, 'config.yaml')
     gmail = GMail(config.email_login, config.email_pass)
     cf = CloudFlare(config.cf_apiemail, config.cf_apikey)
