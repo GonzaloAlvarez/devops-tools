@@ -1,4 +1,4 @@
-import smtplib, yaml
+import smtplib, yaml, logging
 
 class GMail:
     """Send emails using a server, gmail by default"""
