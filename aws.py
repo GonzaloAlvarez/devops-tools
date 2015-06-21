@@ -15,7 +15,7 @@ Options:
 import logging
 from lib.conf import Configuration
 from docopt import docopt
-from lib.aws import AWS
+from lib.cloud import AWS
 
 if __name__ == '__main__':
     arguments = docopt(__doc__, version='AWS Manager 1.0')

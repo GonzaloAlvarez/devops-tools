@@ -1,0 +1,2 @@
+class RemoteOperationExecutionException(Exception):
+    pass
