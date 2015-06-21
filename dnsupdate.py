@@ -1,6 +1,6 @@
 """
-Usage: cloudflare.py 
-       cloudflare.py (-h | --help)
+Usage: dnsupdate 
+       dnsupdate (-h | --help)
 
 Options:
   -h --help     Show this help
