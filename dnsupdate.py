@@ -1,6 +1,5 @@
 """
-Usage: dnsupdate 
-       dnsupdate --ntfyfrom <ntfyfrom> --ntfyto <ntfyto>
+Usage: dnsupdate --ntfyfrom <ntfyfrom> --ntfyto <ntfyto>
        dnsupdate (-h | --help)
 
 Options:
