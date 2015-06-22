@@ -2,3 +2,5 @@ boto3
 ipgetter
 pyyaml
 pyflare
+uptime
+psutil
