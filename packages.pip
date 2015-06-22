@@ -4,3 +4,4 @@ pyyaml
 pyflare
 uptime
 psutil
+docopt
