@@ -29,7 +29,7 @@ class AWS:
 
     def getSelfInstanceId(self):
         try:
-            oldLogLevel = logging.getLogger().getLevel()
+            oldLogLevel = logging.getLogger().getEffectiveLevel()
             logging.getLogger().setLevel(logging.CRITICAL)
             instanceId = boto.utils.get_instance_metadata(timeout=1, num_retries=2)['instance-id']
             logging.getLogger().setLevel(oldLogLevel)
