@@ -28,4 +28,11 @@ class AWS:
         return False
 
     def getSelfInstanceId(self):
-        return boto.utils.get_instance_metadata()['instance-id']
+        try:
+            oldLogLevel = logging.getLogger().getLevel()
+            logging.getLogger().setLevel(logging.CRITICAL)
+            instanceId = boto.utils.get_instance_metadata(timeout=1, num_retries=2)['instance-id']
+            logging.getLogger().setLevel(oldLogLevel)
+            return instanceId
+        except Exception as e:
+            return "This doesn't seem to be an AWS instance"
