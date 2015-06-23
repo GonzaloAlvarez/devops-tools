@@ -2,6 +2,7 @@
        aws [options] list
        aws [options] start <instance-id>
        aws [options] stop <instance-id>
+       aws [options] stop
        aws [options] instanceid
        aws (-h | --help)
        aws --version
@@ -38,4 +39,8 @@ if __name__ == '__main__':
     elif arguments['start'] == True:
         aws.startInstance(arguments['<instance-id>'])
     elif arguments['stop'] == True:
-        aws.stopInstance(arguments['<instance-id>'])
+        status = aws.stopInstance(arguments['<instance-id>'])
+        if status == False:
+            print('Instance could not be stopped')
+        else:
+            print('Instance successfully stopped')
