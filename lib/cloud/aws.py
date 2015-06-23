@@ -1,33 +1,30 @@
 import logging
-from boto3.session import Session
+import boto.ec2
 
 class AWS:
     def __init__(self, apikey, apisecret, region='us-west-2'):
-        self.session = Session(aws_access_key_id=apikey, aws_secret_access_key=apisecret, region_name=region)
-        self.ec2 = self.session.resource('ec2')
+        self.ec2 = boto.ec2.connect_to_region(region, aws_access_key_id=apikey, aws_secret_access_key=apisecret)
+
+    def getInstances(self):
+        reservations = self.ec2.get_all_instances()
+        return [i for r in reservations for i in r.instances]
 
     def listInstances(self):
-        for instance in self.ec2.instances.all():
-            print(instance.id + ' - ' + instance.state['Name'])
+        for instance in self.getInstances():
+            print(instance.id + ' - ' + instance.state)
 
     def startInstance(self, instanceId):
-        found = False
-        for instance in self.ec2.instances.all():
+        for instance in self.getInstances():
             if instance.id == instanceId:
-                found = True
                 instance.start()
-                print('Instance has been started')
-        if not found:
-            print('Instance [' + instanceId + '] was not found')
+                return True
+        return False
 
     def stopInstance(self, instanceId):
-        found = False
-        for instance in self.ec2.instances.all():
+        for instance in self.getInstances():
             if instance.id == instanceId:
-                found = True
                 instance.stop()
-                print('Instance has been stopped')
-        if not found:
-            print('Instance [' + instanceId + '] was not found')
+                return True
+        return False
 
 
