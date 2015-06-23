@@ -30,7 +30,11 @@ if __name__ == '__main__':
     if arguments['list'] == True:
         aws.listInstances()
     elif arguments['instanceid'] == True:
-        print(aws.getSelfInstanceId())
+        instanceId = aws.getSelfInstanceId()
+        if instanceId == None:
+            print('This is not an AWS instance')
+        else:
+            print(instanceId)
     elif arguments['start'] == True:
         aws.startInstance(arguments['<instance-id>'])
     elif arguments['stop'] == True:
