@@ -23,6 +23,8 @@ if __name__ == '__main__':
     config = Configuration(__file__, 'config.yaml')
     if arguments['-d']:
         logging.basicConfig(level=logging.INFO)
+    else:
+        logging.basicConfig(level=logging.ERROR)
     logging.info(arguments)
     aws = AWS(config.aws_apikey, config.aws_apisecret)
     if arguments['list'] == True:
