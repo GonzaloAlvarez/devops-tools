@@ -1,5 +1,5 @@
 import logging
-import boto.ec2
+import boto.ec2, boto.utils
 
 class AWS:
     def __init__(self, apikey, apisecret, region='us-west-2'):
@@ -27,4 +27,5 @@ class AWS:
                 return True
         return False
 
-
+    def getSelfInstanceId(self):
+        return boto.utils.get_instance_metadata()['instance-id']
