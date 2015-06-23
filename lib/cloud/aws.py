@@ -35,4 +35,4 @@ class AWS:
             logging.getLogger().setLevel(oldLogLevel)
             return instanceId
         except Exception as e:
-            return "This doesn't seem to be an AWS instance"
+            return None
