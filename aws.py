@@ -1,9 +1,10 @@
-"""Usage: aws.py [options]
-       aws.py [options] list
-       aws.py [options] start <instance-id>
-       aws.py [options] stop <instance-id>
-       aws.py (-h | --help)
-       aws.py --version
+"""Usage: aws [options]
+       aws [options] list
+       aws [options] start <instance-id>
+       aws [options] stop <instance-id>
+       aws [options] instanceid
+       aws (-h | --help)
+       aws --version
 
 Options:
   -d             Enable debug
@@ -26,6 +27,8 @@ if __name__ == '__main__':
     aws = AWS(config.aws_apikey, config.aws_apisecret)
     if arguments['list'] == True:
         aws.listInstances()
+    elif arguments['instanceid'] == True:
+        print(aws.getSelfInstanceId())
     elif arguments['start'] == True:
         aws.startInstance(arguments['<instance-id>'])
     elif arguments['stop'] == True:
