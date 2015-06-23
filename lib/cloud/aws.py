@@ -20,7 +20,11 @@ class AWS:
                 return True
         return False
 
-    def stopInstance(self, instanceId):
+    def stopInstance(self, instanceId = None):
+        if instanceId == None:
+            instanceId = self.getSelfInstanceId()
+            if instanceId == None:
+                return False
         for instance in self.getInstances():
             if instance.id == instanceId:
                 instance.stop()
@@ -36,3 +40,4 @@ class AWS:
             return instanceId
         except Exception as e:
             return None
+
