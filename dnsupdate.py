@@ -1,10 +1,9 @@
 """
-Usage: dnsupdate --ntfyfrom <ntfyfrom> --ntfyto <ntfyto>
+Usage: dnsupdate --ntfy <ntfy>
        dnsupdate (-h | --help)
 
 Options:
-  --ntfyfrom    Email address to notify from
-  --ntfyto      Email address to send notification to
+  --ntfy        Email address to send notification
   -h --help     Show this help
 
 """
@@ -28,13 +27,12 @@ if __name__ == '__main__':
     else:
         try:
             cf.updateDnsRecord(config.cf_domain, config.cf_host, ipgetter.myip())
-            if hasattr(config, 'ntfyfrom') and hasattr(config, 'ntfyto'):
+            if hasattr(config, 'ntfy'):
                 email_content = "Greetings!\n\n"
                 email_content += "    The IP for DNS Zone " + config.cf_host + '.' + config.cf_domain
                 email_content += " has been updated to " + myip + ".\n\n"
                 email_content += "Have a great day!"
-                gmail.setFromAddress(config.ntfyfrom)
                 from time import gmtime, strftime
-                gmail.sendEmail(config.ntfyto,'IP Address has changed on ' + strftime("%Y-%m-%d %H:%M:%S", gmtime()), email_content)
+                gmail.sendEmail(config.ntfy,'IP Address has changed on ' + strftime("%Y-%m-%d %H:%M:%S", gmtime()), email_content)
         except:
             raise
