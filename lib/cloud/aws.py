@@ -11,22 +11,27 @@ class AWS:
 
     def listInstances(self):
         for instance in self.getInstances():
-            print(instance.id + ' - ' + instance.state)
+            instanceValues = [instance.id, instance.state]
+            if 'Name' in instance.tags:
+                instanceValues.append(instance.tags['Name'])
+            if instance.state == 'running':
+                instanceValues.append(instance.public_dns_name)
+            print ' - '.join(i for i in instanceValues);
 
-    def startInstance(self, instanceId):
+    def startInstance(self, instanceKey):
         for instance in self.getInstances():
-            if instance.id == instanceId:
+            if instance.id == instanceKey or ('Name' in instance.tags and instance.tags['Name'] == instanceKey):
                 instance.start()
                 return True
         return False
 
-    def stopInstance(self, instanceId = None):
-        if instanceId == None:
-            instanceId = self.getSelfInstanceId()
-            if instanceId == None:
+    def stopInstance(self, instanceKey = None):
+        if instanceKey == None:
+            instanceKey = self.getSelfInstanceId()
+            if instanceKey == None:
                 return False
         for instance in self.getInstances():
-            if instance.id == instanceId:
+            if instance.id == instanceKey or ('Name' in instance.tags and instance.tags['Name'] == instanceKey):
                 instance.stop()
                 return True
         return False
