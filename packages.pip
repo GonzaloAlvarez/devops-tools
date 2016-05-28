@@ -5,3 +5,5 @@ pyflare
 uptime
 psutil
 docopt
+click
+Pillow

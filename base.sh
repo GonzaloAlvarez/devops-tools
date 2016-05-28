@@ -8,8 +8,12 @@ if [ ! -d $ENV_PATH ]; then
     if [ -z "$VIRTUALENV" ]; then
         PIP=$(which pip)
         if [ -z "$PIP" ]; then
-            echo "FATAL: pip is missing, but required. Exiting."
-            exit 1
+            EASY_INSTALL=$(which easy_install)
+            if [ -z "$EASY_INSTALL" ]; then
+                echo "FATAL: easy_install is missing, but required. Exiting."
+                exit 1
+            fi
+            sudo $EASY_INSTALL pip
         fi
         sudo $PIP install virtualenv
         VIRTUALENV=$(which virtualenv)
