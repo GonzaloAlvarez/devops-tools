@@ -1,12 +1,12 @@
 import click
+import hashlib
 import re
 import logging
 import sys as Sys
 import os
-from PIL.ExifTags import TAGS
-import PIL.Image
 import shutil
 from datetime import datetime
+from lib.media import ExifTool
 
 # https://github.com/andrewning/sortphotos/blob/master/src/sortphotos.py
 # https://github.com/jmathai/elodie/blob/master/elodie/filesystem.py
@@ -58,51 +58,80 @@ class FilesystemHelper(object):
                 logging.info('Unable to identify date for [{}]'.format(fileName))
         return imageDateObject
 
+    def getMd5Hexdigest(self, fileName):
+        return hashlib.md5(open(fileName, 'rb').read()).hexdigest()
 
-class ImageExifHelper(object):
-    def getExifByTag(self, imageExifInfo, tag):
-        for (k,v) in imageExifInfo.iteritems():
-            if TAGS.get(k) == tag:
-                return v
+    def getFirstIdenticalFileInFolder(self, sourceFile, targetFolder):
+        sourceFileHash = self.getMd5Hexdigest(sourceFile)
+        sourceFileSize = os.stat(sourceFile).st_size
+        for dirname, dirnames, fileNames in os.walk(targetFolder):
+            for fileName in fileNames:
+                targetFile = os.path.join(dirname, fileName)
+                if sourceFileSize == os.stat(targetFile).st_size:
+                    if sourceFileHash == self.getMd5Hexdigest(targetFile):
+                        return targetFile
         return None
 
-    def getDateFromExif(self, image):
-        dateTimeForImage = None
-        if image != None and hasattr(image, '_getexif') and image._getexif() != None:
-            dateTimeForImage = self.getExifByTag(image._getexif(), "DateTimeOriginal")
-            if dateTimeForImage is None:
-                dateTimeForImage = self.getExifByTag(image._getexif(), "DateTime")
-        return dateTimeForImage
+
+class MediaHelper(object):
+    def __init__(self, fileSystemHelper):
+        self.fileSystemHelper = fileSystemHelper
+
+    def getDateFromMediaFile(self, fileName):
+        if fileName is None:
+            return None
+        mediaFileDate = None
+        exifMediaFileDate = self.getExifByTags(fileName, ('DateTimeOriginal', 'DateTime'))
+        if exifMediaFileDate is not None:
+            mediaFileDate = datetime.strptime(exifMediaFileDate, '%Y:%m:%d %H:%M:%S')
+        if mediaFileDate is None:
+            mediaFileDate = self.fileSystemHelper.getDateFromFileName(fileName)
+        return mediaFileDate
+
+
+    def getExifByTags(self, mediaFile, tags):
+        with ExifTool() as et:
+            exifInfo = et.get_metadata(mediaFile)
+            for key in tags:
+                lookupKey = 'EXIF:' + key
+                if lookupKey in exifInfo:
+                    return exifInfo[lookupKey]
+        return None
 
 class Photoman(object):
     def importImagesByExtension(self, sourcePath, destinationPath, extension='jpg'):
         filesystemHelper = FilesystemHelper()
-        imageExifHelper = ImageExifHelper()
+        mediaHelper = MediaHelper(filesystemHelper)
         uiUtils = UIUtils()
-        sourceImageFileList = filesystemHelper.getRecursiveFilesWithExtension(sourcePath, extension)
+        mediaFileInputList = filesystemHelper.getRecursiveFilesWithExtension(sourcePath, extension)
 
-        globalImagesCounter = 1
-        globalImagesTotalCount = len(sourceImageFileList)
-        uiUtils.outputToUser('Identified {} files with extension {}'.format(globalImagesTotalCount, extension))
-        for imageFile in sourceImageFileList:
-            imageObject = PIL.Image.open(imageFile)
-            imageDate = imageExifHelper.getDateFromExif(imageObject)
-            if imageDate is None:
-                imageDateObject = filesystemHelper.getDateFromFileName(imageFile)
-                destImageFileName = imageDateObject.strftime('%d %A')
+        uiUtils.setProgressTotal(len(mediaFileInputList))
+        uiUtils.resetProgress()
+        uiUtils.outputToUser('Identified {} files with extension {}'.format(len(mediaFileInputList), extension))
+        for mediaFile in mediaFileInputList:
+            mediaFileDate = mediaHelper.getDateFromMediaFile(mediaFile)
+            if mediaFileDate is not None:
+                mediaFileOutputFileName = mediaFileDate.strftime('%d %A %Hh%M' if mediaFileDate.hour != 0 and mediaFileDate.minute != 0 else '%d %A')
+                mediaFileOutputPath = filesystemHelper.createFolderWithDateStructure(destinationPath, mediaFileDate)
+                duplicateMediaFile = filesystemHelper.getFirstIdenticalFileInFolder(mediaFile, mediaFileOutputPath)
+                if duplicateMediaFile is None:
+                    mediaFileOutputFullName = filesystemHelper.findUniqueName(mediaFileOutputPath, mediaFileOutputFileName, extension)
+                    shutil.copyfile(mediaFile, mediaFileOutputFullName)
+                else:
+                    logging.warn('File [{}] already exists in destination [{}]. Skipping.'.format(mediaFile, duplicateMediaFile))
             else:
-                imageDateObject = datetime.strptime(imageDate, '%Y:%m:%d %H:%M:%S')
-                destImageFileName = imageDateObject.strftime('%d %A %Hh%M')
-            baseDestImagePath = filesystemHelper.createFolderWithDateStructure(destinationPath, imageDateObject)
-            uniqueFileFullName = filesystemHelper.findUniqueName(baseDestImagePath, destImageFileName, extension)
-            shutil.copyfile(imageFile, uniqueFileFullName)
-            uiUtils.printProgress(globalImagesCounter, globalImagesTotalCount, 'Completed')
-            globalImagesCounter += 1
+                logging.warn('File [{}] does not have any information about date. Skipping.'.format(mediaFile))
+            uiUtils.incrementProgress()
 
 class UIUtils(object):
     def __init__(self):
         logging.basicConfig(filename='/tmp/photoman.log', filemode='w', format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                 datefmt='%m-%d %H:%M', level=logging.DEBUG)
+        self.progressBarTotal = 100
+        self.progressBarCurrent = 0
+
+    def setProgressTotal(self, progressBarTotal):
+        self.progressBarTotal = progressBarTotal
 
     def printProgress (self, iteration, total, prefix = '', suffix = '', decimals = 2, barLength = 100):
         """
@@ -123,6 +152,13 @@ class UIUtils(object):
         if iteration == total:
             print("\n")
 
+    def incrementProgress(self, quantity = 1):
+        self.progressBarCurrent += quantity
+        self.printProgress(self.progressBarCurrent, self.progressBarTotal, 'Completed')
+
+    def resetProgress(self):
+        self.progressBarCurrent = 0
+
     def outputToUser(self, string):
         print string
 
@@ -133,6 +169,7 @@ class UIUtils(object):
         help='Destination folder for the import. It does not necessarily exist')
 def _import(source, dest):
     photoman = Photoman()
+    photoman.importImagesByExtension(source, dest, 'mov')
     photoman.importImagesByExtension(source, dest, 'jpg')
     photoman.importImagesByExtension(source, dest, 'jpeg')
     photoman.importImagesByExtension(source, dest, 'png')
