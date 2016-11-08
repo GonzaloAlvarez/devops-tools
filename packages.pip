@@ -6,3 +6,4 @@ uptime
 psutil
 docopt
 click
+python-magic

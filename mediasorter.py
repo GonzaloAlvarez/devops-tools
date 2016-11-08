@@ -1,22 +1,31 @@
 import click
 import hashlib
+import mimetypes
 import re
+import sys
 import logging
 import sys as Sys
 import os
+import time
 import shutil
 from datetime import datetime
 from lib.media import ExifTool
+import magic
 
 # https://github.com/andrewning/sortphotos/blob/master/src/sortphotos.py
 # https://github.com/jmathai/elodie/blob/master/elodie/filesystem.py
 # https://gist.github.com/attilaolah/1940208
 
 class FilesystemHelper(object):
-    dateInPathRegex = re.compile(ur'(20\d{2})[-/](\d{2})[-](\d{2})')
+    dateInPathRegex = re.compile(ur'(20\d{2})[-/]?(\d{2})[-]?(\d{2})')
     minimalDateInPathRegex = re.compile(ur'(20\d{2})[-/](\d{2})')
 
-    def getRecursiveFilesWithExtension(self, path, extensions=None):
+    @staticmethod
+    def folderExists(folder):
+        return os.path.isdir(folder)
+
+    @staticmethod
+    def listFiles(path, extensions=None):
         files = []
         for dirname, dirnames, filenames in os.walk(path):
             for filename in filenames:
@@ -27,111 +36,182 @@ class FilesystemHelper(object):
                     files.append(os.path.join(dirname, filename))
         return files
 
-    def createFolder(self, folder):
+    @staticmethod
+    def createFolder(folder):
         if not os.path.exists(folder):
             os.makedirs(folder)
-    
-    def createFolderWithDateStructure(self, base, dateobj):
-        base = os.path.dirname(base)
+
+    @staticmethod
+    def createFolderWithDateStructure(base, dateobj):
+        base = os.path.normpath(base) # this is wrong. truncates the last part of the string.
         fullpath = os.path.join(base, str(dateobj.year), dateobj.strftime("%B"))
-        self.createFolder(fullpath)
+        FilesystemHelper.createFolder(fullpath)
         return fullpath
 
-    def findUniqueName(self, basePath, fileName, fileExtension):
-        imageDestFullName = os.path.join(basePath, '{}.{}'.format(fileName, fileExtension))
+    @staticmethod
+    def findUniqueName(basePath, fileName, fileExtension):
+        imageDestFullName = os.path.join(basePath, '{}{}'.format(fileName, fileExtension))
         indexCurrentFile = 1
         while os.path.isfile(imageDestFullName):
-            imageDestFullName = os.path.join(basePath, '{}_{}.{}'.format(fileName, indexCurrentFile, fileExtension))
+            imageDestFullName = os.path.join(basePath, '{}_{}{}'.format(fileName, indexCurrentFile, fileExtension))
             indexCurrentFile += 1
         return imageDestFullName
 
-    def getDateFromFileName(self, fileName):
-        dateMatches = self.dateInPathRegex.search(fileName)
-        imageDateObject = datetime.strptime('1970-1-1', '%Y-%m-%d')
+    @classmethod
+    def getDateFromFileName(cls, fileName):
+        dateMatches = cls.dateInPathRegex.search(fileName)
+        imageDateObject = None
         if dateMatches and dateMatches.group():
-            imageDateObject = datetime.strptime('{}-{}-{}'.format(dateMatches.group(1), dateMatches.group(2), dateMatches.group(3)), '%Y-%m-%d')
-        else:
-            dateMatches = self.minimalDateInPathRegex.search(fileName)
+            try:
+                imageDateObject = datetime.strptime('{}-{}-{}'.format(dateMatches.group(1), dateMatches.group(2), dateMatches.group(3)), '%Y-%m-%d')
+            except ValueError:
+                imageDateObject = None
+        if imageDateObject is None:
+            dateMatches = cls.minimalDateInPathRegex.search(fileName)
             if dateMatches and dateMatches.group():
-                imageDateObject = datetime.strptime('{}-{}-{}'.format(dateMatches.group(1), dateMatches.group(2), '01'), '%Y-%m-%d')
-            else:
-                logging.info('Unable to identify date for [{}]'.format(fileName))
+                try:
+                    imageDateObject = datetime.strptime('{}-{}-{}'.format(dateMatches.group(1), dateMatches.group(2), '01'), '%Y-%m-%d')
+                except ValueError:
+                    imageDateObject = None
+        if imageDateObject is None:
+            imageDateObject = datetime.strptime('1970-1-1', '%Y-%m-%d')
+            logging.info('Unable to identify date for [{}]'.format(fileName))
         return imageDateObject
 
-    def getMd5Hexdigest(self, fileName):
+    @staticmethod
+    def getMd5Hexdigest(fileName):
         return hashlib.md5(open(fileName, 'rb').read()).hexdigest()
 
-    def getFirstIdenticalFileInFolder(self, sourceFile, targetFolder):
-        sourceFileHash = self.getMd5Hexdigest(sourceFile)
+    @staticmethod
+    def getFirstIdenticalFileInFolder(sourceFile, targetFolder):
         sourceFileSize = os.stat(sourceFile).st_size
         for dirname, dirnames, fileNames in os.walk(targetFolder):
             for fileName in fileNames:
                 targetFile = os.path.join(dirname, fileName)
                 if sourceFileSize == os.stat(targetFile).st_size:
-                    if sourceFileHash == self.getMd5Hexdigest(targetFile):
+                    sourceFileHash = FilesystemHelper.getMd5Hexdigest(sourceFile)
+                    if sourceFileHash == FilesystemHelper.getMd5Hexdigest(targetFile):
                         return targetFile
         return None
 
+    @staticmethod
+    def copyFileWithProperties(sourceFile, targetPath):
+        shutil.copy2(sourceFile, targetPath)
+
 
 class MediaHelper(object):
-    def __init__(self, fileSystemHelper):
-        self.fileSystemHelper = fileSystemHelper
-
-    def getDateFromMediaFile(self, fileName):
+    @staticmethod
+    def getDateFromMediaFile(fileName):
         if fileName is None:
             return None
         mediaFileDate = None
-        exifMediaFileDate = self.getExifByTags(fileName, ('DateTimeOriginal', 'DateTime'))
+        exifMediaFileDate = MediaHelper.getExifByTags(fileName, ('DateTimeOriginal', 'DateTime'))
         if exifMediaFileDate is not None:
             mediaFileDate = datetime.strptime(exifMediaFileDate, '%Y:%m:%d %H:%M:%S')
         if mediaFileDate is None:
-            mediaFileDate = self.fileSystemHelper.getDateFromFileName(fileName)
+            mediaFileDate = FilesystemHelper.getDateFromFileName(fileName)
         return mediaFileDate
 
-
-    def getExifByTags(self, mediaFile, tags):
+    @staticmethod
+    def getExifByTags(fileName, tags):
         with ExifTool() as et:
-            exifInfo = et.get_metadata(mediaFile)
+            exifInfo = et.get_metadata(fileName)
             for key in tags:
                 lookupKey = 'EXIF:' + key
                 if lookupKey in exifInfo:
                     return exifInfo[lookupKey]
         return None
 
-class Photoman(object):
-    def importImagesByExtension(self, sourcePath, destinationPath, extension='jpg'):
-        filesystemHelper = FilesystemHelper()
-        mediaHelper = MediaHelper(filesystemHelper)
-        uiUtils = UIUtils()
-        mediaFileInputList = filesystemHelper.getRecursiveFilesWithExtension(sourcePath, extension)
+class MediaFile(object):
+    def __init__(self, fileName):
+        self.fileName = fileName
+        mimeMagic = magic.Magic(mime=True, uncompress=True)
+        self.mimeType = mimeMagic.from_file(self.fileName)
+        self.mimeExtension = mimetypes.guess_extension(self.mimeType)
+        # mimetype returns jpe for jpeg files. http://stackoverflow.com/a/11396288
+        if self.mimeExtension in ('.jpe', '.jpeg'):
+            self.mimeExtension = '.jpg'
+        self.isMedia = self.mimeType.split('/')[0] in ('video', 'image')
+        if self.isMedia:
+            self.date = MediaHelper.getDateFromMediaFile(fileName)
 
-        uiUtils.setProgressTotal(len(mediaFileInputList))
-        uiUtils.resetProgress()
-        uiUtils.outputToUser('Identified {} files with extension {}'.format(len(mediaFileInputList), extension))
-        for mediaFile in mediaFileInputList:
-            mediaFileDate = mediaHelper.getDateFromMediaFile(mediaFile)
-            if mediaFileDate is not None:
-                mediaFileOutputFileName = mediaFileDate.strftime('%d %A %Hh%M' if mediaFileDate.hour != 0 and mediaFileDate.minute != 0 else '%d %A')
-                mediaFileOutputPath = filesystemHelper.createFolderWithDateStructure(destinationPath, mediaFileDate)
-                duplicateMediaFile = filesystemHelper.getFirstIdenticalFileInFolder(mediaFile, mediaFileOutputPath)
-                if duplicateMediaFile is None:
-                    mediaFileOutputFullName = filesystemHelper.findUniqueName(mediaFileOutputPath, mediaFileOutputFileName, extension)
-                    shutil.copyfile(mediaFile, mediaFileOutputFullName)
-                else:
-                    logging.warn('File [{}] already exists in destination [{}]. Skipping.'.format(mediaFile, duplicateMediaFile))
+    def __str__(self):
+        return 'Name: [{}] Mime: {} Extension: {} Date: {}'.format(self.fileName, self.mimeType, self.mimeExtension, self.date.strftime("%Y-%m-%d %H:%M"))
+
+
+class DuplicateMediaFileException(Exception):
+    def __init__(self, existingFile):
+        self.existingFile = existingFile
+
+
+class MediaSorter(object):
+    @staticmethod
+    def sortFiles(sourceFolder, targetFolder, limitCount = None):
+        uiUtils = UIUtils()
+        mimeMagic = magic.Magic(mime=True, uncompress=True)
+        mimetypes.init()
+        inputFileList = FilesystemHelper.listFiles(sourceFolder)
+
+        if limitCount is not None:
+            inputFileList = inputFileList[:limitCount]
+
+        uiUtils.setProgressTotal(len(inputFileList))
+        uiUtils.outputToUser('Identified {} files'.format(len(inputFileList)))
+        for inputFile in inputFileList:
+            sourceMediaFile = MediaFile(inputFile)
+            if sourceMediaFile.isMedia:
+                try:
+                    MediaFileManager.copyMediaFile(sourceMediaFile, targetFolder)
+                except DuplicateMediaFileException as duplicateException:
+                    logging.warn('File [{}] already exists in destination as [{}]. Skipping.'.format(inputFile, duplicateException.existingFile))
             else:
-                logging.warn('File [{}] does not have any information about date. Skipping.'.format(mediaFile))
+                logging.warn('File [{}] does not have a recognized media type [{}]. Skipping.'.format(inputFile, sourceMediaFile.mimeExtension))
             uiUtils.incrementProgress()
+
+class MediaFileManager(object):
+    @staticmethod
+    def generateUniqueTargetFileName(sourceMediaFile, targetFolder):
+        mediaFileDate = sourceMediaFile.date
+        if mediaFileDate.hour != 0 and mediaFileDate.minute != 0:
+            targetFileDateBaseName = mediaFileDate.strftime('%d %A %Hh%M')
+        else:
+            targetFileDateBaseName = mediaFileDate.strftime('%d %A')
+        return FilesystemHelper.findUniqueName(targetFolder, targetFileDateBaseName, sourceMediaFile.mimeExtension)
+
+    @staticmethod
+    def generateTargetFolder(sourceMediaFile, targetBasePath):
+        return FilesystemHelper.createFolderWithDateStructure(targetBasePath, sourceMediaFile.date)
+
+    @staticmethod
+    def checkDuplicates(mediaFile, targetBasePath):
+        identicalFileInFolder = FilesystemHelper.getFirstIdenticalFileInFolder(mediaFile.fileName, targetBasePath)
+        if identicalFileInFolder is not None:
+            raise DuplicateMediaFileException(identicalFileInFolder)
+
+    @staticmethod
+    def copyMediaFile(mediaFile, targetBasePath):
+        targetFolder = MediaFileManager.generateTargetFolder(mediaFile, targetBasePath)
+        if not FilesystemHelper.folderExists(targetFolder):
+            FilesystemHelper.createFolder(targetFolder)
+        try:
+            MediaFileManager.checkDuplicates(mediaFile, targetFolder)
+        except DuplicateMediaFileException as duplicateException:
+            raise duplicateException
+        targetUniqueFile = MediaFileManager.generateUniqueTargetFileName(mediaFile, targetFolder)
+        targetUniquePath = os.path.join(targetFolder, targetUniqueFile)
+        FilesystemHelper.copyFileWithProperties(mediaFile.fileName, targetUniquePath)
+
 
 class UIUtils(object):
     def __init__(self):
-        logging.basicConfig(filename='/tmp/photoman.log', filemode='w', format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+        logging.basicConfig(filename='/tmp/mediasorter.log', filemode='w', format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                 datefmt='%m-%d %H:%M', level=logging.DEBUG)
         self.progressBarTotal = 100
         self.progressBarCurrent = 0
 
     def setProgressTotal(self, progressBarTotal):
         self.progressBarTotal = progressBarTotal
+        self.resetProgress()
 
     def printProgress (self, iteration, total, prefix = '', suffix = '', decimals = 2, barLength = 100):
         """
@@ -163,22 +243,23 @@ class UIUtils(object):
         print string
 
 @click.command('import')
-@click.option('--source', type=click.Path(file_okay=False),
-        help='Import files from this directory, if specified.')
-@click.option('--dest', type=click.Path(file_okay=False),
-        help='Destination folder for the import. It does not necessarily exist')
-def _import(source, dest):
-    photoman = Photoman()
-    photoman.importImagesByExtension(source, dest, 'mov')
-    photoman.importImagesByExtension(source, dest, 'jpg')
-    photoman.importImagesByExtension(source, dest, 'jpeg')
-    photoman.importImagesByExtension(source, dest, 'png')
+@click.argument('source', type=click.Path(file_okay=True),
+        required=True)
+@click.argument('target', type=click.Path(file_okay=False),
+        required=True)
+@click.option('--limit', type=int, default=None)
+@click.pass_context
+def _import(ctx, source, target, limit):
+    mediasorter = MediaSorter()
+    mediasorter.sortFiles(source, target, limit)
 
 @click.group()
-def main():
-    pass
+@click.option('--debug/--no-debug', default=False)
+@click.pass_context
+def main(ctx, debug):
+    ctx.obj['DEBUG'] = debug
 
 main.add_command(_import)
 
 if __name__ =='__main__':
-    main()
+    main(obj={})
