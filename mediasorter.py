@@ -6,15 +6,15 @@ import sys
 import logging
 import sys as Sys
 import os
-import time
 import shutil
 import cProfile
-from datetime import timedelta
+import magic
 import time
+from datetime import timedelta
 from pstats import Stats
 from datetime import datetime
 from lib.media import ExifTool
-import magic
+from lib.lang import Singleton
 from PIL import Image
 from PIL.ExifTags import TAGS
 
@@ -49,10 +49,30 @@ class FilesystemHelper(object):
 
     @staticmethod
     def createFolderWithDateStructure(base, dateobj):
-        base = os.path.normpath(base) # this is wrong. truncates the last part of the string.
+        base = os.path.normpath(base)
         fullpath = os.path.join(base, str(dateobj.year), dateobj.strftime("%B"))
         FilesystemHelper.createFolder(fullpath)
         return fullpath
+
+    @staticmethod
+    def getFileCreationDate(path_to_file):
+        """
+        Try to get the date that a file was created, falling back to when it was
+        last modified if that isn't possible.
+        See http://stackoverflow.com/a/39501288/1709587 for explanation.
+        """
+        if platform.system() == 'Windows':
+            return os.path.getctime(path_to_file)
+        else:
+            stat = os.stat(path_to_file)
+            try:
+                birth_time_osx = stat.st_birthtime
+                m_birth_time_osx = time.localtime(m_birth_time_osx)
+                return datetime.datetime.fromtimestamp(m_birth_time_osx)
+            except AttributeError:
+                # We're probably on Linux. No easy way to get creation dates here,
+                # so we'll settle for when its content was last modified.
+                return stat.st_mtime
 
     @staticmethod
     def findUniqueName(basePath, fileName, fileExtension):
@@ -112,7 +132,7 @@ class MediaHelper(object):
         if mediaFile is None or mediaFile.fileName is None:
             return None
         mediaFileDate = None
-        exifMediaFileDate = MediaHelper.getExifByTags(mediaFile, ('DateTimeOriginal', 'DateTime'))
+        exifMediaFileDate = MediaHelper.getExifByTags(mediaFile, ('DateTimeOriginal', 'DateTime', 'CreateDate', 'ModifyDate'))
         if exifMediaFileDate is not None:
             mediaFileDate = datetime.strptime(exifMediaFileDate, '%Y:%m:%d %H:%M:%S')
         if mediaFileDate is None:
@@ -138,7 +158,6 @@ class MediaHelper(object):
                 if lookupKey in exifInfo:
                     return exifInfo[lookupKey]
         return None
-
 
     @staticmethod
     def getExifByTagsUsingPIL(mediaFile, lookupTags):
@@ -188,12 +207,13 @@ class MediaSorter(object):
         mimeMagic = magic.Magic(mime=True, uncompress=True)
         mimetypes.init()
         inputFileList = FilesystemHelper.listFiles(sourceFolder)
+        uiUtils.output('Identified {} files'.format(len(inputFileList)))
 
         if limitCount is not None:
             inputFileList = inputFileList[:limitCount]
+            uiUtils.output('Working on the first {} files'.format(limitCount))
 
         uiUtils.setProgressTotal(len(inputFileList))
-        uiUtils.output('Identified {} files'.format(len(inputFileList)))
         for inputFile in inputFileList:
             sourceMediaFile = MediaFile(inputFile)
             if sourceMediaFile.isMedia:
@@ -206,45 +226,6 @@ class MediaSorter(object):
                 EventHandler.instance().count('unknown_type')
                 logging.warn('File [{}] does not have a recognized media type [{}]. Skipping.'.format(inputFile, sourceMediaFile.mimeExtension))
             uiUtils.incrementProgress()
-
-
-class Singleton:
-    """
-    A non-thread-safe helper class to ease implementing singletons.
-    This should be used as a decorator -- not a metaclass -- to the
-    class that should be a singleton.
-
-    The decorated class can define one `__init__` function that
-    takes only the `self` argument. Also, the decorated class cannot be
-    inherited from. Other than that, there are no restrictions that apply
-    to the decorated class.
-
-    To get the singleton instance, use the `Instance` method. Trying
-    to use `__call__` will result in a `TypeError` being raised.
-
-    """
-
-    def __init__(self, decorated):
-        self._decorated = decorated
-
-    def instance(self):
-        """
-        Returns the singleton instance. Upon its first call, it creates a
-        new instance of the decorated class and calls its `__init__` method.
-        On all subsequent calls, the already created instance is returned.
-
-        """
-        try:
-            return self._instance
-        except AttributeError:
-            self._instance = self._decorated()
-            return self._instance
-
-    def __call__(self):
-        raise TypeError('Singletons must be accessed through `Instance()`.')
-
-    def __instancecheck__(self, inst):
-        return isinstance(inst, self._decorated)
 
 @Singleton
 class EventHandler(object):
@@ -309,7 +290,7 @@ class UIUtils(object):
         self.progressBarTotal = progressBarTotal
         self.resetProgress()
 
-    def printProgress (self, iteration, total, prefix = '', suffix = '', decimals = 2, barLength = 100):
+    def printProgress (self, iteration, total, prefix = '', suffix = '', decimals = 2, barLength=100):
         """
         Call in a loop to create terminal progress bar
         @params:
@@ -321,7 +302,7 @@ class UIUtils(object):
             barLength   - Optional  : character length of bar (Int) 
         """
         rows, columns = os.popen('stty size', 'r').read().split()
-        barLength = int(columns) - 20
+        barLength = min(int(columns) - 20, barLength)
         filledLength    = int(round(barLength * iteration / float(total)))
         percents        = round(100.00 * (iteration / float(total)), decimals)
         bar             = '#' * filledLength + '-' * (barLength - filledLength)
