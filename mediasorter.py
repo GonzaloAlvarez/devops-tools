@@ -182,7 +182,7 @@ class DuplicateMediaFileException(Exception):
 
 class MediaSorter(object):
     @staticmethod
-    def sortFiles(sourceFolder, targetFolder, limitCount = None):
+    def importFiles(sourceFolder, targetFolder, limitCount = None):
         uiUtils = UIUtils.instance()
         uiUtils.outputNoNewLine('Looking up files...')
         mimeMagic = magic.Magic(mime=True, uncompress=True)
@@ -320,6 +320,8 @@ class UIUtils(object):
             decimals    - Optional  : number of decimals in percent complete (Int) 
             barLength   - Optional  : character length of bar (Int) 
         """
+        rows, columns = os.popen('stty size', 'r').read().split()
+        barLength = int(columns) - 20
         filledLength    = int(round(barLength * iteration / float(total)))
         percents        = round(100.00 * (iteration / float(total)), decimals)
         bar             = '#' * filledLength + '-' * (barLength - filledLength)
@@ -355,7 +357,7 @@ def _import(ctx, source, target, limit):
         profile.enable()
         startTime = time.time()
     mediasorter = MediaSorter()
-    mediasorter.sortFiles(source, target, limit)
+    mediasorter.importFiles(source, target, limit)
     if ctx.obj['DEBUG']:
         profile.disable()
         UIUtils.instance().output('Time elapsed: {}'.format(str(timedelta(seconds=(time.time() - startTime)))))
