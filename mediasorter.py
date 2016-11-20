@@ -10,6 +10,7 @@ import shutil
 import cProfile
 import magic
 import time
+import warnings
 from datetime import timedelta
 from pstats import Stats
 from datetime import datetime
@@ -17,6 +18,7 @@ from lib.media import ExifTool
 from lib.lang import Singleton
 from PIL import Image
 from PIL.ExifTags import TAGS
+from lib.exceptions import DuplicateMediaFileException
 
 # https://github.com/andrewning/sortphotos/blob/master/src/sortphotos.py
 # https://github.com/jmathai/elodie/blob/master/elodie/filesystem.py
@@ -24,6 +26,7 @@ from PIL.ExifTags import TAGS
 
 class FilesystemHelper(object):
     dateInPathRegex = re.compile(ur'(20\d{2})[-/]?(\d{2})[-]?(\d{2})')
+    eurFuzzyDateInPathRegex = re.compile(ur'([0-3][0-9])([0-1][0-9])([9,0,1][0-9])')
     minimalDateInPathRegex = re.compile(ur'(20\d{2})[-/](\d{2})')
 
     @staticmethod
@@ -100,6 +103,13 @@ class FilesystemHelper(object):
                 except ValueError:
                     imageDateObject = None
         if imageDateObject is None:
+            dateMatches = cls.eurFuzzyDateInPathRegex.search(fileName)
+            if dateMatches and dateMatches.group():
+                try:
+                    imageDateObject = datetime.strptime('{}-{}-{}'.format(dateMatches.group(1), dateMatches.group(2), dateMatches.group(3)), '%d-%m-%y')
+                except ValueError:
+                    imageDateObject = None
+        if imageDateObject is None:
             imageDateObject = datetime.strptime('1970-1-1', '%Y-%m-%d')
             EventHandler.instance().count('unknown_date')
             logging.info('Unable to identify date for [{}]'.format(fileName))
@@ -133,9 +143,12 @@ class MediaHelper(object):
             return None
         mediaFileDate = None
         exifMediaFileDate = MediaHelper.getExifByTags(mediaFile, ('DateTimeOriginal', 'DateTime', 'CreateDate', 'ModifyDate'))
-        if exifMediaFileDate is not None:
-            mediaFileDate = datetime.strptime(exifMediaFileDate, '%Y:%m:%d %H:%M:%S')
-        if mediaFileDate is None:
+        if exifMediaFileDate:
+            try:
+                mediaFileDate = datetime.strptime(exifMediaFileDate, '%Y:%m:%d %H:%M:%S')
+            except:
+                mediaFileDate = None
+        if not mediaFileDate:
             mediaFileDate = FilesystemHelper.getDateFromFileName(mediaFile.fileName)
         return mediaFileDate
 
@@ -161,19 +174,22 @@ class MediaHelper(object):
 
     @staticmethod
     def getExifByTagsUsingPIL(mediaFile, lookupTags):
-        pilImage = Image.open(mediaFile.fileName)
-        if '_getexif' in dir(pilImage):
-            pilExif = pilImage._getexif()
-            if pilExif is not None:
-                for tag, value in pilExif.items():
-                    for lookupTag in lookupTags:
-                        if TAGS.get(tag) == lookupTag:
-                            return value
-                EventHandler.instance().count('PIL_nodate')
+        try:
+            pilImage = Image.open(mediaFile.fileName)
+            if '_getexif' in dir(pilImage):
+                pilExif = pilImage._getexif()
+                if pilExif is not None:
+                    for tag, value in pilExif.items():
+                        for lookupTag in lookupTags:
+                            if TAGS.get(tag) == lookupTag:
+                                return value
+                    EventHandler.instance().count('PIL_nodate')
+                else:
+                    EventHandler.instance().count('PIL_noexif')
             else:
-                EventHandler.instance().count('PIL_noexif')
-        else:
-            EventHandler.instance().count('PIL_notsupported')
+                EventHandler.instance().count('PIL_notsupported')
+        except:
+            EventHandler.instance().count('PIL_exception')
         return None
 
 class MediaFile(object):
@@ -191,17 +207,12 @@ class MediaFile(object):
             self.date = MediaHelper.getDateFromMediaFile(self)
 
     def __str__(self):
-        return 'Name: [{}] Mime: {} Extension: {} Date: {}'.format(self.fileName, self.mimeType, self.mimeExtension, self.date.strftime("%Y-%m-%d %H:%M"))
-
-
-class DuplicateMediaFileException(Exception):
-    def __init__(self, existingFile):
-        self.existingFile = existingFile
-
+        return 'Name: [{}] Mime: {} Extension: {}'.format(self.fileName, self.mimeType, self.mimeExtension)
+    # self.date.strftime("%Y-%m-%d %H:%M")
 
 class MediaSorter(object):
     @staticmethod
-    def importFiles(sourceFolder, targetFolder, limitCount = None):
+    def importFiles(sourceFolder, targetFolder, limitCount = None, skipCount = None):
         uiUtils = UIUtils.instance()
         uiUtils.outputNoNewLine('Looking up files...')
         mimeMagic = magic.Magic(mime=True, uncompress=True)
@@ -210,9 +221,14 @@ class MediaSorter(object):
         uiUtils.output('Identified {} files'.format(len(inputFileList)))
 
         if limitCount is not None:
-            inputFileList = inputFileList[:limitCount]
-            uiUtils.output('Working on the first {} files'.format(limitCount))
+            if skipCount is not None and skipCount < len(inputFileList):
+                inputFileList = inputFileList[skipCount:limitCount+skipCount]
+                uiUtils.output('Working on {} files starting from {}'.format(limitCount, skipCount))
+            else:
+                inputFileList = inputFileList[:limitCount]
+                uiUtils.output('Working on the first {} files'.format(limitCount))
 
+        warnings.filterwarnings('ignore') #required for PIL
         uiUtils.setProgressTotal(len(inputFileList))
         for inputFile in inputFileList:
             sourceMediaFile = MediaFile(inputFile)
@@ -331,14 +347,15 @@ class UIUtils(object):
 @click.argument('target', type=click.Path(file_okay=False),
         required=True)
 @click.option('--limit', type=int, default=None)
+@click.option('--skip', type=int, default=None)
 @click.pass_context
-def _import(ctx, source, target, limit):
+def _import(ctx, source, target, limit, skip):
     if ctx.obj['DEBUG']:
         profile = cProfile.Profile()
         profile.enable()
         startTime = time.time()
     mediasorter = MediaSorter()
-    mediasorter.importFiles(source, target, limit)
+    mediasorter.importFiles(source, target, limit, skip)
     if ctx.obj['DEBUG']:
         profile.disable()
         UIUtils.instance().output('Time elapsed: {}'.format(str(timedelta(seconds=(time.time() - startTime)))))
