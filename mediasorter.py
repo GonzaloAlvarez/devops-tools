@@ -20,14 +20,29 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from lib.exceptions import DuplicateMediaFileException
 
-# https://github.com/andrewning/sortphotos/blob/master/src/sortphotos.py
-# https://github.com/jmathai/elodie/blob/master/elodie/filesystem.py
-# https://gist.github.com/attilaolah/1940208
-
 class FilesystemHelper(object):
     dateInPathRegex = re.compile(ur'(20\d{2})[-/]?(\d{2})[-]?(\d{2})')
     eurFuzzyDateInPathRegex = re.compile(ur'([0-3][0-9])([0-1][0-9])([9,0,1][0-9])')
     minimalDateInPathRegex = re.compile(ur'(20\d{2})[-/](\d{2})')
+
+    @staticmethod
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    @staticmethod
+    def which(program):
+        fpath, fname = os.path.split(program)
+        if fpath:
+            if FilesystemHelper.is_exe(program):
+                return program
+        else:
+            for path in os.environ["PATH"].split(os.pathsep):
+                path = path.strip('"')
+                exe_file = os.path.join(path, program)
+                if FilesystemHelper.is_exe(exe_file):
+                    return exe_file
+
+        return None
 
     @staticmethod
     def folderExists(folder):
@@ -46,15 +61,15 @@ class FilesystemHelper(object):
         return files
 
     @staticmethod
-    def createFolder(folder):
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-
-    @staticmethod
-    def createFolderWithDateStructure(base, dateobj):
+    def createFolder(base, *args):
         base = os.path.normpath(base)
-        fullpath = os.path.join(base, str(dateobj.year), dateobj.strftime("%B"))
-        FilesystemHelper.createFolder(fullpath)
+        if not args:
+            fullpath = base
+        else:
+            path_parts = [str(arg) for arg in args]
+            fullpath = os.path.join(base, *path_parts)
+        if not os.path.exists(fullpath):
+            os.makedirs(fullpath)
         return fullpath
 
     @staticmethod
@@ -109,10 +124,6 @@ class FilesystemHelper(object):
                     imageDateObject = datetime.strptime('{}-{}-{}'.format(dateMatches.group(1), dateMatches.group(2), dateMatches.group(3)), '%d-%m-%y')
                 except ValueError:
                     imageDateObject = None
-        if imageDateObject is None:
-            imageDateObject = datetime.strptime('1970-1-1', '%Y-%m-%d')
-            EventHandler.instance().count('unknown_date')
-            logging.info('Unable to identify date for [{}]'.format(fileName))
         return imageDateObject
 
     @staticmethod
@@ -150,6 +161,10 @@ class MediaHelper(object):
                 mediaFileDate = None
         if not mediaFileDate:
             mediaFileDate = FilesystemHelper.getDateFromFileName(mediaFile.fileName)
+        if not mediaFileDate:
+            mediaFileDate = datetime.strptime('1970-1-1', '%Y-%m-%d')
+            EventHandler.instance().count('unknown_date')
+            logging.info('Unable to identify date for [{}]'.format(mediaFile.fileName))
         return mediaFileDate
 
     @staticmethod
@@ -207,12 +222,11 @@ class MediaFile(object):
             self.date = MediaHelper.getDateFromMediaFile(self)
 
     def __str__(self):
-        return 'Name: [{}] Mime: {} Extension: {}'.format(self.fileName, self.mimeType, self.mimeExtension)
-    # self.date.strftime("%Y-%m-%d %H:%M")
+        return 'Name: [{}] Mime: {} Extension: {} Date: {}'.format(self.fileName, self.mimeType, self.mimeExtension, self.date.strftime("%Y-%m-%d %H:%M"))
 
 class MediaSorter(object):
     @staticmethod
-    def importFiles(sourceFolder, targetFolder, limitCount = None, skipCount = None):
+    def importFiles(sourceFolder, targetFolder, limitCount = None, skipCount = None, dryrun = False):
         uiUtils = UIUtils.instance()
         uiUtils.outputNoNewLine('Looking up files...')
         mimeMagic = magic.Magic(mime=True, uncompress=True)
@@ -232,14 +246,14 @@ class MediaSorter(object):
         uiUtils.setProgressTotal(len(inputFileList))
         for inputFile in inputFileList:
             sourceMediaFile = MediaFile(inputFile)
-            if sourceMediaFile.isMedia:
+            if sourceMediaFile.isMedia and not dryrun:
                 try:
                     MediaFileManager.copyMediaFile(sourceMediaFile, targetFolder)
                 except DuplicateMediaFileException as duplicateException:
                     EventHandler.instance().count('duplicated')
                     logging.warn('File [{}] already exists in destination as [{}]. Skipping.'.format(inputFile, duplicateException.existingFile))
-            else:
-                EventHandler.instance().count('unknown_type')
+            elif not sourceMediaFile.isMedia:
+                EventHandler.instance().count('unknown_media_type')
                 logging.warn('File [{}] does not have a recognized media type [{}]. Skipping.'.format(inputFile, sourceMediaFile.mimeExtension))
             uiUtils.incrementProgress()
 
@@ -272,7 +286,8 @@ class MediaFileManager(object):
 
     @staticmethod
     def generateTargetFolder(sourceMediaFile, targetBasePath):
-        return FilesystemHelper.createFolderWithDateStructure(targetBasePath, sourceMediaFile.date)
+        dateobj = sourceMediaFile.date
+        return FilesystemHelper.createFolder(targetBasePath, str(dateobj.year), dateobj.strftime("%B"))
 
     @staticmethod
     def checkDuplicates(mediaFile, targetBasePath):
@@ -283,8 +298,6 @@ class MediaFileManager(object):
     @staticmethod
     def copyMediaFile(mediaFile, targetBasePath):
         targetFolder = MediaFileManager.generateTargetFolder(mediaFile, targetBasePath)
-        if not FilesystemHelper.folderExists(targetFolder):
-            FilesystemHelper.createFolder(targetFolder)
         try:
             MediaFileManager.checkDuplicates(mediaFile, targetFolder)
         except DuplicateMediaFileException as duplicateException:
@@ -348,14 +361,15 @@ class UIUtils(object):
         required=True)
 @click.option('--limit', type=int, default=None)
 @click.option('--skip', type=int, default=None)
+@click.option('--dryrun/--no-dryrun', default=False)
 @click.pass_context
-def _import(ctx, source, target, limit, skip):
+def _import(ctx, source, target, limit, skip, dryrun):
     if ctx.obj['DEBUG']:
         profile = cProfile.Profile()
         profile.enable()
         startTime = time.time()
     mediasorter = MediaSorter()
-    mediasorter.importFiles(source, target, limit, skip)
+    mediasorter.importFiles(source, target, limit, skip, dryrun)
     if ctx.obj['DEBUG']:
         profile.disable()
         UIUtils.instance().output('Time elapsed: {}'.format(str(timedelta(seconds=(time.time() - startTime)))))
