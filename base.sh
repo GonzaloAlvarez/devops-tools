@@ -1,6 +1,6 @@
 #!/bin/bash
-ENV_PATH="$BASE_PATH/.env"
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ENV_PATH="$BASE_PATH/.env"
 
 if [ ! -d $ENV_PATH ]; then
     echo "Creatin the virtual environment..."
