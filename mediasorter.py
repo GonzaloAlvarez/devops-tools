@@ -6,6 +6,7 @@ import sys
 import logging
 import sys as Sys
 import os
+import platform
 import shutil
 import cProfile
 import magic
@@ -73,6 +74,11 @@ class FilesystemHelper(object):
         return fullpath
 
     @staticmethod
+    def getDateFromFileTime(file_time):
+        time_localtime = time.localtime(file_time)
+        return datetime.fromtimestamp(time.mktime(time_localtime))
+
+    @staticmethod
     def getFileCreationDate(path_to_file):
         """
         Try to get the date that a file was created, falling back to when it was
@@ -80,17 +86,15 @@ class FilesystemHelper(object):
         See http://stackoverflow.com/a/39501288/1709587 for explanation.
         """
         if platform.system() == 'Windows':
-            return os.path.getctime(path_to_file)
+            return FilesystemHelper.getDateFromFileTime(os.path.getctime(path_to_file))
         else:
             stat = os.stat(path_to_file)
             try:
-                birth_time_osx = stat.st_birthtime
-                m_birth_time_osx = time.localtime(m_birth_time_osx)
-                return datetime.datetime.fromtimestamp(m_birth_time_osx)
+                return FilesystemHelper.getDateFromFileTime(stat.st_birthtime)
             except AttributeError:
                 # We're probably on Linux. No easy way to get creation dates here,
                 # so we'll settle for when its content was last modified.
-                return stat.st_mtime
+                return FilesystemHelper.getDateFromFileTime(stat.st_mtime)
 
     @staticmethod
     def findUniqueName(basePath, fileName, fileExtension):
@@ -148,6 +152,8 @@ class FilesystemHelper(object):
 
 
 class MediaHelper(object):
+    latest_date = None
+
     @staticmethod
     def getDateFromMediaFile(mediaFile):
         if mediaFile is None or mediaFile.fileName is None:
@@ -157,14 +163,20 @@ class MediaHelper(object):
         if exifMediaFileDate:
             try:
                 mediaFileDate = datetime.strptime(exifMediaFileDate, '%Y:%m:%d %H:%M:%S')
+                MediaHelper.latest_date = mediaFileDate
             except:
                 mediaFileDate = None
         if not mediaFileDate:
             mediaFileDate = FilesystemHelper.getDateFromFileName(mediaFile.fileName)
         if not mediaFileDate:
-            mediaFileDate = datetime.strptime('1970-1-1', '%Y-%m-%d')
-            EventHandler.instance().count('unknown_date')
             logging.info('Unable to identify date for [{}]'.format(mediaFile.fileName))
+            EventHandler.instance().count('unknown_date')
+            if MediaHelper.latest_date:
+                EventHandler.instance().count('using_previous_date')
+                mediaFileDate = MediaHelper.latest_date
+            else:
+                EventHandler.instance().count('using_filedate')
+                mediaFileDate = FilesystemHelper.getFileCreationDate(mediaFile.fileName).strftime('%Y-%m-%d')
         return mediaFileDate
 
     @staticmethod
@@ -287,7 +299,8 @@ class MediaFileManager(object):
     @staticmethod
     def generateTargetFolder(sourceMediaFile, targetBasePath):
         dateobj = sourceMediaFile.date
-        return FilesystemHelper.createFolder(targetBasePath, str(dateobj.year), dateobj.strftime("%B"))
+        mime = sourceMediaFile.mimeType.split('/')[0].capitalize()
+        return FilesystemHelper.createFolder(targetBasePath, mime, str(dateobj.year), dateobj.strftime("%B"))
 
     @staticmethod
     def checkDuplicates(mediaFile, targetBasePath):
