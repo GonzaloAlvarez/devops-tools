@@ -74,6 +74,19 @@ class FilesystemHelper(object):
         return fullpath
 
     @staticmethod
+    def symlink(source, target):
+        if not os.path.isdir(os.path.dirname(target)):
+            FilesystemHelper.createFolder(os.path.dirname(target))
+        sourceFolder = os.path.dirname(source)
+        targetFolder = os.path.dirname(target)
+        relPath = os.path.relpath(sourceFolder, targetFolder)
+        sourcerel = os.path.join(relPath, os.path.basename(source))
+        initialPath = os.getcwd()
+        os.chdir(targetFolder)
+        os.symlink(sourcerel, target)
+        os.chdir(initialPath)
+
+    @staticmethod
     def getDateFromFileTime(file_time):
         time_localtime = time.localtime(file_time)
         return datetime.fromtimestamp(time.mktime(time_localtime))
@@ -260,7 +273,7 @@ class MediaSorter(object):
             sourceMediaFile = MediaFile(inputFile)
             if sourceMediaFile.isMedia and not dryrun:
                 try:
-                    MediaFileManager.copyMediaFile(sourceMediaFile, targetFolder)
+                    MediaFileManager.importMediaFile(sourceMediaFile, targetFolder, sourceFolder)
                 except DuplicateMediaFileException as duplicateException:
                     EventHandler.instance().count('duplicated')
                     logging.warn('File [{}] already exists in destination as [{}]. Skipping.'.format(inputFile, duplicateException.existingFile))
@@ -309,7 +322,7 @@ class MediaFileManager(object):
             raise DuplicateMediaFileException(identicalFileInFolder)
 
     @staticmethod
-    def copyMediaFile(mediaFile, targetBasePath):
+    def importMediaFile(mediaFile, targetBasePath, sourceBasePath):
         targetFolder = MediaFileManager.generateTargetFolder(mediaFile, targetBasePath)
         try:
             MediaFileManager.checkDuplicates(mediaFile, targetFolder)
@@ -318,6 +331,9 @@ class MediaFileManager(object):
         targetUniqueFile = MediaFileManager.generateUniqueTargetFileName(mediaFile, targetFolder)
         targetUniquePath = os.path.join(targetFolder, targetUniqueFile)
         FilesystemHelper.copyFileWithProperties(mediaFile.fileName, targetUniquePath)
+        targetSymbolicLink = os.path.join(targetBasePath, 'Original', os.path.relpath(mediaFile.fileName, sourceBasePath))
+        logging.info('target: [{}]'.format(targetSymbolicLink))
+        FilesystemHelper.symlink(targetUniquePath,targetSymbolicLink)
 
 
 @Singleton
