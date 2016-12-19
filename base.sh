@@ -1,25 +1,18 @@
 #!/bin/bash
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ENV_PATH="$BASE_PATH/.env"
-
+PACKAGES_FILE="$BASE_PATH/packages.pip"
+VIRTUALENV_GIT="https://github.com/pypa/virtualenv.git"
+VIRTUALENV_PATH="$ENV_PATH/virtualenv"
+VIRTUALENV="$VIRTUALENV_PATH/virtualenv.py"
 if [ ! -d $ENV_PATH ]; then
     echo "Creatin the virtual environment..."
-    VIRTUALENV=$(which virtualenv)
-    if [ -z "$VIRTUALENV" ]; then
-        PIP=$(which pip)
-        if [ -z "$PIP" ]; then
-            EASY_INSTALL=$(which easy_install)
-            if [ -z "$EASY_INSTALL" ]; then
-                echo "FATAL: easy_install is missing, but required. Exiting."
-                exit 1
-            fi
-            sudo $EASY_INSTALL pip
-        fi
-        sudo $PIP install virtualenv
-        VIRTUALENV=$(which virtualenv)
+    mkdir -p "$ENV_PATH"
+    PYTHON=$(which python)
+    GIT=$(which git)
+    $GIT clone --depth 1 "$VIRTUALENV_GIT" "$VIRTUALENV_PATH"
+    $PYTHON "$VIRTUALENV" "$ENV_PATH"
+    if [ -r "$PACKAGES_FILE" ]; then
+        $ENV_PATH/bin/pip install -r "$PACKAGES_FILE"
     fi
-    $VIRTUALENV $ENV_PATH
-    $ENV_PATH/bin/pip install -r packages.pip
 fi
-
-

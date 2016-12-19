@@ -332,7 +332,6 @@ class MediaFileManager(object):
         targetUniquePath = os.path.join(targetFolder, targetUniqueFile)
         FilesystemHelper.copyFileWithProperties(mediaFile.fileName, targetUniquePath)
         targetSymbolicLink = os.path.join(targetBasePath, 'Original', os.path.relpath(mediaFile.fileName, sourceBasePath))
-        logging.info('target: [{}]'.format(targetSymbolicLink))
         FilesystemHelper.symlink(targetUniquePath,targetSymbolicLink)
 
 
