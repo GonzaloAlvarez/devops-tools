@@ -1,4 +1,4 @@
 #!/bin/bash
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $BASE_PATH/base.sh
+source $BASE_PATH/bootstrap.sh
 $ENV_PATH/bin/python $BASE_PATH/$(basename "${BASH_SOURCE[0]}").py $@
