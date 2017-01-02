@@ -9,3 +9,5 @@ click
 python-magic
 Pillow
 awscli
+ansible
+boto

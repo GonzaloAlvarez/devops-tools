@@ -1,0 +1,10 @@
+---
+- name: Remove key pair from EC2
+  ec2_key:
+    state: absent
+    region: "{{ aws_region }}"
+    name: "{{ project }}-aws-key"
+- name: Remove private key
+  file: path="{{ ec2_key_path }}" state=absent
+
+

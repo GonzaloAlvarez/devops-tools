@@ -1,0 +1,20 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+AWS_VARS=$(cat config.yaml | grep '^aws' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+while read line; do
+    eval "export $line"
+done <<< "$AWS_VARS"
+export ANSIBLE_CONFIG="$ENV_PATH/ansible.cfg"
+if [ ! -f "$ANSIBLE_CONFIG" ]; then
+    cat << EOF > $ANSIBLE_CONFIG
+[defaults]
+roles_path=$BASE_PATH/ansible/roles
+library=$BASE_PATH/ansible
+retry_files_enabled = False
+EOF
+fi
+EC2_PY="$BASE_PATH/ansible/ec2.py"
+export ANSIBLE_HOSTS=$EC2_PY
+export EC2_INI_PATH="$BASE_PATH/ansible/ec2.ini"
+exec $ENV_PATH/bin/ansible-playbook $@

@@ -1,0 +1,5 @@
+---
+- include: key.yml
+  when: purge | default('false') | match('false')
+- include: key_purge.yml
+  when: purge | default('false') | match('true')

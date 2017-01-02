@@ -1,0 +1,5 @@
+- name: "Create new instance in ec2"
+  hosts: localhost
+  connection: local
+  roles:
+    - ec2
