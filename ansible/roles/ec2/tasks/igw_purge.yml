@@ -1,0 +1,15 @@
+---
+- name: Gather facts about the VPC
+  ec2_vpc_net_facts:
+    region: "{{ aws_region }}"
+    filters: { "tag:Name":"{{ aws_vpc_name }}" }
+  register: aws_vpc_facts
+- name: Purge IGW from VPC
+  ec2_vpc_igw:
+    region: "{{ aws_region }}"
+    vpc_id: "{{ vpc_item.id }}"
+    state: absent
+  with_items: "{{ aws_vpc_facts.vpcs }}"
+  when: aws_vpc_facts.vpcs|length > 0
+  loop_control:
+    loop_var: vpc_item

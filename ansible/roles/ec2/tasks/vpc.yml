@@ -1,0 +1,20 @@
+---
+- name: Create a new VPC in AWS
+  ec2_vpc_net:
+    state: present
+    region: "{{ aws_region }}"
+    name: "{{ aws_vpc_name }}"
+    cidr_block: "{{ aws_vpc_cidr_block }}"
+    tenancy: default
+  register: aws_vpc
+- name: Create VPC subnet
+  ec2_vpc_subnet:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ aws_vpc.vpc.id }}"
+    az: "{{ aws_az_1 }}"
+    cidr: "{{ aws_vpc_subnet_cidr_block }}"
+    resource_tags: {
+        "app":"{{ project }}-subnet"
+    }
+  register: aws_vpc_subnet

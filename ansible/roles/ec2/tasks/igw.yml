@@ -1,0 +1,7 @@
+---
+- name: Create Internet Gateway
+  ec2_vpc_igw:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ aws_vpc.vpc.id }}"
+  register: aws_vpc_igw

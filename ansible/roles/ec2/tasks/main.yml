@@ -1,5 +1,7 @@
 ---
-- include: key.yml
+- include: "{{ item }}.yml"
+  with_items: "{{ ec2_tasks }}"
   when: purge | default('false') | match('false')
-- include: key_purge.yml
+- include: "{{ item }}_purge.yml"
+  with_items: "{{ ec2_tasks[::-1] }}"
   when: purge | default('false') | match('true')

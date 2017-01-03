@@ -1,0 +1,25 @@
+---
+- name: Gather AWS subnet facts
+  ec2_vpc_subnet_facts:
+    region: "{{ aws_region }}"
+    filters:
+      { "tag:app": "{{ project }}-subnet" }
+  register: aws_vpc_subnet_facts
+- name: Remove all subnets registered
+  ec2_vpc_subnet:
+    state: absent
+    cidr: "{{ subnet_item['cidr_block'] }}"
+    vpc_id: "{{ subnet_item['vpc_id'] }}"
+    region: "{{ aws_region }}"
+  with_items: "{{ aws_vpc_subnet_facts.subnets }}"
+  when: aws_vpc_subnet_facts.subnets|length > 0
+  loop_control:
+    loop_var: subnet_item
+- name: Remove VPC in AWS
+  ec2_vpc_net:
+    state: absent
+    region: "{{ aws_region }}"
+    name: "{{ aws_vpc_name }}"
+    cidr_block: "{{ aws_vpc_cidr_block }}"
+    tenancy: default
+  register: aws_vpc_content
