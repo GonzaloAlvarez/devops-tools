@@ -15,6 +15,25 @@
   when: aws_vpc_subnet_facts.subnets|length > 0
   loop_control:
     loop_var: subnet_item
+# We now remove the Routing table, as the subnet
+# was a dependency and it would fail if we try
+# to remove it earlier
+- name: Gather facts about the VPC
+  ec2_vpc_net_facts:
+    region: "{{ aws_region }}"
+    filters: { "tag:Name":"{{ aws_vpc_name }}" }
+  register: aws_vpc_facts
+- name: Remove VPC Routing table
+  ec2_vpc_route_table:
+    state: absent
+    region: "{{ aws_region }}"
+    vpc_id: "{{ vpc_item.id }}"
+    tags: { "Name":"{{ project }}-vpc-public-rtable" }
+  with_items: "{{ aws_vpc_facts.vpcs }}"
+  when: aws_vpc_facts.vpcs|length > 0
+  loop_control:
+    loop_var: vpc_item
+# And we finalize by removing the VPC altogether
 - name: Remove VPC in AWS
   ec2_vpc_net:
     state: absent

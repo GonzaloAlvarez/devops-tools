@@ -1,0 +1,13 @@
+---
+- name: Create internal routing table
+  ec2_vpc_route_table:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ aws_vpc.vpc.id }}"
+    resource_tags: { "Name":"{{ project }}-vpc-public-rtable" }
+    subnets:
+      - "{{ aws_vpc_subnet.subnet.id }}"
+    routes:
+      - dest: 0.0.0.0/0
+        gateway_id: "{{ aws_vpc_igw.gateway_id }}"
+  register: aws_vpc_public_rtable

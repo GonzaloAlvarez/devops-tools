@@ -3,6 +3,7 @@
     - key
     - vpc
     - igw
+    - rtables
   aws_region: "{{ lookup('env','AWS_DEFAULT_REGION') | default('us-west-1') }}"
   ec2_key_path: "{{ lookup('env','ENV_PATH') | default('.env') }}/aws-key-{{ project }}-private.pem"
   aws_vpc_name: "{{ project }}-vpc"
