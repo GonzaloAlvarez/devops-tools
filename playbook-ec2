@@ -14,8 +14,8 @@ library=$BASE_PATH/ansible
 retry_files_enabled = False
 EOF
 fi
-EC2_PY="$BASE_PATH/ansible/ec2.py"
+EC2_PY="$BASE_PATH/ansible/ec2_inventory.py"
 export ENV_PATH
 export ANSIBLE_HOSTS=$EC2_PY
-export EC2_INI_PATH="$BASE_PATH/ansible/ec2.ini"
+export EC2_INI_PATH="$BASE_PATH/ansible/ec2_dynamic_inventory.ini"
 exec $ENV_PATH/bin/ansible-playbook $@

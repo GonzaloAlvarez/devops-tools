@@ -15,6 +15,7 @@
     az: "{{ aws_az_1 }}"
     cidr: "{{ aws_vpc_subnet_cidr_block }}"
     resource_tags: {
-        "app":"{{ project }}-subnet"
+        "app":"{{ project }}-subnet",
+        "Name":"{{ project }}-vpc-subnet"
     }
   register: aws_vpc_subnet

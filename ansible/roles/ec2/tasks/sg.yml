@@ -1,0 +1,16 @@
+---
+- name: Get my current IP address
+  ipify_facts:
+- set_fact:
+    aws_ec2_group_local_rule: 
+      - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "{{ ipify_public_ip }}/32" }
+- set_fact:
+    aws_ec2_group_rules_ext: "{{ aws_ec2_group_rules + aws_ec2_group_local_rule }}"
+- name: Create AWS Security Group
+  ec2_group:
+    state: present
+    region: "{{ aws_region }}"
+    vpc_id: "{{ aws_vpc.vpc.id }}"
+    name: "{{ project }}-secgroup"
+    description: "{{ project }} Security Group"
+    rules: "{{ aws_ec2_group_rules_ext }}"

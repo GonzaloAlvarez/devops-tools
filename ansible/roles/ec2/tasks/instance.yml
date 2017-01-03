@@ -1,0 +1,32 @@
+---
+- name: Create the AWS instance
+  ec2:
+    key_name: "{{ project }}-aws-key"
+    instance_type: "{{ aws_ec2_instance_type }}"
+    region: "{{ aws_region }}"
+    vpc_subnet_id: "{{ aws_vpc_subnet.subnet.id }}"
+    group: "{{ project }}-secgroup"
+    exact_count: "{{ aws_ec2_instance_count }}"
+    assign_public_ip: yes
+    wait: yes
+    image: "{{ aws_ec2_image }}"
+    instance_tags:
+      Name: "{{ project }}-{{ aws_region }}-instance"
+    count_tag:
+      Name: "{{ project }}-{{ aws_region }}-instance"
+  register: aws_ec2_facts
+- name: Wait for SSH to come up
+  wait_for:
+    host={{ instance_item.public_dns_name }}
+    port=22
+    delay=60
+    timeout=320
+    state=started
+  with_items: "{{ aws_ec2_facts.instances }}"
+  when: ( aws_ec2_facts.changed ) and ( aws_ec2_facts.instances|length > 0 )
+  loop_control:
+    loop_var: instance_item
+- name: Refresh inventory
+  meta: refresh_inventory
+- debug: var=hostvars[item]
+  with_items: "{{groups['all']}}"

@@ -5,3 +5,9 @@
     region: "{{ aws_region }}"
     vpc_id: "{{ aws_vpc.vpc.id }}"
   register: aws_vpc_igw
+- name: Tag Internet Gateway
+  ec2_tag:
+    resource: "{{ aws_vpc_igw.gateway_id }}"
+    state: present
+    tags:
+      Name: "{{ project }}-igw"
