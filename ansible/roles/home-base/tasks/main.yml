@@ -1,0 +1,6 @@
+---
+- name: Get uptime
+  shell: uptime
+  register: uptime_result
+- debug:
+    msg: "Uptime for {{ ansible_hostname }}: {{ uptime_result.stdout }}"

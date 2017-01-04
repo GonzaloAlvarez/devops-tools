@@ -7,7 +7,7 @@
     - sg
     - instance
   aws_region: "{{ lookup('env','AWS_DEFAULT_REGION') | default('us-west-1') }}"
-  ec2_key_path: "{{ lookup('env','ENV_PATH') | default('.env') }}/aws-key-{{ project }}-private.pem"
+  ec2_key_path: "{{ private_key_file }}"
   aws_vpc_name: "{{ project }}-vpc"
   aws_vpc_cidr_block: "10.0.0.0/16"
   aws_vpc_subnet_cidr_block: "10.0.1.0/24"

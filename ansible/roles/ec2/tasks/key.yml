@@ -5,12 +5,6 @@
     region: "{{ aws_region }}"
     name: "{{ project }}-aws-key"
   register: ec2_key
-
 - name: Save Private Key
   copy: content="{{ ec2_key.key.private_key }}" dest="{{ ec2_key_path }}" mode=0600
-  when: ec2_key.changed
-
-- name: Saved Private Key
-  debug:
-    msg: "Private key saved: {{ ec2_key_path }}"
   when: ec2_key.changed

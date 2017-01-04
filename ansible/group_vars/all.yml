@@ -1,2 +1,6 @@
 ---
   project: "testone"
+  private_key_file: "{{ lookup('env','ENV_PATH') | default('.env') }}/aws-key-{{ project }}-private.pem"
+  ssh_user: "admin"
+  ansible_ssh_private_key_file: "{{ private_key_file }}"
+  ansible_ssh_user: "{{ ssh_user }}"

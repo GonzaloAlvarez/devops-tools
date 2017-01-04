@@ -28,5 +28,3 @@
     loop_var: instance_item
 - name: Refresh inventory
   meta: refresh_inventory
-- debug: var=hostvars[item]
-  with_items: "{{groups['all']}}"

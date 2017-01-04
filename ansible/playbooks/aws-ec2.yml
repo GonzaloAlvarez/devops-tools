@@ -1,5 +1,11 @@
 - name: "Create new instance in ec2"
   hosts: localhost
   connection: local
+  gather_facts: False
   roles:
     - ec2
+- name: "Execute base configuration"
+  hosts: all
+  gather_facts: True
+  roles:
+    - { role: 'home-base', when: purge | default('false') | match('false') }

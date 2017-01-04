@@ -6,12 +6,14 @@ while read line; do
     eval "export $line"
 done <<< "$AWS_VARS"
 export ANSIBLE_CONFIG="$ENV_PATH/ansible.cfg"
+export ANSIBLE_HOST_KEY_CHECKING=False
 if [ ! -f "$ANSIBLE_CONFIG" ]; then
     cat << EOF > $ANSIBLE_CONFIG
 [defaults]
 roles_path=$BASE_PATH/ansible/roles
 library=$BASE_PATH/ansible
 retry_files_enabled = False
+host_key_checking = False
 EOF
 fi
 EC2_PY="$BASE_PATH/ansible/ec2_inventory.py"
