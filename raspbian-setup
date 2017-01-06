@@ -1,0 +1,40 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+
+RASPBIAN_PATH="$ENV_PATH/raspbian"
+RASPBIAN_EXTRACT_PATH="$RASPBIAN_PATH/extract"
+RASPBIAN_FILENAME="raspbian-latest.zip"
+RASPBIAN_FILE="$RASPBIAN_PATH/$RASPBIAN_FILENAME"
+RASPBIAN_LATEST_URL="http://downloads.raspberrypi.org/raspbian_latest"
+CURL="$(which curl)"
+UNZIP="$(which 7za)"
+DISKUTIL="$(which diskutil)"
+SUDO="$(which sudo)"
+DD="$(which dd)"
+
+mkdir -p "$RASPBIAN_EXTRACT_PATH"
+
+if [ ! -r "$RASPBIAN_FILE" ]; then
+    echo "Downloading latest raspberry image"
+    $CURL -L -o "$RASPBIAN_FILE" "$RASPBIAN_LATEST_URL"
+fi
+RASPBIAN_IMAGEFILE="$(find "$RASPBIAN_EXTRACT_PATH" -name "*.img" | head -n 1)"
+if [ ! -r "$RASPBIAN_IMAGEFILE" ]; then
+    $UNZIP x -o"$RASPBIAN_EXTRACT_PATH" "$RASPBIAN_FILE"
+    RASPBIAN_IMAGEFILE="$(find "$RASPBIAN_EXTRACT_PATH" -name "*.img" | head -n 1)"
+fi
+for DISKFORMAT in Windows_FAT_32 DOS_FAT_32 Windows_NTFS Linux; do
+    SDCARD_DISKID=$($DISKUTIL list | grep "$DISKFORMAT" | tr ' ' '\n' | grep -e 'disk[0-9]')
+    if [ ! -z "$SDCARD_DISKID" ]; then
+        break;
+    fi
+done
+if [ -z "$SDCARD_DISKID" ]; then
+    echo "Unable to find the SD Card mounted in your system. Exiting."
+    exit 1
+fi
+echo "SD Card in [$SDCARD_DISKID][${SDCARD_DISKID%??}]"
+$SUDO $DISKUTIL unmount $SDCARD_DISKID
+$SUDO $DD bs=1m if=$RASPBIAN_IMAGEFILE of=/dev/r${SDCARD_DISKID%??}
+$SUDO $DISKUTIL umount $SDCARD_DISKID

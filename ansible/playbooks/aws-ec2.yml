@@ -7,5 +7,8 @@
 - name: "Execute base configuration"
   hosts: all
   gather_facts: True
+  become: True
+  become_user: root
+  become_method: sudo
   roles:
-    - { role: 'home-base', when: purge | default('false') | match('false') }
+    - { role: 'base', when: purge | default('false') | match('false') }
