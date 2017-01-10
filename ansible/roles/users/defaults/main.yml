@@ -1,0 +1,7 @@
+---
+  admin_users:
+    - gonzalo
+  purge_users:
+    - admin
+  ssh_keys:
+    - "https://raw.githubusercontent.com/GonzaloAlvarez/credentials/master/SSH/GonzaloAlvarez-MasterSSH-pubkey.pem"

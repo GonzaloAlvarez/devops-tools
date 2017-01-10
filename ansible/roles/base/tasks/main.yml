@@ -1,7 +1,3 @@
 ---
 - include: "{{ item }}.yml"
   with_items: "{{ base_tasks }}"
-  when: purge | default('false') | match('false')
-- include: "{{ item }}_purge.yml"
-  with_items: "{{ base_tasks[::-1] }}"
-  when: purge | default('false') | match('true')

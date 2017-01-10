@@ -1,0 +1,10 @@
+---
+- name: Configure authorized keys for user accounts
+  authorized_key:
+    user: "{{ key_item[0] }}"
+    key: "{{ key_item[1] }}"
+  with_nested:
+    - "{{ admin_users }}"
+    - "{{ ssh_keys }}"
+  loop_control:
+    loop_var: key_item

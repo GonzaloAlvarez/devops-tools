@@ -15,6 +15,12 @@
     count_tag:
       Name: "{{ project }}-{{ aws_region }}-instance"
   register: aws_ec2_facts
+- name: Dumping name of hosts to file
+  local_action: copy content="{{ instance_item.public_dns_name }}" dest="{{ local_inventory_file }}"
+  with_items: "{{ aws_ec2_facts.instances }}"
+  when: ( aws_ec2_facts.changed ) and ( aws_ec2_facts.instances|length > 0 )
+  loop_control:
+    loop_var: instance_item
 - name: Wait for SSH to come up
   wait_for:
     host={{ instance_item.public_dns_name }}

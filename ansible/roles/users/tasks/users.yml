@@ -1,0 +1,12 @@
+---
+- name: Create basic set of users for the environment
+  user:
+    name: "{{ user_item }}"
+    state: present
+    groups: wheel,sshusers
+    shell: /bin/bash
+  with_items: "{{ admin_users }}"
+  when: admin_users|length > 0
+  loop_control:
+    loop_var: user_item
+

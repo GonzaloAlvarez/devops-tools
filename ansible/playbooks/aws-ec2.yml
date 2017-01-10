@@ -4,6 +4,17 @@
   gather_facts: False
   roles:
     - ec2
+- name: "Add minimal user configurations"
+  hosts: all
+  vars:
+    ansible_ssh_private_key_file: "{{ aws_private_key_file }}"
+    ansible_ssh_user: "{{ aws_ssh_user }}"
+  gather_facts: True
+  become: True
+  become_user: root
+  become_method: sudo
+  roles:
+    - { role: 'users', when: purge | default('false') | match('false') }
 - name: "Execute base configuration"
   hosts: all
   gather_facts: True

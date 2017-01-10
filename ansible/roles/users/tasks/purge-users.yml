@@ -1,0 +1,10 @@
+---
+- name: Remove unnecessary users from the system
+  user:
+    name: "{{ user_item }}"
+    state: absent
+    force: yes
+  with_items: "{{ purge_users }}"
+  when: purge_users|length > 0
+  loop_control:
+    loop_var: user_item

@@ -1,0 +1,9 @@
+---
+- name: Make sure there is a 'wheel' group
+  group:
+    name: wheel
+    state: present
+- name: Make sure there is a 'sshusers' group
+  group:
+    name: sshusers
+    state: present

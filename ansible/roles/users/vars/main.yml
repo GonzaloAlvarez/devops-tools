@@ -1,0 +1,7 @@
+---
+  users_tasks:
+    - groups
+    - users
+    - sudoers
+    - keys
+    - purge-users

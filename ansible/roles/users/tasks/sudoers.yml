@@ -1,0 +1,7 @@
+---
+- name: Add 'wheel' users to the list of allowed for passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'

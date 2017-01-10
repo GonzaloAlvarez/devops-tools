@@ -1,10 +1,12 @@
 ---
 - name: Get my current IP address
   ipify_facts:
-- set_fact:
+- name: Set variables with list of ports to use
+  set_fact:
     aws_ec2_group_local_rule: 
       - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "{{ ipify_public_ip }}/32" }
-- set_fact:
+- name: Set variables with list of ports to use
+  set_fact:
     aws_ec2_group_rules_ext: "{{ aws_ec2_group_rules + aws_ec2_group_local_rule }}"
 - name: Create AWS Security Group
   ec2_group:
