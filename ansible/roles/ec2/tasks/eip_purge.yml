@@ -2,19 +2,16 @@
 - name: Gathering facts about the instances
   ec2_remote_facts:
     region: "{{ aws_region }}"
-    filters: 
-      "tag:Name": "{{ project }}-{{ aws_region }}-instance"
-      instance-state-name: running
+    filters: { "tag:Name": "{{ project }}-{{ aws_region }}-instance" }
   register: ec2_instance_facts
-- name: Remove Instances
-  ec2:
-    state: absent
+- name: Remove EIPs
+  ec2_eip:
     region: "{{ aws_region }}"
-    wait: true
-    instance_ids: "{{ instance_item.id }}"
+    instance_id: "{{ instance_item.id }}"
+    state: absent
+    release_on_disassociation: yes
   with_items: "{{ ec2_instance_facts.instances }}"
   when: ec2_instance_facts.instances|length > 0
   loop_control:
     loop_var: instance_item
-- name: Refresh inventory
-  meta: refresh_inventory
+

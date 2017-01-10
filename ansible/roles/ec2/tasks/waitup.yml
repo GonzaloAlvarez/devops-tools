@@ -6,15 +6,15 @@
       "tag:Name": "{{ project }}-{{ aws_region }}-instance"
       instance-state-name: running
   register: ec2_instance_facts
-- name: Remove Instances
-  ec2:
-    state: absent
-    region: "{{ aws_region }}"
-    wait: true
-    instance_ids: "{{ instance_item.id }}"
+- name: Wait for SSH to come up
+  wait_for:
+    host={{ instance_item.public_dns_name }}
+    port=22
+    delay=60
+    timeout=320
+    state=started
   with_items: "{{ ec2_instance_facts.instances }}"
-  when: ec2_instance_facts.instances|length > 0
+  when: ( ec2_instances_changed ) and ( ec2_instance_facts.instances|length > 0 )
   loop_control:
     loop_var: instance_item
-- name: Refresh inventory
-  meta: refresh_inventory
+

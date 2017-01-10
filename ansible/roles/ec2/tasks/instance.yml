@@ -15,22 +15,13 @@
     count_tag:
       Name: "{{ project }}-{{ aws_region }}-instance"
   register: aws_ec2_facts
+- name: Set instances created as a fact
+  set_fact:
+    ec2_instances: "{{ aws_ec2_facts.instances }}"
+    ec2_instances_changed: "{{ aws_ec2_facts.changed }}"
 - name: Dumping name of hosts to file
   local_action: copy content="{{ instance_item.public_dns_name }}" dest="{{ local_inventory_file }}"
   with_items: "{{ aws_ec2_facts.instances }}"
   when: ( aws_ec2_facts.changed ) and ( aws_ec2_facts.instances|length > 0 )
   loop_control:
     loop_var: instance_item
-- name: Wait for SSH to come up
-  wait_for:
-    host={{ instance_item.public_dns_name }}
-    port=22
-    delay=60
-    timeout=320
-    state=started
-  with_items: "{{ aws_ec2_facts.instances }}"
-  when: ( aws_ec2_facts.changed ) and ( aws_ec2_facts.instances|length > 0 )
-  loop_control:
-    loop_var: instance_item
-- name: Refresh inventory
-  meta: refresh_inventory
