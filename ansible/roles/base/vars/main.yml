@@ -1,3 +1,6 @@
 ---
-  base_tasks:
+  base_root_tasks:
     - packages
+  base_tasks:
+    - vim
+    - dotfiles

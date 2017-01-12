@@ -1,0 +1,6 @@
+---
+- name: "Execute base configuration"
+  hosts: all
+  gather_facts: True
+  roles:
+    - { role: 'base', when: purge | default('false') | match('false') }

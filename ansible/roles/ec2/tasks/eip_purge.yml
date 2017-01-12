@@ -2,7 +2,9 @@
 - name: Gathering facts about the instances
   ec2_remote_facts:
     region: "{{ aws_region }}"
-    filters: { "tag:Name": "{{ project }}-{{ aws_region }}-instance" }
+    filters: 
+      "tag:Name": "{{ project }}-{{ aws_region }}-instance"
+      instance-state-name: running
   register: ec2_instance_facts
 - name: Remove EIPs
   ec2_eip:

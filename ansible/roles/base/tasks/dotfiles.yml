@@ -1,0 +1,7 @@
+---
+- name: Download dotfiles
+  git:
+    repo: "https://github.com/GonzaloAlvarez/dotfiles.git"
+    dest: "{{ ansible_env.HOME }}/.dotfiles"
+- name: Install dotfiles
+  shell: "{{ ansible_env.HOME }}/.dotfiles/build.sh {{ inventory_hostname }}"

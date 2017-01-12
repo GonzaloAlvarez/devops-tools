@@ -3,8 +3,10 @@
   apt: cache_valid_time="{{ apt_cache_valid_time }}" update_cache=yes
 - name: Install aptitude to upgrade system
   apt: pkg=aptitude state=latest
+  when: quick | default('false') | match('false')
 - name: Upgrade system
   apt: upgrade=safe update_cache=yes
+  when: quick | default('false') | match('false')
 - name: Remove packages
   apt: pkg="{{ pkg_item }}" state=absent purge=yes
   with_items: "{{ apt_purge_packages }}"
