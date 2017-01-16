@@ -19,9 +19,3 @@
   set_fact:
     ec2_instances: "{{ aws_ec2_facts.instances }}"
     ec2_instances_changed: "{{ aws_ec2_facts.changed }}"
-- name: Dumping name of hosts to file
-  local_action: copy content="{{ instance_item.public_dns_name }}" dest="{{ local_inventory_file }}"
-  with_items: "{{ aws_ec2_facts.instances }}"
-  when: ( aws_ec2_facts.changed ) and ( aws_ec2_facts.instances|length > 0 )
-  loop_control:
-    loop_var: instance_item

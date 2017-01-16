@@ -1,0 +1,3 @@
+---
+- name: Remove inventory file
+  file: path="{{ local_inventory_file}}" state=absent
