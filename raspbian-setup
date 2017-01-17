@@ -6,12 +6,13 @@ RASPBIAN_PATH="$ENV_PATH/raspbian"
 RASPBIAN_EXTRACT_PATH="$RASPBIAN_PATH/extract"
 RASPBIAN_FILENAME="raspbian-latest.zip"
 RASPBIAN_FILE="$RASPBIAN_PATH/$RASPBIAN_FILENAME"
-RASPBIAN_LATEST_URL="http://downloads.raspberrypi.org/raspbian_latest"
+RASPBIAN_LATEST_URL="http://downloads.raspberrypi.org/raspbian_lite_latest"
 CURL="$(which curl)"
 UNZIP="$(which 7za)"
 DISKUTIL="$(which diskutil)"
 SUDO="$(which sudo)"
 DD="$(which dd)"
+MOUNT="$(which mount)"
 
 mkdir -p "$RASPBIAN_EXTRACT_PATH"
 
@@ -37,4 +38,6 @@ fi
 echo "SD Card in [$SDCARD_DISKID][${SDCARD_DISKID%??}]"
 $SUDO $DISKUTIL unmount $SDCARD_DISKID
 $SUDO $DD bs=1m if=$RASPBIAN_IMAGEFILE of=/dev/r${SDCARD_DISKID%??}
+MOUNT_POINT=$($MOUNT | grep "${SDCARD_DISKID%??}" | awk '{print $3}')
+touch $MOUNT_POINT/ssh
 $SUDO $DISKUTIL umount $SDCARD_DISKID
