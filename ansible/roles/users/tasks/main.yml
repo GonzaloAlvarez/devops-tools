@@ -1,3 +1,11 @@
 ---
+- local_action: "command ssh -q -o BatchMode=yes -o ConnectTimeout=3 -l {{ main_ssh_user }} -i {{ main_private_key_file }} {{ inventory_hostname }} 'echo ok'"
+  register: test_user
+  become: False
+  ignore_errors: true
+  changed_when: false
+- action: setup
+  when: "{{ test_user | failed }}"
 - include: "{{ item }}.yml"
   with_items: "{{ users_tasks }}"
+  when: "{{ test_user | failed }}"

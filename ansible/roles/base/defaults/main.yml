@@ -15,6 +15,7 @@
     - procps
     - psmisc
     - git
+    - dbus
   apt_purge_packages:
     - at
     - exim4
@@ -23,3 +24,4 @@
     - procmail
     - exim4-config
     - exim4-daemon-light
+  system_timezone: "US/Pacific"

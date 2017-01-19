@@ -5,7 +5,10 @@ AWS_VARS=$(cat config.yaml | grep '^aws' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U
 while read line; do
     eval "export $line"
 done <<< "$AWS_VARS"
-export ANSIBLE_CONFIG="$ENV_PATH/ansible.cfg"
+ANSIBLE_PATH="$ENV_PATH/ansible"
+rm -Rf "$ANSIBLE_PATH"
+mkdir -p "$ANSIBLE_PATH"
+export ANSIBLE_CONFIG="$ANSIBLE_PATH/ansible.cfg"
 export ANSIBLE_HOST_KEY_CHECKING=False
 if [ ! -f "$ANSIBLE_CONFIG" ]; then
     cat << EOF > $ANSIBLE_CONFIG
@@ -18,6 +21,15 @@ EOF
 fi
 EC2_PY="$BASE_PATH/ansible/ec2_inventory.py"
 export ENV_PATH
-export ANSIBLE_HOSTS=$EC2_PY
+if [ "$1" == "ec2" ]; then
+    export ANSIBLE_HOSTS=$EC2_PY
+else
+    export ANSIBLE_HOSTS="$BASE_PATH/ansible/hosts"
+    cat << EOF > $ANSIBLE_HOSTS
+[all]
+$1
+EOF
+fi
+shift
 export EC2_INI_PATH="$BASE_PATH/ansible/ec2_dynamic_inventory.ini"
 exec $ENV_PATH/bin/ansible-playbook $@
