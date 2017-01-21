@@ -1,0 +1,14 @@
+dnsupdate: python ipgetter docopt pyyaml boto pyflare
+mediasorter: python click python-magic Pillow python-magic
+ghi: ruby ghi
+awscli: python awscli
+aws: python docopt boto pyflare
+getmac: node getmac
+internal-ip: node internal-ip
+iponmap: node iponmap
+public-ip: node ipify
+playbook: python ansible boto
+raspbian-setup: env
+speed-test: node speed-test
+vtop: node vtop
+watcherd: python uptime psutil
