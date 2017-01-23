@@ -1,0 +1,6 @@
+---
+- include: "{{ item }}.yml"
+  become: True
+  become_user: root
+  become_method: sudo
+  with_items: "{{ rpi_tasks }}"

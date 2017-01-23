@@ -13,23 +13,26 @@ export ANSIBLE_HOST_KEY_CHECKING=False
 if [ ! -f "$ANSIBLE_CONFIG" ]; then
     cat << EOF > $ANSIBLE_CONFIG
 [defaults]
-roles_path=$BASE_PATH/ansible/roles
-library=$BASE_PATH/ansible
+roles_path=$ANSIBLE_PATH/roles
+library=$ANSIBLE_PATH
 retry_files_enabled = False
 host_key_checking = False
 EOF
 fi
-EC2_PY="$BASE_PATH/ansible/ec2_inventory.py"
+EC2_PY="$ANSIBLE_PATH/ec2_inventory.py"
 export ENV_PATH
 if [ "$1" == "ec2" ]; then
     export ANSIBLE_HOSTS=$EC2_PY
 else
-    export ANSIBLE_HOSTS="$BASE_PATH/ansible/hosts"
+    export ANSIBLE_HOSTS="$ANSIBLE_PATH/hosts"
     cat << EOF > $ANSIBLE_HOSTS
 [all]
 $1
 EOF
 fi
+for file in $BASE_PATH/ansible/*; do
+    ln -s $file $ANSIBLE_PATH/$(basename $file)
+done
 shift
 export EC2_INI_PATH="$BASE_PATH/ansible/ec2_dynamic_inventory.ini"
 exec $ENV_PATH/bin/ansible-playbook $@

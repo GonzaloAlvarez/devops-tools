@@ -3,7 +3,6 @@
   apt_install_packages:
     - bzip2
     - e2fsprogs
-    - acpi
     - gzip
     - mc
     - vim-nox

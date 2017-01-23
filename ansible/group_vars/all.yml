@@ -7,3 +7,5 @@
   main_private_key_file: "{{ lookup('env','HOME') }}/.ssh/GonzaloAlvarez-MasterSSH-privkey.pem"
   ansible_ssh_private_key_file: "{{ main_private_key_file }}"
   ansible_ssh_user: "{{ main_ssh_user }}"
+  raspberry_ssh_user: "pi"
+  raspberry_ssh_pass: "raspberry"
