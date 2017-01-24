@@ -1,0 +1,6 @@
+- name: restart sshd
+  service: name={{ sshd_service_name }} state=restarted
+  become: True
+  become_user: root
+  become_method: sudo
+  when: ansible_os_family != "Darwin"

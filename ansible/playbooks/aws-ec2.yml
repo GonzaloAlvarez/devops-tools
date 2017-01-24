@@ -20,4 +20,5 @@
   hosts: all
   gather_facts: True
   roles:
+    - { role: 'ssh-hardening', when: purge | default('false') | match('false') }
     - { role: 'base', when: purge | default('false') | match('false') }

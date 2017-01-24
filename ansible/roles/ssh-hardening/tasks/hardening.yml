@@ -1,0 +1,15 @@
+---
+
+- name: Override sshd_config and set permissions to root/wheel/644
+  template:
+    src: "opensshd.conf.j2"
+    dest: "{{sshd_config}}"
+    mode: 0644
+    owner: "root"
+    group: "wheel"
+    validate: "/usr/sbin/sshd -T -f %s"
+  notify: restart sshd
+
+- debug:
+    msg: "No restart of the SSH daemon required on OSX, will auto-reload"
+  when: ansible_os_family == "Darwin"

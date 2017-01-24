@@ -1,0 +1,65 @@
+---
+
+# Sets the groups being allowed to login over SSH if specified
+sshd_allow_groups: "sshusers"
+# Sets the groups being denied to login over SSH if specified
+sshd_deny_groups: ""
+# Sets the users being allowed to login over SSH if specified
+sshd_allow_users: ""
+# Sets the users being denied to login over SSH if specified
+sshd_deny_users: ""
+
+# Define the global auth methods applying to all users/groups.
+# For example, 'publickey,password' forces a combinded authentication where
+# the user first must present a trusted SSH-key and then enter the
+# SSH user's password
+sshd_auth_methods: ""
+
+# Define the auth methods per user. For example:
+# sshd_match_users:
+#   - { user: 'inventory', auth_method: 'password' }
+sshd_match_users: []
+
+# Decide if password auth should be allowed or not
+sshd_password_auth: "yes"
+
+# Allow or disable the usage of public keys
+sshd_pubkey_auth: "yes"
+
+# sshd config location
+sshd_config: /etc/ssh/sshd_config
+
+# ssh service name
+sshd_service_name: ssh
+
+# Allowed sshd ports
+sshd_ports: ['22']
+
+# true if IPv6 is required
+network_ipv6_enable: false
+
+# One or more IP addresses the ssh server should listen to
+sshd_listen_to: ['0.0.0.0']
+
+# Host keys to look for when starting the SSH server
+sshd_host_key_files: ['/etc/ssh/ssh_host_rsa_key', '/etc/ssh/ssh_host_dsa_key', '/etc/ssh/ssh_host_ecdsa_key']
+
+# Specifies  the  maximum  number  of authentication attempts permitted per connection.
+# Once the number of failures reaches half this value, additional failures are logged
+sshd_max_auth_retries: 2
+
+# Specifies an interval for sending keep alive messages
+sshd_client_alive_interval: 600
+# Specifies how often keep alive messages are being sent
+sshd_client_alive_count: 3
+
+# false to disable TCP Forwarding
+sshd_allow_tcp_forwarding: false
+# false to disable Agent Forwarding
+sshd_allow_agent_forwarding: false
+
+# false to disable printing of the MOTD
+sshd_print_motd: false
+
+# false to disable display of last login information
+sshd_print_last_log: false

@@ -1,0 +1,136 @@
+# {{ansible_managed}}
+
+# Basic configuration
+# ===================
+
+# Either disable or only allow ssh root login via certificates.
+PermitRootLogin no
+
+# Define which port sshd should listen to. Default to `22`.
+{% for port in sshd_ports -%}
+Port {{port}}
+{% endfor %}
+
+# Address family should always be limited to the active network configuration.
+AddressFamily {{ 'any' if network_ipv6_enable else 'inet' }}
+
+# Define which addresses sshd should listen to. Default to `0.0.0.0`, ie make sure you put your desired address in here, since otherwise sshd will listen to everyone.
+{% for address in sshd_listen_to -%}
+ListenAddress {{address}}
+{% endfor %}
+
+# List HostKeys here.
+{% for key in sshd_host_key_files -%}
+HostKey {{key}}
+{% endfor %}
+
+# Security configuration
+# ======================
+
+# Set the protocol version to 2 for security reasons. Disables legacy support.
+Protocol 2
+
+# Make sure sshd checks file modes and ownership before accepting logins. This prevents accidental misconfiguration.
+StrictModes yes
+
+# Logging, obsoletes QuietMode and FascistLogging
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Authentication
+# --------------
+
+# Secure Login directives.
+UseLogin no
+UsePrivilegeSeparation sandbox
+
+PermitUserEnvironment no
+LoginGraceTime 30s
+MaxAuthTries {{sshd_max_auth_retries}}
+MaxSessions 10
+MaxStartups 10:30:100
+
+# Enable public key authentication
+PubkeyAuthentication {{sshd_pubkey_auth}}
+
+# Never use host-based authentication. It can be exploited.
+IgnoreRhosts yes
+IgnoreUserKnownHosts yes
+HostbasedAuthentication no
+
+# Enable PAM to enforce system wide rules
+UsePAM yes
+
+# Disable password-based authentication, it can allow for potentially easier brute-force attacks.
+PasswordAuthentication {{sshd_password_auth}}
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+
+# Only enable Kerberos authentication if it is configured.
+KerberosAuthentication no
+KerberosOrLocalPasswd no
+KerberosTicketCleanup yes
+#KerberosGetAFSToken no
+
+# Only enable GSSAPI authentication if it is configured.
+GSSAPIAuthentication no
+GSSAPICleanupCredentials yes
+
+{% if sshd_auth_methods -%}
+# Global auth methods for all users
+AuthenticationMethods {{sshd_auth_methods}}
+{% endif %}
+{% if sshd_match_users -%}
+{% for user in sshd_match_users %}
+# Individual rules for user {{user.user}}
+Match User {{user.user}}
+  AuthenticationMethods {{user.auth_method}}
+{% endfor %}
+Match all
+{% endif %}
+{% if sshd_deny_users -%}
+DenyUsers {{sshd_deny_users}}
+{% endif %}
+{% if sshd_allow_users -%}
+AllowUsers {{sshd_allow_users}}
+{% endif %}
+{% if sshd_deny_groups -%}
+DenyGroups {{sshd_deny_groups}}
+{% endif %}
+{% if sshd_allow_groups -%}
+AllowGroups {{sshd_allow_groups}}
+{% endif %}
+
+# Network
+# -------
+
+# Disable TCP keep alive since it is spoofable. Use ClientAlive messages instead, they use the encrypted channel
+TCPKeepAlive no
+
+# Manage `ClientAlive..` signals via interval and maximum count. This will periodically check up to a `..CountMax` number of times within `..Interval` timeframe, and abort the connection once these fail.
+ClientAliveInterval {{sshd_client_alive_interval}}
+ClientAliveCountMax {{sshd_client_alive_count}}
+
+# Disable tunneling
+PermitTunnel no
+
+# Disable forwarding tcp connections.
+# no real advantage without denied shell access
+AllowTcpForwarding {{ 'yes' if sshd_allow_tcp_forwarding else 'no' }}
+
+# Disable agent formwarding, since local agent could be accessed through forwarded connection.
+# no real advantage without denied shell access
+AllowAgentForwarding {{ 'yes' if sshd_allow_agent_forwarding else 'no' }}
+
+# Do not allow remote port forwardings to bind to non-loopback addresses.
+GatewayPorts no
+
+# Disable X11 forwarding, since local X11 display could be accessed through forwarded connection.
+X11Forwarding no
+X11UseLocalhost yes
+
+# Misc. configuration
+# ===================
+
+PrintMotd {{ 'yes' if sshd_print_motd else 'no' }}
+PrintLastLog {{ 'yes' if sshd_print_last_log else 'no' }}
