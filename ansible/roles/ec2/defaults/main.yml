@@ -7,6 +7,9 @@
   aws_ec2_instance_type: "{{ instance_type | default('t2.nano') }}"
   aws_ec2_instance_count: "{{ instance_count | default(1) }}"
   aws_ec2_image: "ami-2a34e94a"
+  aws_ec2_ami_owner: "379101102735"
+  aws_ec2_ami_name: "debian-jessie-*"
+  aws_ec2_ami_architecture: "x86_64"
   aws_ec2_group_rules:
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.233.176/29" }
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.233.160/28" }

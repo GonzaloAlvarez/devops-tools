@@ -1,5 +1,6 @@
 ---
   ec2_tasks:
+    - ami_lookup
     - key
     - vpc
     - igw

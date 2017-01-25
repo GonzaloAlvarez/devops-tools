@@ -1,0 +1,19 @@
+---
+- name: Search for a viable AMI in EC2 for the instance
+  ec2_ami_find:
+    owner: "{{ aws_ec2_ami_owner }}"
+    name: "{{ aws_ec2_ami_name }}"
+    architecture: "{{ aws_ec2_ami_architecture }}"
+    sort: creationDate
+    sort_order: descending
+    sort_end: 1
+  register: ec2_ami_list
+  when: ec2_ami|default("") == ""
+- name: Update ami to be used, if we found one
+  set_fact:
+    aws_ec2_image: "{{ ec2_ami_list.results[0].ami_id }}"
+  when: ec2_ami|default("") == "" and ec2_ami_list.results|length > 0
+- name: Make use of the AMI provided
+  set_fact:
+    aws_ec2_image: "{{ ec2_ami }}"
+  when: ec2_ami|default("") != ""
