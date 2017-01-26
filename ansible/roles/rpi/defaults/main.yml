@@ -6,6 +6,8 @@ raspberry_pi_boot_config_options:
   # Enable 1200ma USB current on newer model Pis.
   - regexp: "^#?max_usb_current"
     line: "max_usb_current=1"
+  - regexp: "^#?start_x"
+    line: "start_x=1"
 
 raspberry_pi_rc_local_options:
   # Disable HDMI on startup (for power savings).

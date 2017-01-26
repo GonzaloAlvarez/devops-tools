@@ -25,7 +25,7 @@ if [ ! -r "$RASPBIAN_IMAGEFILE" ]; then
     $UNZIP x -o"$RASPBIAN_EXTRACT_PATH" "$RASPBIAN_FILE"
     RASPBIAN_IMAGEFILE="$(find "$RASPBIAN_EXTRACT_PATH" -name "*.img" | head -n 1)"
 fi
-for DISKFORMAT in Windows_FAT_32 DOS_FAT_32 Windows_NTFS Linux; do
+for DISKFORMAT in Windows_FAT_32 DOS_FAT_32 Windows_FAT_16 Windows_NTFS Linux; do
     SDCARD_DISKID=$($DISKUTIL list | grep "$DISKFORMAT" | tr ' ' '\n' | grep -e 'disk[0-9]')
     if [ ! -z "$SDCARD_DISKID" ]; then
         break;
@@ -38,6 +38,20 @@ fi
 echo "SD Card in [$SDCARD_DISKID][${SDCARD_DISKID%??}]"
 $SUDO $DISKUTIL unmount $SDCARD_DISKID
 $SUDO $DD bs=1m if=$RASPBIAN_IMAGEFILE of=/dev/r${SDCARD_DISKID%??}
+for DISKFORMAT in Windows_FAT_32 DOS_FAT_32 Windows_FAT_16 Windows_NTFS Linux; do
+    SDCARD_DISKID=$($DISKUTIL list | grep "$DISKFORMAT" | tr ' ' '\n' | grep -e 'disk[0-9]')
+    if [ ! -z "$SDCARD_DISKID" ]; then
+        break;
+    fi
+done
+if [ -z "$SDCARD_DISKID" ]; then
+    echo "Unable to find the SD Card mounted in your system. Exiting."
+    exit 1
+fi
 MOUNT_POINT=$($MOUNT | grep "${SDCARD_DISKID%??}" | awk '{print $3}')
 touch $MOUNT_POINT/ssh
+if [ "$1" = "zero" ]; then
+    echo "dtoverlay=dwc2" >> "$MOUNT_POINT/config.txt"
+    sed -i -e 's/rootwait/rootwait modules-load=dwc2,g_ether/g' "$MOUNT_POINT/cmdline.txt"
+fi
 $SUDO $DISKUTIL umount $SDCARD_DISKID

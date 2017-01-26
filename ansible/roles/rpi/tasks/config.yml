@@ -20,3 +20,6 @@
   with_items: "{{ raspberry_pi_rc_local_options }}"
   loop_control:
     loop_var: rpi_item
+
+- name: Apply configuration
+  command: raspi-config --apply-os-config
