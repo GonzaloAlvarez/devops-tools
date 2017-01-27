@@ -4,8 +4,18 @@
   aws_vpc_cidr_block: "10.0.0.0/16"
   aws_vpc_subnet_cidr_block: "10.0.1.0/24"
   aws_az_1: "{{ aws_region }}a"
+  aws_ec2_instance_tag_name: "{{ project }}-{{ aws_region }}-instance"
+  aws_ec2_instances:
+    - count: 1
+      tags:
+        - Name: "{{ aws_ec2_instance_tag_name }}"
+          Vpn: "Server"
+    - count: 0
+      tags:
+        - Name: "{{ aws_ec2_instance_tag_name }}"
+          Vpn: "Client"
+  aws_ec2_instance_count: "{{ aws_ec2_instances | default(1) | sum(attribute='count') }}"
   aws_ec2_instance_type: "{{ instance_type | default('t2.nano') }}"
-  aws_ec2_instance_count: "{{ instance_count | default(1) }}"
   aws_ec2_image: "ami-2a34e94a"
   aws_ec2_ami_owner: "379101102735"
   aws_ec2_ami_name: "debian-jessie-*"

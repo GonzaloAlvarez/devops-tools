@@ -1,19 +1,28 @@
 ---
-- name: Create the AWS instance
+- name: Create the AWS instances
   ec2:
     key_name: "{{ project }}-aws-key"
     instance_type: "{{ aws_ec2_instance_type }}"
     region: "{{ aws_region }}"
     vpc_subnet_id: "{{ aws_vpc_subnet.subnet.id }}"
     group: "{{ project }}-secgroup"
-    exact_count: "{{ aws_ec2_instance_count }}"
+    exact_count: "{{ instance_item.0.count }}"
     assign_public_ip: yes
     wait: yes
     image: "{{ aws_ec2_image }}"
-    instance_tags:
-      Name: "{{ project }}-{{ aws_region }}-instance"
-    count_tag:
-      Name: "{{ project }}-{{ aws_region }}-instance"
+    instance_tags: "{{ instance_item.1 }}"
+    count_tag: "{{ instance_item.1 }}"
+  with_subelements:
+    - "{{ aws_ec2_instances }}"
+    - tags
+  loop_control:
+    loop_var: instance_item
+- name: Gathering facts about the instances
+  ec2_remote_facts:
+    region: "{{ aws_region }}"
+    filters: 
+      "tag:Name": "{{ project }}-{{ aws_region }}-instance"
+      instance-state-name: running
   register: aws_ec2_facts
 - name: Set instances created as a fact
   set_fact:

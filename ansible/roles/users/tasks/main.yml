@@ -4,6 +4,8 @@
   become: False
   ignore_errors: true
   changed_when: false
+- pause:
+    seconds: 5
 - action: setup
   when: "{{ test_user | failed }}"
 - include: "{{ item }}.yml"
