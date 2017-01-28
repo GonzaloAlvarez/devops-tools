@@ -12,3 +12,4 @@ raspbian-setup: env
 speed-test: node speed-test
 vtop: node vtop
 watcherd: python uptime psutil
+vault: python ansible
