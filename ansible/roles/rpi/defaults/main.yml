@@ -13,3 +13,9 @@ raspberry_pi_rc_local_options:
   # Disable HDMI on startup (for power savings).
   - regexp: "^/usr/bin/tvservice"
     line: "/usr/bin/tvservice -o"
+
+wifi_proto: "RSN"
+wifi_key: "WPA-PSK"
+wifi_pairwise: "CCMP"
+wifi_ssid: "{{ lookup('env', 'WIFI_SSID') | default('UNSET') }}"
+wifi_password: "{{ lookup('env', 'WIFI_PASS') | default('UNSET') }}" 

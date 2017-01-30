@@ -1,3 +1,5 @@
 ---
   rpi_tasks:
     - config
+    - wifi
+    - reboot

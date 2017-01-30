@@ -11,10 +11,10 @@ if [ ! -r "$CONFIG_FILE" ]; then
         exit 1
     fi
 fi
-AWS_VARS=$(cat $CONFIG_FILE | grep '^aws' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+CONFIG_VARS=$(cat $CONFIG_FILE | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
 while read line; do
     eval "export $line"
-done <<< "$AWS_VARS"
+done <<< "$CONFIG_VARS"
 ANSIBLE_PATH="$ENV_PATH/ansible"
 rm -Rf "$ANSIBLE_PATH"
 mkdir -p "$ANSIBLE_PATH"
