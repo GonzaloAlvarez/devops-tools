@@ -1,3 +1,11 @@
 ---
 - name: Configure WIFI
   template: src=wpa_supplicant.conf.j2 dest=/etc/wpa_supplicant/wpa_supplicant.conf mode=0600
+- name: Force WLan to autoconnect on boot
+  lineinfile:
+    dest: /etc/network/interfaces
+    insertbefore: "allow-hotplug wlan0"
+    regexp: "auto wlan0"
+    line: "auto wlan0"
+    state: present
+  

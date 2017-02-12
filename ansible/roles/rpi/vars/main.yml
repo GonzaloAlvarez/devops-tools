@@ -2,4 +2,5 @@
   rpi_tasks:
     - config
     - wifi
+    - sshpwdmsg
     - reboot
