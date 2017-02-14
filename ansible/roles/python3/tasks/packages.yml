@@ -1,0 +1,7 @@
+---
+- name: Install Python3 packages
+  apt: pkg="{{ pkg_item }}" state=latest
+  with_items: "{{ python3_packages }}"
+  loop_control:
+    loop_var: pkg_item
+
