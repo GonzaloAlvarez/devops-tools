@@ -3,4 +3,4 @@
   hosts: all
   gather_facts: True
   roles:
-    - { role: 'base', when: purge | default('false') | match('false') }
+    - { role: 'homeassistant', when: purge | default('false') | match('false') }

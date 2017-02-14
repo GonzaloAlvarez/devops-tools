@@ -1,0 +1,7 @@
+---
+- name: create user
+  user: name="{{ hass_user }}" comment="Home Assistant" createhome=no system=yes shell="/sbin/nologin"
+- name: create directory
+  file: path="{{ hass_base_dir }}" state=directory mode=02775 owner="{{ hass_user }}" group="{{ hass_user }}"
+- name: create config directory
+  file: path="{{ hass_config_dir }}" state=directory mode=02775 owner="{{ hass_user }}" group="{{ hass_user }}"

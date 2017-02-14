@@ -1,0 +1,27 @@
+---
+- name: check if virtualenv exists
+  stat:
+    path: "{{ hass_base_dir }}/bin/python"
+  register:
+    stat_result
+- name: create virtualenv
+  command: virtualenv -p python3 "{{ hass_base_dir }}"
+  become_user: "{{ hass_user }}"
+  become: yes
+  when:
+    stat_result.stat.exists == False
+- name: Install homeassistant latest version
+  pip:
+    name: homeassistant
+    executable: "{{ hass_base_dir }}/bin/pip"
+  become_user: "{{ hass_user }}"
+  become: yes
+- name: Install systemd configuration
+  template: 
+    src=homeassistant.systemd.j2
+    dest=/etc/systemd/system/homeassistant.service
+    mode=0755
+- name: reload systemctl
+  command: systemctl daemon-reload
+- name: restart homeassistant
+  service: name=homeassistant state=restarted

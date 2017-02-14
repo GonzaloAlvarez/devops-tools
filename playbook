@@ -27,6 +27,8 @@ roles_path=$ANSIBLE_PATH/roles
 library=$ANSIBLE_PATH
 retry_files_enabled = False
 host_key_checking = False
+[ssh_connection]
+scp_if_ssh=True
 EOF
 fi
 EC2_PY="$ANSIBLE_PATH/ec2_inventory.py"

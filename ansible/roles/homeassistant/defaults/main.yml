@@ -1,0 +1,4 @@
+---
+hass_user: 'homeassistant'
+hass_base_dir: '/srv/homeassistant'
+hass_config_dir: '{{ hass_base_dir }}/config'

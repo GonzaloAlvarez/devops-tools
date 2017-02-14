@@ -22,3 +22,4 @@
   roles:
     - { role: 'ssh-hardening', when: purge | default('false') | match('false') }
     - { role: 'base', when: purge | default('false') | match('false') }
+    - { role: 'homeassistant', when: purge | default('false') | match('false') }

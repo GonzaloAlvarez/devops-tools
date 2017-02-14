@@ -1,0 +1,4 @@
+---
+  hass_root_tasks:
+    - users
+    - install

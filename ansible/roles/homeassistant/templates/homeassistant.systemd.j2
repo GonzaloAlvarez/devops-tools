@@ -1,0 +1,12 @@
+[Unit]
+Description=Home Assistant
+After=network.target
+
+[Service]
+Type=simple
+User={{ hass_user }}
+ExecStartPre=source {{ hass_base_dir }}/bin/activate 
+ExecStart={{ hass_base_dir }}/bin/hass -c "{{ hass_config_dir }}"
+
+[Install]
+WantedBy=multi-user.target
