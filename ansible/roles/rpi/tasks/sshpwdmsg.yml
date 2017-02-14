@@ -1,0 +1,5 @@
+---
+- name: Remove unneeded banner file from profile
+  file:
+    path: /etc/profile.d/sshpasswd.sh
+    state: absent
