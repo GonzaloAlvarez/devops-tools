@@ -7,6 +7,17 @@ RASPBIAN_EXTRACT_PATH="$RASPBIAN_PATH/extract"
 RASPBIAN_FILENAME="raspbian-latest.zip"
 RASPBIAN_FILE="$RASPBIAN_PATH/$RASPBIAN_FILENAME"
 RASPBIAN_LATEST_URL="http://downloads.raspberrypi.org/raspbian_lite_latest"
+
+ARMBIAN_OPIONE_PATH="$ENV_PATH/one"
+ARMBIAN_OPIONE_FILENAME="Debian_jessie_default.7z"
+ARMBIAN_OPIONE_FILE="$ARMBIAN_OPIONE_PATH/$ARMBIAN_OPIONE_FILENAME"
+ARMBIAN_OPIONE_URL="https://dl.armbian.com/orangepione/$ARMBIAN_OPIONE_FILENAME"
+
+ARMBIAN_OPIZERO_PATH="$ENV_PATH/ozero"
+ARMBIAN_OPIZERO_FILENAME="Debian_jessie_default.7z"
+ARMBIAN_OPIZERO_FILE="$ARMBIAN_OPIZERO_PATH/$ARMBIAN_OPIZERO_FILENAME"
+ARMBIAN_OPIZERO_URL="https://dl.armbian.com/orangepizero/$ARMBIAN_OPIZERO_FILENAME"
+
 CURL="$(which curl)"
 UNZIP="$(which 7za)"
 DISKUTIL="$(which diskutil)"
@@ -14,10 +25,22 @@ SUDO="$(which sudo)"
 DD="$(which dd)"
 MOUNT="$(which mount)"
 
+if [ "$1" = "one" ]; then
+    RASPBIAN_PATH="$ARMBIAN_OPIONE_PATH"
+    RASPBIAN_EXTRACT_PATH="$ARMBIAN_OPIONE_PATH/extract"
+    RASPBIAN_FILE="$ARMBIAN_OPIONE_FILE"
+    RASPBIAN_LATEST_URL="$ARMBIAN_OPIONE_URL"
+elif [ "$1" = "ozero" ]; then
+    RASPBIAN_PATH="$ARMBIAN_OPIZERO_PATH"
+    RASPBIAN_EXTRACT_PATH="$ARMBIAN_OPIZERO_PATH"
+    RASPBIAN_FILE="$ARMBIAN_OPIZERO_FILE"
+    RASPBIAN_LATEST_URL="$ARMBIAN_OPIZERO_URL"
+fi
+
 mkdir -p "$RASPBIAN_EXTRACT_PATH"
 
 if [ ! -r "$RASPBIAN_FILE" ]; then
-    echo "Downloading latest raspberry image"
+    echo "Downloading latest image [$RASPBIAN_LATEST_URL]"
     $CURL -L -o "$RASPBIAN_FILE" "$RASPBIAN_LATEST_URL"
 fi
 RASPBIAN_IMAGEFILE="$(find "$RASPBIAN_EXTRACT_PATH" -name "*.img" | head -n 1)"
@@ -50,6 +73,7 @@ if [ -z "$SDCARD_DISKID" ]; then
 fi
 MOUNT_POINT=$($MOUNT | grep "${SDCARD_DISKID%??}" | awk '{print $3}')
 touch $MOUNT_POINT/ssh
+
 if [ "$1" = "zero" ]; then
     echo "dtoverlay=dwc2" >> "$MOUNT_POINT/config.txt"
     sed -i -e 's/rootwait/rootwait modules-load=dwc2,g_ether/g' "$MOUNT_POINT/cmdline.txt"

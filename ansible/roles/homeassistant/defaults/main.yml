@@ -2,3 +2,7 @@
 hass_user: 'homeassistant'
 hass_base_dir: '/srv/homeassistant'
 hass_config_dir: '{{ hass_base_dir }}/config'
+hass_longitude: '-122.35'
+hass_latitude: '47.6'
+hass_unit_system: 'metric'
+hass_time_zone: 'America/Los_Angeles'

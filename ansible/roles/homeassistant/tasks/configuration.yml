@@ -1,0 +1,9 @@
+---
+- name: Install HomeAssistant configuration
+  template: 
+    src=configuration.yaml.j2
+    dest="{{ hass_config_dir }}/configuration.yaml"
+    mode=0644
+  become_user: "{{ hass_user }}"
+  become: yes
+
