@@ -22,4 +22,9 @@
   roles:
     - { role: 'ssh-hardening', when: purge | default('false') | match('false') }
     - { role: 'base', when: purge | default('false') | match('false') }
-    - { role: 'homeassistant', when: purge | default('false') | match('false') }
+- name: "Execute extra roles"
+  hosts: all
+  gather_facts: True
+  roles:
+    - { role: "desktop", when: (purge | default('false') | match('false') ) and ( 'desktop' in extra_roles )}
+    - { role: "homeassistant", when: (purge | default('false') | match('false') ) and ( 'homeassistant' in extra_roles )}

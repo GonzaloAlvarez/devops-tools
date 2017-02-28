@@ -1,0 +1,5 @@
+---
+  debian_desktop_packages:
+    - xfce4
+    - xfce4-goodies
+    - gnome-icon-theme

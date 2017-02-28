@@ -1,0 +1,7 @@
+---
+- name: Install Desktop packages
+  apt: pkg="{{ pkg_item }}" state=latest
+  with_items: "{{ debian_desktop_packages }}"
+  loop_control:
+    loop_var: pkg_item
+
