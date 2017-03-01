@@ -1,7 +1,8 @@
 ---
 - name: Install Desktop packages
-  apt: pkg="{{ pkg_item }}" state=latest
+  apt: pkg="{{ item }}" state=latest
   with_items: "{{ debian_desktop_packages }}"
-  loop_control:
-    loop_var: pkg_item
+- name: Install Chrome/Chromium
+  apt: pkg="{{ item }}" state=latest
+  with_items: "{{ debian_chrome_packages }}"
 

@@ -1,6 +1,8 @@
 ---
-- include: "{{ item }}.yml"
+- include: "{{ include_item }}.yml"
   become: True
   become_user: root
   become_method: sudo
   with_items: "{{ desktop_tasks }}"
+  loop_control:
+    loop_var: include_item

@@ -3,3 +3,6 @@
     - xfce4
     - xfce4-goodies
     - gnome-icon-theme
+  debian_chrome_packages:
+    - chromium
+  install_chrome: True
