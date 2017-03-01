@@ -1,0 +1,9 @@
+---
+  vnc_packages:
+    - vnc4server
+  vnc_server_script: /usr/local/bin/vncserver.init
+  aws_private_key_file: "{{ lookup('env','ENV_PATH') | default('.env') }}/aws-key-{{ project }}-private.pem"
+  vnc_pass: "{{ lookup('env','MASTER_PASS') | default('empty_pass_123') }}"
+  vnc_users:
+    - name: "{{ main_ssh_user }}"
+      vnc_num: 1

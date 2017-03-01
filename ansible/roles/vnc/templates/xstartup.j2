@@ -1,0 +1,9 @@
+#!/bin/sh
+#{{ ansible_managed }}
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+xsetroot -solid grey &
+xterm -geometry 80x24+10+10 -ls -title "$VNCDESKTOP Desktop" &
+startxfce4 &
+vncconfig -iconic &

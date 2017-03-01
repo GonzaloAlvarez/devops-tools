@@ -1,0 +1,13 @@
+[Unit]
+Description=Manage VNC Server
+
+[Service]
+Type=oneshot
+ExecStart={{ vnc_server_script }} start
+ExecStop={{ vnc_server_script }} stop
+ExecReload={{ vnc_server_script }} restart
+User=root
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

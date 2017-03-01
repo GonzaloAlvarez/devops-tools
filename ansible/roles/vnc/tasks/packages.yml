@@ -1,0 +1,7 @@
+---
+- name: Install VNC packages
+  apt: pkg="{{ pkg_item }}" state=latest
+  with_items: "{{ vnc_packages }}"
+  loop_control:
+    loop_var: pkg_item
+

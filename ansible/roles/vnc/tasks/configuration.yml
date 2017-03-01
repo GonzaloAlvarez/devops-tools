@@ -1,0 +1,64 @@
+---
+- name: Copy the vncservers.conf file in /etc/ directory
+  template:
+    src: vncservers.conf.j2
+    dest: /etc/vncservers.conf
+    owner: root
+    group: root
+- name: Create users folder
+  file:
+    name: "/home/{{ user_item.name }}/.vnc"
+    state: directory
+    owner: "{{ user_item.name }}"
+    group: "{{ user_item.name }}"
+    mode: 0755
+  with_items: "{{ vnc_users }}"
+  loop_control:
+    loop_var: user_item
+- name: Copy the modified "xstartup" file
+  template:
+    src: xstartup.j2
+    dest: "/home/{{ user_item.name }}/.vnc/xstartup"
+    mode: 0755
+    owner: "{{ user_item.name }}"
+    group: "{{ user_item.name }}"
+  with_items: "{{ vnc_users }}"
+  loop_control:
+    loop_var: user_item
+- name: Create the vncserver startup script in {{ vnc_server_script }}
+  template:
+    src: vncserver.j2
+    dest: "{{ vnc_server_script }}"
+    owner: root
+    group: root
+    mode: 0755
+- name: Create the pass file
+  template:
+    src: vncserver_pass.j2
+    dest: /tmp/pass
+    owner: root
+    group: root
+    mode: 0644
+- name: Run VNC Server for the first time
+  shell: "sudo -u {{ user_item.name }} -i vncserver </tmp/pass &>/dev/null"
+  with_items: "{{ vnc_users }}"
+  loop_control:
+    loop_var: user_item
+- name: Remove temporary file
+  file:
+    name: /tmp/pass
+    state: absent
+- name: Kill VNC Server
+  shell: "sudo -u {{ user_item.name }} -i vncserver -kill :{{ user_item.vnc_num }}"
+  with_items: "{{ vnc_users }}"
+  loop_control:
+    loop_var: user_item
+- name: Install systemd configuration
+  template: 
+    src=vncserver.systemd.j2
+    dest=/etc/systemd/system/vncserver.service
+    mode=0755
+- name: reload systemctl
+  command: systemctl daemon-reload
+- name: restart vncserver
+  service: name=vncserver state=restarted

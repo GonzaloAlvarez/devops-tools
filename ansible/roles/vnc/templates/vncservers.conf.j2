@@ -1,0 +1,4 @@
+#{{ ansible_managed }}
+
+VNCSERVERS="{% for user in vnc_users %}{{user.vnc_num}}:{{user.name}} {% endfor %}"
+VNCSERVERARGS="-SecurityTypes=None -localhost -geometry 1280x800 -alwaysshared"
