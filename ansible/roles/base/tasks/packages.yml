@@ -17,4 +17,6 @@
   with_items: "{{ apt_install_packages }}"
   loop_control:
     loop_var: pkg_item
-
+- name: Clean APT Cache
+  command: apt-get clean warn=no
+  changed_when: False
