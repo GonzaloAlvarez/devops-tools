@@ -1,0 +1,4 @@
+---
+- name: Install Python packages
+  apt: pkg="{{ item }}" state=latest
+  with_items: "{{ python_packages }}"

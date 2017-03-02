@@ -1,0 +1,7 @@
+---
+- name: restart docker
+  become: True
+  become_user: root
+  become_method: sudo
+  systemd: state=restarted daemon_reload=yes name=docker
+  listen: "restart docker service"
