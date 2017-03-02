@@ -1,0 +1,3 @@
+---
+  portainer_version: 'latest'
+  portainer_port: '9000'

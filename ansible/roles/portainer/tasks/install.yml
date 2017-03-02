@@ -1,0 +1,14 @@
+---
+- name: Create and start portainer container
+  docker_container:
+    name: portainer
+    hostname: portainer
+    image: 'portainer/portainer:{{ portainer_version }}'
+    state: started
+    restart: yes
+    restart_policy: always
+    pull: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "{{portainer_port}}:9000"
