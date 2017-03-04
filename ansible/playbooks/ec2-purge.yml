@@ -1,0 +1,7 @@
+---
+- name: "Purge instances in ec2"
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  roles:
+    - { role: ec2, purge: 'true' }

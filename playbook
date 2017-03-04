@@ -1,27 +1,37 @@
 #!/bin/bash
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $BASE_PATH/bootstrap.sh
+
+export ENV_PATH
 CONFIG_FILE="$BASE_PATH/config.yaml"
-if [ ! -r "$CONFIG_FILE" ]; then
-    if [ -r "$CONFIG_FILE.enc" ]; then
-        log "Decrypting config file"
-        $ENV_PATH/bin/ansible-vault decrypt -v --ask-vault-pass --output="$CONFIG_FILE" "${CONFIG_FILE}.enc"
-    else
-        log "No configuration file found. Exiting"
-        exit 1
-    fi
-fi
-CONFIG_VARS=$(cat $CONFIG_FILE | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
-while read line; do
-    eval "export $line"
-done <<< "$CONFIG_VARS"
 ANSIBLE_PATH="$ENV_PATH/ansible"
-rm -Rf "$ANSIBLE_PATH"
-mkdir -p "$ANSIBLE_PATH"
-export ANSIBLE_CONFIG="$ANSIBLE_PATH/ansible.cfg"
-export ANSIBLE_HOST_KEY_CHECKING=False
-if [ ! -f "$ANSIBLE_CONFIG" ]; then
-    cat << EOF > $ANSIBLE_CONFIG
+
+function decrypt_configuration() {
+    if [ ! -r "$CONFIG_FILE" ]; then
+        if [ -r "$CONFIG_FILE.enc" ]; then
+            log "Decrypting config file"
+            $ENV_PATH/bin/ansible-vault decrypt -v --ask-vault-pass --output="$CONFIG_FILE" "${CONFIG_FILE}.enc"
+        else
+            log "No configuration file found. Exiting"
+            exit 1
+        fi
+    fi
+}
+
+function export_config() {
+    CONFIG_VARS=$(cat $CONFIG_FILE | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+    while read line; do
+        eval "export $line"
+    done <<< "$CONFIG_VARS"
+}
+
+function setup_workspace() {
+    rm -Rf "$ANSIBLE_PATH"
+    mkdir -p "$ANSIBLE_PATH"
+    export ANSIBLE_CONFIG="$ANSIBLE_PATH/ansible.cfg"
+    export ANSIBLE_HOST_KEY_CHECKING=False
+    if [ ! -f "$ANSIBLE_CONFIG" ]; then
+        cat << EOF > $ANSIBLE_CONFIG
 [defaults]
 roles_path=$ANSIBLE_PATH/roles
 library=$ANSIBLE_PATH
@@ -30,21 +40,64 @@ host_key_checking = False
 [ssh_connection]
 scp_if_ssh=True
 EOF
-fi
-EC2_PY="$ANSIBLE_PATH/ec2_inventory.py"
-export ENV_PATH
-if [ "$1" == "ec2" ]; then
-    export ANSIBLE_HOSTS=$EC2_PY
-else
-    export ANSIBLE_HOSTS="$ANSIBLE_PATH/hosts"
-    cat << EOF > $ANSIBLE_HOSTS
+    fi
+    for file in $BASE_PATH/ansible/*; do
+        ln -s $file $ANSIBLE_PATH/$(basename $file)
+    done
+}
+
+function setup_inventory() {
+    EC2_PY="$ANSIBLE_PATH/ec2_inventory.py"
+    export EC2_INI_PATH="$BASE_PATH/ansible/ec2_dynamic_inventory.ini"
+    if [ "$1" == "ec2" ]; then
+        export ANSIBLE_HOSTS=$EC2_PY
+    else
+        export ANSIBLE_HOSTS="$ANSIBLE_PATH/hosts"
+        cat << EOF > $ANSIBLE_HOSTS
 [all]
 $1
 EOF
-fi
-for file in $BASE_PATH/ansible/*; do
-    ln -s $file $ANSIBLE_PATH/$(basename $file)
-done
+    fi
+}
+
+function playbook_lookup() {
+    PLAYBOOK_BASE="$(echo "$1" | cut -d ',' -f 1)"
+    PLAYBOOK="$PLAYBOOK_BASE"
+    [[ -f "$PLAYBOOK" ]] && return 0
+    PLAYBOOK="$ANSIBLE_PATH/playbooks/$PLAYBOOK_BASE"
+    [[ -f "$PLAYBOOK" ]] && return 0
+    PLAYBOOK="$ANSIBLE_PATH/playbooks/$PLAYBOOK_BASE.yml"
+    [[ -f "$PLAYBOOK" ]] && return 0
+    PLAYBOOK="$ANSIBLE_PATH/playbooks/$PLAYBOOK_BASE.yaml"
+    [[ -f "$PLAYBOOK" ]] && return 0
+    echo "Role or playbook not found [$PLAYBOOK_BASE]"
+    exit 1
+}
+
+function add_roles() {
+    ROLES="$(echo "$1" | cut -s -d ',' -f 2-)"
+    if [ "$ROLES" ]; then
+        cp "$PLAYBOOK" "$ANSIBLE_PATH/main.yml"
+        PLAYBOOK="$ANSIBLE_PATH/main.yml"
+        OIFS=$IFS
+        IFS=","
+        for role in $ROLES; do
+            if [ -d "$ANSIBLE_PATH/roles/$role" ]; then
+                echo "Including role [$role]"
+                echo "    - role: '$role'" >> $PLAYBOOK
+            else
+                echo "Role [$role] not found. Ignoring."
+            fi
+        done
+    fi
+}
+
+decrypt_configuration
+export_config
+setup_workspace
+setup_inventory "$1"
 shift
-export EC2_INI_PATH="$BASE_PATH/ansible/ec2_dynamic_inventory.ini"
-exec $ENV_PATH/bin/ansible-playbook $@
+playbook_lookup "$1"
+add_roles "$1"
+shift
+exec $ENV_PATH/bin/ansible-playbook $PLAYBOOK $@
