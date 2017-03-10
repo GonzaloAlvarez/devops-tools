@@ -1,0 +1,20 @@
+---
+- name: Display all variables/facts known for a host
+  debug:
+    var: groups
+- include: "{{ task_item }}.yml"
+  become: True
+  become_user: root
+  become_method: sudo
+  with_items: "{{ openvpn_client_tasks }}"
+  when: "'tag_Vpn_Client' in group_names"
+  loop_control:
+    loop_var: task_item
+- include: "{{ task_item }}.yml"
+  become: True
+  become_user: root
+  become_method: sudo
+  with_items: "{{ openvpn_server_tasks }}"
+  when: "'tag_Vpn_Server' in group_names"
+  loop_control:
+    loop_var: task_item

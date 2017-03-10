@@ -77,8 +77,8 @@ function playbook_lookup() {
 function add_roles() {
     ROLES="$(echo "$1" | cut -s -d ',' -f 2-)"
     if [ "$ROLES" ]; then
-        cp "$PLAYBOOK" "$ANSIBLE_PATH/main.yml"
-        PLAYBOOK="$ANSIBLE_PATH/main.yml"
+        cp "$PLAYBOOK" "$ANSIBLE_PATH/primary.yml"
+        PLAYBOOK="$ANSIBLE_PATH/primary.yml"
         OIFS=$IFS
         IFS=","
         for role in $ROLES; do
@@ -100,4 +100,5 @@ shift
 playbook_lookup "$1"
 add_roles "$1"
 shift
+$ENV_PATH/bin/ansible --version
 exec $ENV_PATH/bin/ansible-playbook $PLAYBOOK $@

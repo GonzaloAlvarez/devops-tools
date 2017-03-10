@@ -1,0 +1,7 @@
+---
+  openvpn_client_tasks:
+    - packages
+    - client
+  openvpn_server_tasks:
+    - packages
+    - server

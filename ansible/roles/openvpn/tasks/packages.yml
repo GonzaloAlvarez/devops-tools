@@ -1,0 +1,4 @@
+---
+- name: Install OpenVPN packages
+  apt: pkg="{{ item }}" state=latest
+  with_items: "{{ openvpn_packages }}"

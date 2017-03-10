@@ -1,0 +1,70 @@
+---
+- name: 
+  debug:
+    msg: "Install client packages"
+
+- name: Trigger credentials decryption
+  include_role: 
+    name: credentials
+    static: yes
+  vars:
+    decrypt_files: 
+      - 'OpenVPN/GonzaloAlvarez-OpenVPN-TLS.key.enc'
+      - 'OpenVPN/GonzaloAlvarez-OpenVPN-CA.key.enc'
+
+- name: Copy TLS Key
+  copy:
+    src: "{{ credentials_temp_folder.stdout }}/credentials/OpenVPN/GonzaloAlvarez-OpenVPN-TLS.key"
+    dest: "/etc/openvpn/ta.key"
+    remote_src: yes
+    mode: 0600
+
+- name: Copy CA Key
+  copy:
+    src: "{{ credentials_temp_folder.stdout }}/credentials/OpenVPN/GonzaloAlvarez-OpenVPN-CA.key"
+    dest: "/etc/openvpn/ca.key"
+    remote_src: yes
+    mode: 0600
+
+- name: Purge temporary directory
+  file:
+    path: "{{ credentials_temp_folder.stdout }}"
+    state: absent
+    force: yes
+
+- name: Gather the CA certificate
+  get_url:
+    url: "https://raw.githubusercontent.com/GonzaloAlvarez/credentials/master/OpenVPN/GonzaloAlvarez-OpenVPN-CA.crt"
+    dest: "/etc/openvpn/ca.crt"
+    mode: 0600
+
+- name: Gather the dh key
+  get_url:
+    url: "https://raw.githubusercontent.com/GonzaloAlvarez/credentials/master/OpenVPN/dh2048.pem"
+    dest: "/etc/openvpn/dh2048.pem"
+    mode: 0600
+
+- name: Generate client key
+  shell: openssl genrsa -out {{ inventory_hostname }}.key {{ openvpn_key_size }} chdir=/etc/openvpn creates={{ inventory_hostname }}.key
+
+- name: Generate client csr
+  shell: openssl req -new -key {{ inventory_hostname }}.key -subj "{{ openvpn_request_subject }}/CN={{ inventory_hostname }}" -out client.csr chdir=/etc/openvpn creates=client.csr
+
+- name: Generate client certificate
+  shell: openssl x509 -CA ca.crt -CAkey ca.key -CAcreateserial -req -days {{ openvpn_days_valid }} -in client.csr -out {{ inventory_hostname }}.crt chdir=/etc/openvpn  creates={{ inventory_hostname }}.crt
+
+- name: Purge CA key
+  file:
+    path: "/etc/openvpn/ca.key"
+    state: absent
+    force: yes
+
+- name: Associate OpenVpn Server
+  set_fact:
+    openvpn_server_host: "{{ groups['tag_Vpn_Server'][0] }}"
+
+- name: Create client config
+  template: src=client.conf.j2 dest=/etc/openvpn/client.conf mode=0644
+
+- name: Restart Vpn Client
+  systemd: state=restarted name=openvpn@client

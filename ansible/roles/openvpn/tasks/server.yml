@@ -1,0 +1,58 @@
+---
+- name: Trigger credentials decryption
+  include_role: 
+    name: credentials
+    static: yes
+  vars:
+    decrypt_files: 
+      - 'OpenVPN/GonzaloAlvarez-OpenVPN-Server.key.enc'
+      - 'OpenVPN/GonzaloAlvarez-OpenVPN-TLS.key.enc'
+
+- name: Copy Server key
+  copy:
+    src: "{{ credentials_temp_folder.stdout }}/credentials/OpenVPN/GonzaloAlvarez-OpenVPN-Server.key"
+    dest: "/etc/openvpn/server.key"
+    remote_src: yes
+    mode: 0600
+
+- name: Copy TLS Key
+  copy:
+    src: "{{ credentials_temp_folder.stdout }}/credentials/OpenVPN/GonzaloAlvarez-OpenVPN-TLS.key"
+    dest: "/etc/openvpn/ta.key"
+    remote_src: yes
+    mode: 0600
+
+- name: Purge temporary directory
+  file:
+    path: "{{ credentials_temp_folder.stdout }}"
+    state: absent
+    force: yes
+
+- name: Generate ccd folder for OpenVPN
+  file:
+    path: "/etc/openvpn/ccd"
+    state: directory
+
+- name: Gather the Server certificate
+  get_url:
+    url: "https://raw.githubusercontent.com/GonzaloAlvarez/credentials/master/OpenVPN/GonzaloAlvarez-OpenVPN-Server.crt"
+    dest: "/etc/openvpn/server.crt"
+    mode: 0600
+
+- name: Gather the CA certificate
+  get_url:
+    url: "https://raw.githubusercontent.com/GonzaloAlvarez/credentials/master/OpenVPN/GonzaloAlvarez-OpenVPN-CA.crt"
+    dest: "/etc/openvpn/ca.crt"
+    mode: 0600
+
+- name: Gather the dh key
+  get_url:
+    url: "https://raw.githubusercontent.com/GonzaloAlvarez/credentials/master/OpenVPN/dh2048.pem"
+    dest: "/etc/openvpn/dh2048.pem"
+    mode: 0600
+
+- name: Create server config
+  template: src=server.conf.j2 dest=/etc/openvpn/server.conf mode=0644
+
+- name: Start openvpn server
+  systemd: state=restarted name=openvpn@server

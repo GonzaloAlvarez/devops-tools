@@ -5,9 +5,14 @@
   set_fact:
     aws_ec2_group_local_rule: 
       - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "{{ ipify_public_ip }}/32" }
+- name: Set self access universally
+  set_fact:
+    aws_ec2_group_samesg_rule:
+      - { proto: all, group_name: "{{ project }}-secgroup" }
+      - { proto: all, cidr_ip: "{{ aws_vpc_subnet_cidr_block }}" }
 - name: Set variables with list of ports to use
   set_fact:
-    aws_ec2_group_rules_ext: "{{ aws_ec2_group_rules + aws_ec2_group_local_rule }}"
+    aws_ec2_group_rules_ext: "{{ aws_ec2_group_rules + aws_ec2_group_local_rule + aws_ec2_group_samesg_rule }}"
 - name: Create AWS Security Group
   ec2_group:
     state: present

@@ -1,6 +1,5 @@
 ---
-- name: "Execute base configuration"
+- name: "Execute roles"
   hosts: all
   gather_facts: True
   roles:
-    - { role: 'homeassistant', when: purge | default('false') | match('false') }
