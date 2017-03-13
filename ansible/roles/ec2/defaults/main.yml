@@ -10,7 +10,7 @@
       tags:
         - Name: "{{ aws_ec2_instance_tag_name }}"
           Vpn: "Server"
-    - count: 1
+    - count: 0
       tags:
         - Name: "{{ aws_ec2_instance_tag_name }}"
           Vpn: "Client"
@@ -20,26 +20,26 @@
   aws_ec2_ami_owner: "379101102735"
   aws_ec2_ami_name: "debian-jessie-*"
   aws_ec2_ami_architecture: "x86_64"
+  aws_ec2_outside_port: "443"
+  aws_ec2_outside_proto: "tcp"
   aws_ec2_group_rules:
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.233.176/29" }
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.233.160/28" }
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.233.32/28" }
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.233.48/29" }
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.234.32/28" }
-
-# Missing rules to open 443
-# 0.0.0.0/1
-# 128.0.0.0/2
-# 192.0.0.0/9
-# 192.128.0.0/11
-# 192.160.0.0/13
-# 192.169.0.0/16
-# 192.170.0.0/15
-# 192.172.0.0/14
-# 192.176.0.0/12
-# 192.192.0.0/10
-# 193.0.0.0/8
-# 194.0.0.0/7
-# 196.0.0.0/6
-# 200.0.0.0/5
-# 208.0.0.0/4
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "0.0.0.0/1" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "128.0.0.0/2" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "192.0.0.0/9" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "192.128.0.0/11" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "192.160.0.0/13" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "192.169.0.0/16" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "192.170.0.0/15" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "192.172.0.0/14" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "192.176.0.0/12" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "192.192.0.0/10" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "193.0.0.0/8" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "194.0.0.0/7" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "196.0.0.0/6" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "200.0.0.0/5" }
+    - { from_port: "{{ aws_ec2_outside_port }}", to_port: "{{ aws_ec2_outside_port }}", proto: "{{ aws_ec2_outside_proto }}", cidr_ip: "208.0.0.0/4" }
