@@ -1,0 +1,8 @@
+---
+- name: reload sslh
+  become: True
+  become_user: root
+  become_method: sudo
+  service:
+    name: sslh
+    state: reloaded

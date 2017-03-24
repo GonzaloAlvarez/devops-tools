@@ -23,6 +23,7 @@ openvpn_hmac_firewall: "{{ openvpn_path }}/keys/ta.key"
 openvpn_server: ''
 openvpn_proto: 'tcp'
 openvpn_port: '1194'
+openvpn_client_port: '443'
 openvpn_dev: 'tun'
 
 openvpn_tls_version_min: "tls-version-min 1.2"

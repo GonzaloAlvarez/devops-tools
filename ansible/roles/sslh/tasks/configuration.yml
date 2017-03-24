@@ -1,0 +1,10 @@
+---
+- name: SSLH Configuration template
+  template:
+    src: sslh.j2
+    dest: /etc/default/sslh
+    owner: sslh
+    group: sslh
+    mode: 644
+  notify: reload sslh
+- meta: flush_handlers

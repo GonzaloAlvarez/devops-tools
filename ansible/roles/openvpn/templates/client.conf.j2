@@ -31,7 +31,7 @@ proto {{ openvpn_proto }}
 # You can have multiple remote entries
 # to load balance between the servers.
 remote {{ openvpn_server_host }}
-port {{ openvpn_port }}
+port {{ openvpn_client_port }}
 
 # Choose a random host from the remote
 # list for load-balancing.  Otherwise

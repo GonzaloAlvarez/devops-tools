@@ -12,4 +12,4 @@ if [ 0$1 -gt 0 ]; then
     LINE=$1
 fi
 EC2_DNS_NAME="$(head -n $LINE "$EC2_INVENTORY_FILE" | tail -n 1)"
-$SSH -o StrictHostKeyChecking=no $EC2_DNS_NAME
+$SSH -o StrictHostKeyChecking=no $EC2_DNS_NAME  -p 443

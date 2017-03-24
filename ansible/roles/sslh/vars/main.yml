@@ -1,0 +1,4 @@
+---
+  sslh_tasks:
+    - packages
+    - configuration

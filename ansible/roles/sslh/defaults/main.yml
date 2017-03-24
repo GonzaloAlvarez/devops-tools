@@ -1,0 +1,18 @@
+---
+sslh:
+  user: "sslh"
+  verbose: false
+  foreground: false
+  inetd: false
+  numeric: false
+  timeout: 10
+  listen:
+    host: "0.0.0.0"
+    port: "443"
+  protocols:
+    - name: "ssh"
+      host: "localhost"
+      port: "22"
+    - name: "openvpn"
+      host: "localhost"
+      port: "1194"
