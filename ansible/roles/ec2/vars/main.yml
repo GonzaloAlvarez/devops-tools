@@ -8,6 +8,7 @@
     - sg
     - instance
     - eip
+    - alarm
     - waitup
     - inventory
   ec2_key_path: "{{ aws_private_key_file }}"

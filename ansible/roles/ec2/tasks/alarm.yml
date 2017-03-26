@@ -1,0 +1,24 @@
+---
+- name: Create auto terminate alarms
+  ec2_metric_alarm:
+    state: present
+    name: "cpu-low-{{ instance_item.id }}"
+    region: "{{ aws_region }}"
+    metric: "CPUUtilization"
+    namespace: "AWS/EC2"
+    statistic: "Average"
+    comparison: "<="
+    threshold: 5.0
+    period: 60
+    evaluation_periods: 5
+    unit: "Percent"
+    description: "This will alarm when cpu usage average is lower than 5% for 5 minutes"
+    dimensions:
+      InstanceId: "{{ instance_item.id }}"
+    alarm_actions:
+      - "arn:aws:automate:{{ aws_region }}:ec2:terminate"
+  with_items: "{{ ec2_instances }}"
+  when: ( ec2_instances|length > 0 )
+  loop_control:
+    loop_var: instance_item
+
