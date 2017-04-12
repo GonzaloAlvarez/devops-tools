@@ -42,7 +42,9 @@ scp_if_ssh=True
 EOF
     fi
     for file in $BASE_PATH/ansible/*; do
-        ln -s $file $ANSIBLE_PATH/$(basename $file)
+        if [ "$(basename $file)" != "group_vars" ]; then
+            ln -s $file $ANSIBLE_PATH/$(basename $file)
+        fi
     done
 }
 
@@ -89,7 +91,27 @@ function add_roles() {
                 echo "Role [$role] not found. Ignoring."
             fi
         done
+        IFS=$OIFS
     fi
+}
+
+function setup_vars() {
+    mkdir -p "$ANSIBLE_PATH/group_vars"
+    cp "$BASE_PATH/ansible/group_vars/all.yml" "$ANSIBLE_PATH/group_vars/all.yml"
+    VARS_FILE="$(echo "$1" | cut -d ',' -f 1)"
+    if [ -r "$BASE_PATH/ansible/group_vars/$VARS_FILE.yml" ]; then
+        OIFS=$IFS
+        IFS=","
+        for varfile in $1; do
+            if [ -r "$BASE_PATH/ansible/group_vars/$varfile.yml" ]; then
+                echo "Including var file [$varfile]"
+                cat "$BASE_PATH/ansible/group_vars/$varfile.yml" >> "$ANSIBLE_PATH/group_vars/all.yml"
+            fi
+        done
+        IFS=$OIFS
+        return 0
+    fi
+    return 1
 }
 
 decrypt_configuration
@@ -100,5 +122,6 @@ shift
 playbook_lookup "$1"
 add_roles "$1"
 shift
+setup_vars "$1" && shift
 $ENV_PATH/bin/ansible --version
 exec $ENV_PATH/bin/ansible-playbook $PLAYBOOK $@
