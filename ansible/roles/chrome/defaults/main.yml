@@ -1,0 +1,5 @@
+---
+  chrome_packages:
+    - google-chrome-unstable
+  chrome_repo: 'deb http://dl.google.com/linux/chrome/deb/ stable main'
+  chrome_repo_key: 'https://dl-ssl.google.com/linux/linux_signing_key.pub'

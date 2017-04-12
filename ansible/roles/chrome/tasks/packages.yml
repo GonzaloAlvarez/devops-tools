@@ -1,0 +1,12 @@
+---
+- name: Add chrome repository key
+  apt_key: 
+    url: '{{ chrome_repo_key }}'
+    state: present
+- name: Add chrome repository
+  apt_repository:
+    repo: '{{ chrome_repo }}'
+    state: present
+- name: Install Chrome packages
+  apt: pkg="{{ item }}" state=latest
+  with_items: "{{ chrome_packages }}"

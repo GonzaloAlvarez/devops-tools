@@ -2,7 +2,3 @@
 - name: Install Desktop packages
   apt: pkg="{{ item }}" state=latest
   with_items: "{{ debian_desktop_packages }}"
-- name: Install Chrome/Chromium
-  apt: pkg="{{ item }}" state=latest
-  with_items: "{{ debian_chrome_packages }}"
-

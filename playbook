@@ -19,7 +19,7 @@ function decrypt_configuration() {
 }
 
 function export_config() {
-    CONFIG_VARS=$(cat $CONFIG_FILE | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+    CONFIG_VARS=$(cat $CONFIG_FILE | grep -v "^#" | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
     while read line; do
         eval "export $line"
     done <<< "$CONFIG_VARS"

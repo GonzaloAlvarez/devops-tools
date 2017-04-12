@@ -10,7 +10,7 @@
       tags:
         - Name: "{{ aws_ec2_instance_tag_name }}"
           Vpn: "Server"
-    - count: 1
+    - count: 0
       tags:
         - Name: "{{ aws_ec2_instance_tag_name }}"
           Vpn: "Client"
