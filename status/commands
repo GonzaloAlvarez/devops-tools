@@ -1,0 +1,14 @@
+hostname -f
+uname -a
+uptime
+free -m
+netstat -lnt
+vmstat
+w
+users
+tail -n 20 /var/log/syslog
+last
+getmac
+internal-ip
+public-ip
+speed-test -j -b
