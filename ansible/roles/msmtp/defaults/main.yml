@@ -1,0 +1,17 @@
+---
+  msmtp_install_packages:
+    - msmtp-mta
+    - heirloom-mailx
+    - ca-certificates
+  msmtp_purge_packages:
+    - exim
+    - postfix
+  msmtp_default_recipient: gonzaloab@gmail.com
+  msmtp_from: "{{ lookup('env','EMAIL_LOGIN') }}"
+  msmtp_hub_pass: "{{ lookup('env', 'EMAIL_PASS') }}"
+  msmtp_hub_port: 587
+  msmtp_hub_server: smtp.mailgun.org
+  msmtp_hub_user: "{{ lookup('env', 'EMAIL_LOGIN') }}"
+  msmtp_send_testmail: yes
+  msmtp_tls_certcheck: 'on'
+  msmtp_tls_trust_file: /etc/ssl/certs/ca-certificates.crt

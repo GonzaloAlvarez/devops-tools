@@ -1,0 +1,17 @@
+---
+- name: create msmtp config
+  template:
+    src: msmtprc.j2 
+    dest: /etc/msmtprc
+    owner: root 
+    group: root 
+    mode: 644
+- name: create msmtp aliases
+  template:
+    src: msmtp_aliases.j2
+    dest: /etc/msmtp_aliases
+    owner: root 
+    group: root 
+    mode: 644
+  changed_when: True
+  notify: Send mail notification

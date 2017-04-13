@@ -1,0 +1,4 @@
+---
+  msmtp_tasks:
+    - packages
+    - config

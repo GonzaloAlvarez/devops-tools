@@ -1,0 +1,12 @@
+---
+- name: Purge mail related packages
+  apt: 
+    pkg: "{{ item }}" 
+    state: absent
+    purge: yes
+  with_items: "{{ msmtp_purge_packages }}"
+- name: Install msmtp packages
+  apt: 
+    pkg: "{{ item }}" 
+    state: latest
+  with_items: "{{ msmtp_install_packages }}"
