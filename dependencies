@@ -13,4 +13,4 @@ speed-test: node speed-test
 vtop: node vtop
 watcherd: python uptime psutil
 vault: python ansible
-mailstatus: python jinja2
+mailstatus: python jinja2 requests pyyaml

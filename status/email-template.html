@@ -73,7 +73,7 @@
 
 <!-- HIDDEN PREHEADER TEXT -->
 <div style="display: none; font-size: 1px; color: #fefefe; line-height: 1px; font-family: 'Lato', Helvetica, Arial, sans-serif; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
-    We're sorry to see you go. We'll still be here if you ever want to reopen your account.
+    Server status email for {{ host.ip }}
 </div>
 
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -135,7 +135,7 @@
 							<!-- COPY -->
 							<tr>
 								<td bgcolor="#ffffff" align="left" style="padding: 20px 30px 40px 30px; color: #666666; font-family: 'Lato', Helvetica, Arial, sans-serif; font-size: 18px; font-weight: 400; line-height: 25px;" >
-									<p style="margin: 0;">{{ host.ip }}&nbsp;</p>
+                                    <p style="margin: 0;">Status data for host [{{ host.ip }}] on {{ timenow }}.</p>
 								</td>
 							</tr>
 						</table>
