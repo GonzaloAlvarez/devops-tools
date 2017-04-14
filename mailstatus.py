@@ -24,7 +24,11 @@ if __name__ =='__main__':
             commands.append({'line':'# ' + line,'output':command_output})
     host={'ip': load(urlopen('https://api.ipify.org/?format=json'))['ip']}
     output = template.render(commands=commands, host=host)
-    config = Configuration(__file__, 'config.yaml')
+    config = {}
+    if os.path.exists(os.path.join(self_path, 'config.yaml')):
+        config = Configuration(__file__, 'config.yaml')
+    elif os.path.exists(os.path.join(self_path, 'mail.yaml')):
+        config = Configuration(__file__, 'mail.yaml')
     request_url = 'https://api.mailgun.net/v2/{0}/messages'.format(config.mailgun_domain)
     request = requests.post(request_url, auth=('api', config.mailgun_apikey), data={
         'from': 'Server Status <' + config.email_login + '>',
