@@ -1,0 +1,4 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+$NODE_BASE/node_modules/chrome-remote-interface/bin/client.js $@
