@@ -1,0 +1,2 @@
+  sshd_allow_tcp_forwarding: true
+  sshd_allow_agent_forwarding: true
