@@ -1,0 +1,7 @@
+---
+  devoto_packages:
+    - git
+    - python-dev
+    - libssl-dev
+  devoto_vault_pass: "{{ lookup('env','VAULT_PASS') }}"
+  devoto_target_path: "/opt/devtools"

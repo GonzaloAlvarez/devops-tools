@@ -18,7 +18,7 @@
     alarm_actions:
       - "arn:aws:automate:{{ aws_region }}:ec2:terminate"
   with_items: "{{ ec2_instances }}"
-  when: ( ec2_instances|length > 0 )
+  when: ( ec2_instances|length > 0 ) and ( aws_ec2_terminate_alarm | match('true') | default('false') )
   loop_control:
     loop_var: instance_item
 

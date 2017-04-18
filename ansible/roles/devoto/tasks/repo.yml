@@ -1,0 +1,17 @@
+---
+- name: Download git repo
+  become: True
+  become_user: root
+  become_method: sudo
+  git:
+    repo: 'https://github.com/GonzaloAlvarez/devops-tools.git'
+    dest: '{{ devoto_target_path }}'
+- name: Change permissions
+  become: True
+  become_user: root
+  become_method: sudo
+  file:
+    path: '{{ devoto_target_path }}'
+    group: "{{ ansible_ssh_user }}"
+    owner: "{{ ansible_ssh_user }}"
+    recurse: yes

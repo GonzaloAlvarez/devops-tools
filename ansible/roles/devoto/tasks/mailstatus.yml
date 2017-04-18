@@ -1,0 +1,33 @@
+---
+- name: Create tempfile for password
+  tempfile:
+    state: file
+  register: tmpfile
+- name: Put password in variable file
+  copy:
+    dest: "{{ tmpfile.path }}"
+    content: "{{ devoto_vault_pass }}"
+  when: quick | default('false') | match('false')
+- name: Decrypt the vault
+  shell: "{{ devoto_target_path }}/vault decrypt --output {{ devoto_target_path }}/config.yaml --vault-password-file {{ tmpfile.path }} {{ devoto_target_path }}/config.yaml.enc"
+  when: quick | default('false') | match('false')
+- name: Remove the temporary file
+  file:
+    path: "{{ tmpfile.path }}"
+    state: absent
+  when: quick | default('false') | match('false')
+- name: Hardcode needed variables for mailstatus to work
+  copy:
+    content: "mailgun_domain: {{ lookup('env', 'MAILGUN_DOMAIN') }}\nmailgun_apikey: {{ lookup('env', 'MAILGUN_APIKEY') }}\nemail_recipient: {{ lookup('env', 'EMAIL_RECIPIENT') }}\nemail_login: {{ lookup('env', 'EMAIL_LOGIN') }}\n"
+    dest: "{{ devoto_target_path }}/mail.yaml"
+  when: quick | default('false') | match('true')
+- name: Create a cronjob for status emails
+  become: True
+  become_user: root
+  become_method: sudo
+  cron:
+    name: "status mail"
+    job: "cd {{ devoto_target_path }} && ./mailstatus"
+    user: "{{ ansible_ssh_user }}"
+    state: present
+    special_time: daily
