@@ -48,6 +48,10 @@ function ruby_install() {
     done
 }
 
+function node_eval() {
+    source $ENV_PATH/bin/activate
+}
+
 function node_install() {
     if [ ! -x $ENV_PATH/bin/node ]; then
         python_base
@@ -64,12 +68,14 @@ function node_install() {
 
 function install_dependencies() {
     EXECUTABLE_NAME="$(basename $0)"
+    DEPENDENCIES_LINE="$(grep "^${EXECUTABLE_NAME}:" "$DEPENDENCIES_FILE" | head -n 1)"
+    FRAMEWORK="$(echo "$DEPENDENCIES_LINE" | cut -d ' ' -f 2)"
     if [ ! -f "$ENV_PATH/$EXECUTABLE_NAME.installed" ]; then
-        DEPENDENCIES_LINE="$(grep "^${EXECUTABLE_NAME}:" "$DEPENDENCIES_FILE" | head -n 1)"
-        FRAMEWORK="$(echo "$DEPENDENCIES_LINE" | cut -d ' ' -f 2)"
         FRAMEWORK_DEPENDENCIES="$(echo "$DEPENDENCIES_LINE" | cut -d ' ' -f 3-)"
         eval "${FRAMEWORK}_install $FRAMEWORK_DEPENDENCIES"
         touch "$ENV_PATH/$EXECUTABLE_NAME.installed"
+    elif [ "$FRAMEWORK" == "node" ]; then
+        node_eval
     fi
 }
 
