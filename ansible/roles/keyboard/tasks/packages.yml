@@ -1,0 +1,7 @@
+---
+- name: Install Keyboard packages for Debian
+  apt: 
+    pkg: "{{ item }}" 
+    state: latest
+  with_items: "{{ keyboard_packages }}"
+  when: ansible_os_family == 'Debian'

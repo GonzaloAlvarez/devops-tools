@@ -1,0 +1,7 @@
+---
+- name: dpkg-reconfigure keyboard-configuration
+  become: yes
+  become_user: root
+  become_method: sudo
+  command: /usr/sbin/dpkg-reconfigure -f noninteractive keyboard-configuration
+  when: ansible_os_family == 'Debian'

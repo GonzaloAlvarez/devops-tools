@@ -1,0 +1,13 @@
+---
+  keyboard_packages:
+    - keyboard-configuration
+# The XKB keyboard model name.
+  keyboard_model: pc105
+# The XKB keyboard layout name.
+  keyboard_layout: us
+# The XKB keyboard variant components.
+  keyboard_variant: 'intl'
+# The XKB keyboard option components.
+  keyboard_options: ''
+# The behavior of <BackSpace> and <Delete> keys.
+  keyboard_backspace: guess

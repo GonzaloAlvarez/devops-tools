@@ -1,0 +1,4 @@
+---
+  keyboard_tasks:
+    - packages
+    - configure
