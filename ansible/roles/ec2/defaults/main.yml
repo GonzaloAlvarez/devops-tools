@@ -22,7 +22,7 @@
   aws_ec2_ami_architecture: "x86_64"
   aws_ec2_outside_port: "443"
   aws_ec2_outside_proto: "tcp"
-  aws_ec2_terminate_alarms: 'true'
+  aws_ec2_terminate_alarm: 'true'
   aws_ec2_group_rules:
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.233.176/29" }
     - { from_port: 22, to_port: 22, proto: tcp, cidr_ip: "205.251.233.160/28" }
