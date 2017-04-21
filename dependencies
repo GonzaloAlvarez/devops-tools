@@ -15,3 +15,4 @@ watcherd: python uptime psutil
 vault: python ansible
 mailstatus: python jinja2 requests pyyaml
 chrome-ri: node chrome-remote-interface
+rclone: rclone

@@ -66,6 +66,25 @@ function node_install() {
     done
 }
 
+function rclone_install() {
+    python_base
+    local RCLONE_FILE="$ENV_PATH/rclone/rclone-latest.zip"
+    local RCLONE_URL="https://downloads.rclone.org/rclone-current-linux-amd64.zip"
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        RCLONE_URL="https://downloads.rclone.org/rclone-current-osx-amd64.zip"
+    fi
+    log "Installing httpie to download requirements"
+    $ENV_PATH/bin/pip install -q --upgrade httpie
+    $ENV_PATH/bin/pip install -q --upgrade requests[security]
+    mkdir -p $ENV_PATH/rclone
+    $ENV_PATH/bin/http --download --verify=no --output "$RCLONE_FILE" "$RCLONE_URL"
+    $ENV_PATH/bin/python -m zipfile -e "$RCLONE_FILE" "$ENV_PATH/rclone"
+    RCLONE_EXE="$(find "$ENV_PATH/rclone" -mindepth 1 -maxdepth 1 -type 'd')/rclone"
+    log "RClone downloaded [$RCLONE_EXE]"
+    mv "$RCLONE_EXE" $ENV_PATH/bin/rclone
+    chmod +x "$ENV_PATH/bin/rclone"
+}
+
 function install_dependencies() {
     EXECUTABLE_NAME="$(basename $0)"
     DEPENDENCIES_LINE="$(grep "^${EXECUTABLE_NAME}:" "$DEPENDENCIES_FILE" | head -n 1)"
