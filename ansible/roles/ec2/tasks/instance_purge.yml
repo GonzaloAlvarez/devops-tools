@@ -6,7 +6,7 @@
       "tag:Name": "{{ project }}-{{ aws_region }}-instance"
       instance-state-name: running
   register: ec2_instance_facts
-- name: Remove Instances
+- name: Terminating instances
   ec2:
     state: absent
     region: "{{ aws_region }}"

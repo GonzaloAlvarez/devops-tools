@@ -1,0 +1,27 @@
+---
+- name: "Create new instance in ec2"
+  hosts: localhost
+  connection: local
+  gather_facts: False
+  roles:
+    - ec2
+- name: "Add minimal user configurations"
+  hosts: "tag_Project_{{ lookup('env', 'ANSIBLE_EC2_PROJECT_NAME') | default('testone') }}"
+  vars:
+    ansible_ssh_private_key_file: "{{ aws_private_key_file }}"
+    ansible_ssh_user: "{{ aws_ssh_user }}"
+  gather_facts: False
+  become: True
+  become_user: root
+  become_method: sudo
+  roles:
+    - role: 'users'
+- name: "Execute roles"
+  hosts: "tag_Project_{{ lookup('env', 'ANSIBLE_EC2_PROJECT_NAME') | default('testone') }}"
+  gather_facts: True
+  roles:
+    - role: 'ssh-hardening'
+    - role: 'base'
+    - role: 'sslh'
+    - role: 'msmtp'
+    - role: 'keyboard'

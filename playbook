@@ -62,8 +62,14 @@ EOF
 function setup_inventory() {
     EC2_PY="$ANSIBLE_PATH/ec2_inventory.py"
     export EC2_INI_PATH="$BASE_PATH/ansible/ec2_dynamic_inventory.ini"
-    if [ "$1" == "ec2" ]; then
+    INVENTORY_ARG="$(echo "$1" | cut -d ',' -f 1)"
+    if [ "$INVENTORY_ARG" == "ec2" ]; then
         export ANSIBLE_HOSTS=$EC2_PY
+        if [ "$(echo "$1" | grep -e ',[a-zA-Z0-9]')" ]; then
+            export ANSIBLE_EC2_PROJECT_NAME="$(echo "$1" | cut -d ',' -f 2-)"
+        else
+            export ANSIBLE_EC2_PROJECT_NAME="testone"
+        fi
     else
         export ANSIBLE_HOSTS="$ANSIBLE_PATH/hosts"
         cat << EOF > $ANSIBLE_HOSTS
