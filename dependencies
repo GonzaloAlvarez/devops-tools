@@ -16,3 +16,5 @@ vault: python ansible
 mailstatus: python jinja2 requests pyyaml
 chrome-ri: node chrome-remote-interface
 rclone: rclone
+ec2-list: python awscli
+ec2-connect: python awscli

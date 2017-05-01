@@ -1,0 +1,24 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+AWS_VARS=$(cat config.yaml | grep '^aws' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+SSH=$(which ssh)
+while read line; do
+    eval "export $line"
+done <<< "$AWS_VARS"
+QUERY_PARAM="Reservations[].Instances[].[PublicDnsName,Tags[?Key=='Name'].Value[],InstanceType,PublicIpAddress]"
+FILTER_PARAM="Name=instance-state-name,Values=running"
+PYTHON_SCRIPT="import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1].format(x[0],x[1][0],x[2],x[3]) for x in j]); print l"
+INSTANCES_DETAILS=$($ENV_PATH/bin/aws ec2 describe-instances --query $QUERY_PARAM --filters $FILTER_PARAM)
+INSTANCES_PLAIN_DETAILS="$(echo $INSTANCES_DETAILS | $ENV_PATH/bin/python -c 'import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1].format(x[0],x[1][0],x[2],x[3]) for x in j]); print l' "{}")"
+if [ -z "$INSTANCES_PLAIN_DETAILS" ]; then
+    echo "No instances"
+fi
+# ./awscli ec2 authorize-security-group-ingress --group-id "sg-3e355f46" --protocol tcp --port 22 --cidr 67.185.162.138/2
+LINE=1
+if [ 0$1 -gt 0 ]; then
+    LINE=$1
+fi
+EC2_DNS_NAME="$(echo "$INSTANCES_PLAIN_DETAILS" | head -n $LINE | tail -n 1)"
+echo "Connecting to [$EC2_DNS_NAME]"
+$SSH -o StrictHostKeyChecking=no $EC2_DNS_NAME  -p 443

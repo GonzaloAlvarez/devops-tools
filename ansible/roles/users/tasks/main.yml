@@ -11,10 +11,10 @@
     port=22
     delay=5
     timeout=300
-  when: "{{ test_user | failed }}"
+  when: test_user | failed 
   become: False
 - action: setup
-  when: "{{ test_user | failed }}"
+  when: test_user | failed
 - include: "{{ item }}.yml"
   with_items: "{{ users_tasks }}"
-  when: "{{ test_user | failed }}"
+  when: test_user | failed

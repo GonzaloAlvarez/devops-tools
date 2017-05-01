@@ -1,4 +1,0 @@
----
-- name: Dumping name of hosts to file
-  local_action: copy content="{{ ec2_instance_facts.instances|map(attribute='public_dns_name')|join('\n') }}" dest="{{ local_inventory_file }}"
-  when: ec2_instance_facts.instances|length > 0

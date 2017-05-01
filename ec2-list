@@ -1,0 +1,24 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+AWS_VARS=$(cat config.yaml | grep '^aws' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+SSH=$(which ssh)
+while read line; do
+    eval "export $line"
+done <<< "$AWS_VARS"
+QUERY_PARAM="Reservations[].Instances[].[PublicDnsName,Tags[?Key=='Name'].Value[],InstanceType,PublicIpAddress]"
+FILTER_PARAM="Name=instance-state-name,Values=running"
+PYTHON_SCRIPT="import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1].format(x[0],x[1][0],x[2],x[3]) for x in j]); print l"
+INSTANCES_DETAILS=$($ENV_PATH/bin/aws ec2 describe-instances --query $QUERY_PARAM --filters $FILTER_PARAM)
+INSTANCES_PLAIN_DETAILS="$(echo $INSTANCES_DETAILS | $ENV_PATH/bin/python -c 'import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1].format(i+1,x[0],x[1][0],x[2],x[3]) for i,x in enumerate(j)]); print l' "{} {} {} {} {}")"
+if [ "$1" == "-s" ]; then
+    while read line; do
+        echo $line | cut -d ' ' -f 2- | column -s' ' -t
+        INSTANCE_DNS="$(echo $line | cut -d ' ' -f 2)"
+        UPTIME_BOX=$($SSH -n -o StrictHostKeyChecking=no $INSTANCE_DNS -p 443 -q 'uptime' 2>/dev/null)
+        FREEMEM_BOX=$($SSH -n -o StrictHostKeyChecking=no $INSTANCE_DNS -p 443 -q "free -t -m | grep Mem | awk '{print int((\$3 - \$7) / \$2 * 100)}'" 2>/dev/null)
+        echo " $UPTIME_BOX | Mem: $FREEMEM_BOX%"
+    done <<< "$INSTANCES_PLAIN_DETAILS"
+else
+    echo "$INSTANCES_PLAIN_DETAILS" | column -s' ' -t
+fi

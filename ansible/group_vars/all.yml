@@ -2,7 +2,6 @@
   project: "{{ lookup('env', 'ANSIBLE_EC2_PROJECT_NAME') | default('testone') }}"
   aws_private_key_file: "{{ lookup('env','ENV_PATH') | default('.env') }}/aws-key-{{ project }}-private.pem"
   aws_ssh_user: "admin"
-  local_inventory_file: "{{ lookup('env','ENV_PATH') | default('.env') }}/ec2-inventory"
   main_ssh_user: "gonzalo"
   main_private_key_file: "{{ lookup('env','HOME') }}/.ssh/GonzaloAlvarez-MasterSSH-privkey.pem"
   ansible_ssh_private_key_file: "{{ main_private_key_file }}"
