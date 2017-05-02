@@ -12,7 +12,8 @@ PYTHON_SCRIPT="import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1
 INSTANCES_DETAILS=$($ENV_PATH/bin/aws ec2 describe-instances --query $QUERY_PARAM --filters $FILTER_PARAM)
 INSTANCES_PLAIN_DETAILS="$(echo $INSTANCES_DETAILS | $ENV_PATH/bin/python -c 'import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1].format(x[0],x[1][0],x[2],x[3]) for x in j]); print l' "{}")"
 if [ -z "$INSTANCES_PLAIN_DETAILS" ]; then
-    echo "No instances"
+    echo "No instances. Exiting."
+    exit 0
 fi
 # ./awscli ec2 authorize-security-group-ingress --group-id "sg-3e355f46" --protocol tcp --port 22 --cidr 67.185.162.138/2
 LINE=1
