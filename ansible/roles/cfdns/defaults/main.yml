@@ -1,0 +1,5 @@
+---
+  cfdns_zone: "{{ lookup('env', 'CF_DNS_ZONE') | default('gon.al') }}"
+  cfdns_record: "{{ lookup('env', 'CF_DNS_HOST') | default('server') }}"
+  cfdns_login_email: "{{ lookup('env', 'CF_API_EMAIL') }}"
+  cfdns_login_apitoken: "{{ lookup('env', 'CF_API_KEY') }}"

@@ -1,0 +1,4 @@
+---
+- include: "{{ item }}.yml"
+  with_items: "{{ cfdns_tasks }}"
+  when: "'tag_Dns_Cloudflare' in group_names"

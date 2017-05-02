@@ -11,6 +11,7 @@
         - Name: "{{ aws_ec2_instance_tag_name }}"
           Project: "{{ project }}"
           Vpn: "Server"
+          Dns: "Cloudflare"
     - count: 0
       tags:
         - Name: "{{ aws_ec2_instance_tag_name }}"

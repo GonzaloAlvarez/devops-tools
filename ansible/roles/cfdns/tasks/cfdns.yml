@@ -1,0 +1,9 @@
+---
+- name: Update CloudFlare DNS servers
+  cloudflare_dns:
+    zone: "{{ cfdns_zone }}"
+    record: "{{ cfdns_record }}"
+    type: A
+    value: "{{ cfdns_targetip | default(inventory_hostname)}}"
+    account_email: "{{ cfdns_login_email }}"
+    account_api_token: "{{ cfdns_login_apitoken }}"
