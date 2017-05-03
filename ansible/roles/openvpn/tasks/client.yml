@@ -1,8 +1,4 @@
 ---
-- name: 
-  debug:
-    msg: "Install client packages"
-
 - name: Trigger credentials decryption
   include_role: 
     name: credentials
