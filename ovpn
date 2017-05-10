@@ -1,0 +1,64 @@
+#!/bin/bash
+# Bootstrap section
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+#$ENV_PATH/bin/python $BASE_PATH/$(basename "${BASH_SOURCE[0]}").py $@
+
+# OpenVPN key generation variables
+OPENVPN_DAYS_VALID="365"
+OPENVPN_KEY_SIZE="2048"
+OPENVPN_KEY_COUNTRY="US"
+OPENVPN_KEY_PROVINCE="WA"
+OPENVPN_KEY_CITY="Seattle"
+OPENVPN_KEY_ORG="GonzaloAlvarez"
+OPENVPN_KEY_OU="GonzaloAlvarez"
+OPENVPN_REQUEST_SUBJECT="/C=$OPENVPN_KEY_COUNTRY/ST=$OPENVPN_KEY_PROVINCE/L=$OPENVPN_KEY_CITY/O=$OPENVPN_KEY_ORG/OU=$OPENVPN_KEY_OU"
+OPENVPN_CLIENT_CONFIG_FILE="/etc/openvpn/client-template.conf"
+
+# General locaion and dependencies variables
+GIT="$(which git)"
+GPG="$(which gpg)"
+OPENSSL="$(which openssl)"
+ENVSUBST="$(which envsubst)"
+CREDENTIALS_PATH="$ENV_PATH/.cred"
+PRIVATE_PATH="$ENV_PATH/.priv"
+CONFIG_FILE="$BASE_PATH/config.yaml"
+CREDENTIALS_REPO="https://github.com/GonzaloAlvarez/credentials.git"
+
+TARGET_HOSTNAME="$1"
+
+# Load all gpg variables from the config file
+GPG_VARS=$(cat $CONFIG_FILE | grep '^gpg' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+while read line; do
+    eval "export $line"
+done <<< "$GPG_VARS"
+
+# Verify prerequisites
+if [ ! -r "$OPENVPN_CLIENT_CONFIG_FILE" ]; then
+    echo "Missing OpenVPN client template configuration"
+    exit
+fi
+if [ -z "$1" ]; then
+    echo "Missing attribute. Use $0 CLIENT_NAME"
+    exit 1
+fi
+
+# Setup some paths
+mkdir -p $PRIVATE_PATH
+chmod 700 $PRIVATE_PATH
+rm -Rf $CREDENTIALS_PATH
+
+# Getting the resources to build the keys
+$GIT clone $CREDENTIALS_REPO $CREDENTIALS_PATH
+$GPG --homedir "$PRIVATE_PATH" --batch -q --import "$GPG_PRIVATE_KEY_FILE_PATH"
+echo "$GPG_PRIVATE_KEY_PASSPHRASE" | $GPG --homedir "$PRIVATE_PATH" --batch -q --passphrase-fd 0 --output "$CREDENTIALS_PATH/OpenVPN/GonzaloAlvarez-OpenVPN-TLS.key" --decrypt "$CREDENTIALS_PATH/OpenVPN/GonzaloAlvarez-OpenVPN-TLS.key.enc"
+echo "$GPG_PRIVATE_KEY_PASSPHRASE" | $GPG --homedir "$PRIVATE_PATH" --batch -q --passphrase-fd 0 --output "$CREDENTIALS_PATH/OpenVPN/GonzaloAlvarez-OpenVPN-CA.key" --decrypt "$CREDENTIALS_PATH/OpenVPN/GonzaloAlvarez-OpenVPN-CA.key.enc"
+$OPENSSL genrsa -out "$PRIVATE_PATH/$TARGET_HOSTNAME.key" $OPENVPN_KEY_SIZE
+$OPENSSL req -new -key "$PRIVATE_PATH/$TARGET_HOSTNAME".key -subj "$OPENVPN_REQUEST_SUBJECT/CN=$TARGET_HOSTNAME" -out "$PRIVATE_PATH/$TARGET_HOSTNAME.csr"
+$OPENSSL x509 -CA "$CREDENTIALS_PATH/OpenVPN/GonzaloAlvarez-OpenVPN-CA.crt" -CAkey "$CREDENTIALS_PATH/OpenVPN/GonzaloAlvarez-OpenVPN-CA.key" -CAcreateserial -req -days $OPENVPN_DAYS_VALID -in "$PRIVATE_PATH/$TARGET_HOSTNAME.csr" -out "$PRIVATE_PATH/$TARGET_HOSTNAME.crt"
+
+export OPENVPN_CLIENT_CERT_CONTENT="$(< "$PRIVATE_PATH/$TARGET_HOSTNAME.crt")"
+export OPENVPN_CLIENT_KEY_CONTENT="$(< "$PRIVATE_PATH/$TARGET_HOSTNAME.key")"
+$ENVSUBST < $OPENVPN_CLIENT_CONFIG_FILE > "$PRIVATE_PATH/$TARGET_HOSTNAME.ovpn"
+
+
