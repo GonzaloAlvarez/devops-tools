@@ -1,0 +1,25 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+
+CREDENTIALS_PATH="$ENV_PATH/credentials"
+CREDENTIALS_URL="https://github.com/GonzaloAlvarez/credentials.git"
+ENC_PATH="$ENV_PATH/gpg"
+GPG_CMD="$GPG -q --home $ENC_PATH"
+VIM_CMD="$VIM -u NONE --cmd \"set statusline=PrivateKey\" --cmd \"set paste\" --cmd \"set nocompatible\" +start"
+PRIVATE_KEY="$ENC_PATH/PrivateKey.pem"
+INPUT_FILE="$CREDENTIALS_PATH/SSH/GonzaloAlvarez-MasterSSH-privkey.pem.enc"
+INPUT_FILE_EXT="${INPUT_FILE##*.}"
+INPUT_FILE_NAME="${INPUT_FILE%.*}"
+
+$GIT clone "$CREDENTIALS_URL" "$CREDENTIALS_PATH"
+rm -Rf "$ENC_PATH" 2>/dev/null
+mkdir -p "$ENC_PATH"
+chmod 700 "$ENC_PATH"
+eval "$VIM_CMD $PRIVATE_KEY"
+chmod 600 "$PRIVATE_KEY"
+$GPG_CMD --import "$PRIVATE_KEY"
+if [ "$INPUT_FILE_EXT" == "enc" ]; then
+    OUTPUT_ARG="--output $INPUT_FILE_NAME"
+fi
+$GPG_CMD $OUTPUT_ARG --decrypt "$INPUT_FILE"

@@ -85,16 +85,36 @@ function rclone_install() {
     chmod +x "$ENV_PATH/bin/rclone"
 }
 
+function shell_eval() {
+    for dep in "$@"; do
+        DEP_LOCATION="$(which $dep)"
+        if [ -z "$DEP_LOCATION" ]; then
+            echo "Dependency [$dep] unable to fulfill. Exiting."
+            exit 1
+        fi
+        DEP_NAME=$(echo "$dep" | tr '[:lower:]' '[:upper:]')
+        export $DEP_NAME="$DEP_LOCATION"
+    done
+}
+
+function shell_install() {
+    env_install
+    log "Boostraping shell dependencies"
+    shell_eval $@
+}
+
 function install_dependencies() {
     EXECUTABLE_NAME="$(basename $0)"
     DEPENDENCIES_LINE="$(grep "^${EXECUTABLE_NAME}:" "$DEPENDENCIES_FILE" | head -n 1)"
     FRAMEWORK="$(echo "$DEPENDENCIES_LINE" | cut -d ' ' -f 2)"
+    FRAMEWORK_DEPENDENCIES="$(echo "$DEPENDENCIES_LINE" | cut -d ' ' -f 3-)"
     if [ ! -f "$ENV_PATH/$EXECUTABLE_NAME.installed" ]; then
-        FRAMEWORK_DEPENDENCIES="$(echo "$DEPENDENCIES_LINE" | cut -d ' ' -f 3-)"
-        eval "${FRAMEWORK}_install $FRAMEWORK_DEPENDENCIES"
+        ${FRAMEWORK}_install $FRAMEWORK_DEPENDENCIES
         touch "$ENV_PATH/$EXECUTABLE_NAME.installed"
-    elif [ "$FRAMEWORK" == "node" ]; then
-        node_eval
+    else 
+        if [ -n "$(type -t ${FRAMEWORK}_eval)" ] && [ "$(type -t ${FRAMEWORK}_eval)" = function ]; then
+            ${FRAMEWORK}_eval $FRAMEWORK_DEPENDENCIES
+        fi
     fi
 }
 
