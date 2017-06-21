@@ -1,0 +1,7 @@
+---
+- name: Install GnuPG packages
+  become: True
+  become_user: root
+  become_method: sudo
+  apt: pkg="{{ item }}" state=latest
+  with_items: "{{ gpg_packages }}"

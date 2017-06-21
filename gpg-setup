@@ -15,6 +15,7 @@ INPUT_FILE_NAME="${INPUT_FILE%.*}"
 $GIT clone "$CREDENTIALS_URL" "$CREDENTIALS_PATH"
 rm -Rf "$ENC_PATH" 2>/dev/null
 mkdir -p "$ENC_PATH"
+echo "allow-loopback-pinentry" > $ENC_PATH/gpg-agent.conf
 chmod 700 "$ENC_PATH"
 eval "$VIM_CMD $PRIVATE_KEY"
 chmod 600 "$PRIVATE_KEY"

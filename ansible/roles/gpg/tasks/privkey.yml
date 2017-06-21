@@ -1,0 +1,11 @@
+---
+- name: Export local private key to variable
+  shell: "echo '{{ gpg_key_passphrase }}' | GPG_TTY=$(tty) $(which gpg) --pinentry-mode loopback --batch --yes --no-tty --passphrase-fd 0 --export-secret-key -a --homedir {{ gpg_local_homedir }}"
+  args:
+    executable: /bin/bash
+  delegate_to: localhost
+  register: gpg_local_key
+- name: Import gpg key in remote 
+  shell: 'echo "{{ gpg_local_key.stdout }}" | $(which gpg) --import --homedir {{ gpg_remote_homedir }}'
+  args:
+    executable: /bin/bash

@@ -1,0 +1,6 @@
+---
+- include: "{{ task_item }}.yml"
+  with_items: "{{ gpg_tasks }}"
+  loop_control:
+    loop_var: task_item
+

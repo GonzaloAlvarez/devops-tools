@@ -1,7 +1,8 @@
 #!/bin/bash
 BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $BASE_PATH/bootstrap.sh
-AWS_VARS=$(cat config.yaml | grep '^aws' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+CONFIG_FILE="$BASE_PATH/config.yaml"
+AWS_VARS=$(cat $CONFIG_FILE | grep '^aws' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
 SSH=$(which ssh)
 while read line; do
     eval "export $line"

@@ -1,0 +1,6 @@
+---
+  gpg_packages:
+    - gnupg
+  gpg_local_homedir: "{{ lookup('env','ENV_PATH') | default('.env') }}/gpg"
+  gpg_remote_homedir: "{{ ansible_env.HOME}}/.gnupg"
+  gpg_key_passphrase: "{{ lookup('env', 'GPG_PRIVATE_KEY_PASSPHRASE') }}"

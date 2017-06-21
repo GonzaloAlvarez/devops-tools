@@ -22,6 +22,10 @@
     remote_src: yes
     mode: 0600
 
+- name: Load TLS key into variable
+  shell: grep -v "^#" "/etc/openvpn/ta.key"
+  register: openvpn_tls_key_catout
+
 - name: Purge temporary directory
   file:
     path: "{{ credentials_temp_folder.stdout }}"
@@ -45,6 +49,10 @@
     dest: "/etc/openvpn/ca.crt"
     mode: 0600
 
+- name: Load CA cert into variable
+  shell: grep -v "^#" "/etc/openvpn/ca.crt"
+  register: openvpn_ca_crt_catout
+
 - name: Gather the dh key
   get_url:
     url: "https://raw.githubusercontent.com/GonzaloAlvarez/credentials/master/OpenVPN/dh2048.pem"
@@ -53,6 +61,15 @@
 
 - name: Create server config
   template: src=server.conf.j2 dest=/etc/openvpn/server.conf mode=0644
+
+- name: Associate required variables for client template
+  set_fact:
+    openvpn_ca_crt_content: "{{ openvpn_ca_crt_catout.stdout }}"
+    openvpn_ta_key_content: "{{ openvpn_tls_key_catout.stdout }}"
+    openvpn_server_host: "{{ inventory_hostname }}"
+
+- name: Create client template config
+  template: src=client-template.conf.j2 dest=/etc/openvpn/client-template.conf mode=644
 
 - name: Start openvpn server
   systemd: state=restarted name=openvpn@server

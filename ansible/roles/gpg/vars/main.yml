@@ -1,0 +1,4 @@
+---
+  gpg_tasks:
+    - packages
+    - privkey
