@@ -1,0 +1,20 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+AWS_VARS=$(cat config.yaml | grep '^aws' | cut -d '#' -f 1 | sed 's/\([^:]*\)/\U\1/' | tr ':' '=' | tr "'" '"' | tr -d ' ')
+while read line; do
+    eval "export $line"
+done <<< "$AWS_VARS"
+ACCOUNT_ID=$($ENV_PATH/bin/aws ec2 describe-security-groups --group-names 'Default' --query 'SecurityGroups[0].OwnerId' --output text)
+echo "Account ID: $ACCOUNT_ID"
+USER_NAME=$($ENV_PATH/bin/aws iam get-user --output text | cut -f 6)
+$ENV_PATH/bin/aws configure get region
+echo "User: $USER_NAME"
+echo "User Groups:"
+$ENV_PATH/bin/aws iam list-groups-for-user --user-name $USER_NAME
+echo "User Policies:"
+$ENV_PATH/bin/aws iam list-attached-user-policies --user-name $USER_NAME
+echo "Summary: "
+$ENV_PATH/bin/aws iam get-account-summary
+echo "EC2 Hosts:"
+$BASE_PATH/ec2-list

@@ -2,11 +2,12 @@ dnsupdate: python ipgetter docopt pyyaml boto pyflare
 mediasorter: python click python-magic Pillow python-magic
 ghi: ruby ghi
 awscli: python awscli
+awsinfo: python awscli
 aws: python docopt boto pyflare
 getmac: node getmac
 internal-ip: node internal-ip
 iponmap: node iponmap
-public-ip: node ipify
+public-ip: node ipify-cli
 playbook: python ansible boto paramiko
 raspbian-setup: env
 speed-test: node speed-test
@@ -18,4 +19,5 @@ chrome-ri: node chrome-remote-interface
 rclone: rclone
 ec2-list: python awscli
 ec2-connect: python awscli
+ec2-copy: python awscli
 gpg-setup: shell vim git gpg
