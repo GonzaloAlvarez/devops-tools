@@ -1,0 +1,16 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+
+BATS_PATH="$ENV_PATH/bats"
+BATS_MAIN="$BATS_PATH/libexec/bats"
+
+if [ ! -f "$BATS_MAIN" ]; then
+    mkdir -p "$BATS_PATH/lib"
+    $GIT clone https://github.com/sstephenson/bats.git "$BATS_PATH/repo"
+    $GIT clone https://github.com/ztombol/bats-support.git "$BATS_PATH/lib/bats-support"
+    $GIT clone "https://github.com/ztombol/bats-assert.git" "$BATS_PATH/lib/bats-assert"
+    $BATS_PATH/repo/install.sh "$BATS_PATH"
+fi
+
+PATH="$BASE_PATH:$PATH" BLIBS="$BATS_PATH/lib" $BASH $BATS_MAIN tests/*.bats

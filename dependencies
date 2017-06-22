@@ -22,3 +22,4 @@ ec2-connect: python awscli
 ec2-copy: python awscli
 gpg-setup: shell vim git gpg
 ovpn: python httpie
+test-all: shell git bash
