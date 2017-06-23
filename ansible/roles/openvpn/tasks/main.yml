@@ -1,7 +1,4 @@
 ---
-- name: Display all variables/facts known for a host
-  debug:
-    var: groups
 - include: "{{ task_item }}.yml"
   become: True
   become_user: root
