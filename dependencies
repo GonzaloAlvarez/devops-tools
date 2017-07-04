@@ -23,3 +23,4 @@ ec2-copy: python awscli
 gpg-setup: shell vim git gpg
 ovpn: python httpie
 test-all: shell git bash
+getmail: python git+ssh://git@github.com/wor/getmail.git
