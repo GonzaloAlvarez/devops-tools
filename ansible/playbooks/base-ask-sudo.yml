@@ -1,0 +1,9 @@
+---
+- name: "Execute roles"
+  hosts: all
+  gather_facts: True
+  vars_prompt:
+    - name: "ansible_sudo_pass"
+      prompt: "Sudo password"
+      private: yes
+  roles:

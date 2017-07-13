@@ -53,9 +53,13 @@ scp_if_ssh=True
 EOF
     fi
     for file in $BASE_PATH/ansible/*; do
-        if [ "$(basename $file)" != "group_vars" ]; then
-            ln -s $file $ANSIBLE_PATH/$(basename $file)
-        fi
+        [[ "$(basename $file)" == "group_vars" ]] && continue
+        [[ "$(basename $file)" == "roles" ]] && continue
+        ln -s $file $ANSIBLE_PATH/$(basename $file)
+    done
+    mkdir $ANSIBLE_PATH/roles
+    for file in $BASE_PATH/ansible/roles/*; do
+        ln -s $file $ANSIBLE_PATH/roles/$(basename $file)
     done
 }
 
@@ -101,7 +105,11 @@ function add_roles() {
         OIFS=$IFS
         IFS=","
         for role in $ROLES; do
-            if [ -d "$ANSIBLE_PATH/roles/$role" ]; then
+            if [ -d "$role" ]; then
+                ln -s "$role" "$ANSIBLE_PATH/roles/${role##*/}"
+                echo "Including role [${role##*/}]"
+                echo "    - role: '${role##*/}'" >> $PLAYBOOK
+            elif [ -d "$ANSIBLE_PATH/roles/$role" ]; then
                 echo "Including role [$role]"
                 echo "    - role: '$role'" >> $PLAYBOOK
             else
@@ -116,11 +124,19 @@ function setup_vars() {
     mkdir -p "$ANSIBLE_PATH/group_vars"
     cp "$BASE_PATH/ansible/group_vars/all.yml" "$ANSIBLE_PATH/group_vars/all.yml"
     VARS_FILE="$(echo "$1" | cut -d ',' -f 1)"
-    if [ -r "$BASE_PATH/ansible/group_vars/$VARS_FILE.yml" ]; then
+    if [ ${VARS_FILE/group_vars} != $VARS_FILE -o -r "$BASE_PATH/ansible/group_vars/$VARS_FILE.yml" ]; then
         OIFS=$IFS
         IFS=","
         for varfile in $1; do
-            if [ -r "$BASE_PATH/ansible/group_vars/$varfile.yml" ]; then
+            if [ -r "$varfile" ]; then
+                if [ "$(basename $varfile)" == "all.yml" ]; then
+                    echo "Resetting all.yml with [$varfile]"
+                    cat "$varfile" > $ANSIBLE_PATH/group_vars/all.yml
+                else
+                    echo "Including var file [$varfile]"
+                    cat "$varfile" >> "$ANSIBLE_PATH/group_vars/all.yml"
+                fi
+            elif [ -r "$BASE_PATH/ansible/group_vars/$varfile.yml" ]; then
                 echo "Including var file [$varfile]"
                 cat "$BASE_PATH/ansible/group_vars/$varfile.yml" >> "$ANSIBLE_PATH/group_vars/all.yml"
             fi
