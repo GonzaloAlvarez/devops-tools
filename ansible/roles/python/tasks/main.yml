@@ -3,7 +3,10 @@
   become: True
   become_user: root
   become_method: sudo
-  with_items: "{{ python_tasks }}"
+  with_items: "{{ root_tasks | default([]) }}"
   loop_control:
     loop_var: task_item
-
+- include: "{{ task_item }}.yml"
+  with_items: "{{ user_tasks | default([]) }}"
+  loop_control:
+    loop_var: task_item

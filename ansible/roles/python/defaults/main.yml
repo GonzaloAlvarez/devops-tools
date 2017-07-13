@@ -1,5 +1,5 @@
 ---
-  python_packages:
+  apt_packages:
     - python
     - python-pip
     - python-virtualenv
