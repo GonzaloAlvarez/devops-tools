@@ -1,0 +1,6 @@
+---
+- name: Install required packages
+  apt: 
+    deb: "{{ item }}"
+  with_items: "{{ apt_packages | default([]) }}"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
