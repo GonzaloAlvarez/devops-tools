@@ -1,0 +1,9 @@
+---
+  ubuntu_purge_packages:
+    - ubuntu-desktop
+    - xserver-xorg-core
+    - unity8 
+    - ubuntu-system-settings
+    - webbrowser-app
+    - plymouth-theme-ubuntu-text
+    - lightdm

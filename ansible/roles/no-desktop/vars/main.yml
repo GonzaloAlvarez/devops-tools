@@ -1,0 +1,7 @@
+---
+  root_tasks:
+    - purge
+    - no-splash
+    - reboot
+  user_tasks:
+    - wait

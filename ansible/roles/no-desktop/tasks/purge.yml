@@ -1,0 +1,9 @@
+---
+- name: Purge packages
+  apt: 
+    pkg: "{{ item }}" 
+    autoremove: yes
+    purge: yes
+    state: absent
+  with_items: "{{ ubuntu_purge_packages | default([]) }}"
+  when: ansible_distribution == 'Ubuntu'

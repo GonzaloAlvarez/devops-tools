@@ -1,0 +1,10 @@
+---
+- name: Remove Splash screen from terminal
+  lineinfile:
+    dest: /etc/default/grub
+    regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 noplymouth"'
+- name: update-grub
+  command: update-grub
+  failed_when: ('error' in update_grub_register.stderr)
+  register: update_grub_register

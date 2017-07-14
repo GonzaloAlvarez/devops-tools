@@ -1,0 +1,4 @@
+---
+- name: Wait for box to be back up
+  local_action: 
+    wait_for host={{ inventory_hostname }} port=22 state=started delay=60 timeout=120
