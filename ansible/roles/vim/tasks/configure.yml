@@ -1,5 +1,5 @@
 ---
-- name: Install VIM configuration in the environment
+- name: Install VIM configuration
   git:
     repo: "https://github.com/GonzaloAlvarez/vim.git"
     dest: "{{ ansible_env.HOME }}/.vim"

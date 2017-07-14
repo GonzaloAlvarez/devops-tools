@@ -1,0 +1,6 @@
+---
+dependencies:
+  - { role: sys-update }
+  - { role: min-packages }
+  - { role: timezone }
+  - { role: dotfiles }

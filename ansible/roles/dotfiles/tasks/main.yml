@@ -1,0 +1,5 @@
+---
+- include: "{{ task_item }}.yml"
+  with_items: "{{ user_tasks | default([]) }}"
+  loop_control:
+    loop_var: task_item

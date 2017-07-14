@@ -3,6 +3,6 @@
   become: True
   become_user: root
   become_method: sudo
-  with_items: "{{ root_tasks | default([]) }}"
+  with_items: "{{ root_tasks }}"
   loop_control:
     loop_var: task_item

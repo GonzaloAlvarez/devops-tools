@@ -1,4 +1,5 @@
 ---
   root_tasks:
-    - apt
+    - packages
   user_tasks:
+    - configure

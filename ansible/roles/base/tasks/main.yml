@@ -1,8 +1,0 @@
----
-- include: "{{ item }}.yml"
-  become: True
-  become_user: root
-  become_method: sudo
-  with_items: "{{ base_root_tasks }}"
-- include: "{{ item }}.yml"
-  with_items: "{{ base_tasks }}"

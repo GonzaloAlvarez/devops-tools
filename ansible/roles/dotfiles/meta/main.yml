@@ -1,0 +1,6 @@
+---
+dependencies:
+  - { role: sys-update }
+  - { role: tmux }
+  - { role: vim }
+  - { role: git }

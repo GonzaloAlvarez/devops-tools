@@ -1,0 +1,5 @@
+---
+- name: Install required packages
+  apt: pkg="{{ item }}" state=latest
+  with_items: "{{ apt_packages }}"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

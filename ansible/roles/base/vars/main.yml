@@ -1,7 +1,0 @@
----
-  base_root_tasks:
-    - packages
-    - timezone
-  base_tasks:
-    - vim
-    - dotfiles
