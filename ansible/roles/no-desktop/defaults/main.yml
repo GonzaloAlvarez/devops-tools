@@ -7,3 +7,5 @@
     - webbrowser-app
     - plymouth-theme-ubuntu-text
     - lightdm
+  amazon_purge_packages:
+    - gnome-desktop

@@ -4,7 +4,9 @@
     dest: /etc/default/grub
     regexp: "^GRUB_CMDLINE_LINUX_DEFAULT="
     line: 'GRUB_CMDLINE_LINUX_DEFAULT="console=tty1 noplymouth"'
+  when: ansible_distribution == 'Ubuntu'
 - name: update-grub
   command: update-grub
   failed_when: ('error' in update_grub_register.stderr)
   register: update_grub_register
+  when: ansible_distribution == 'Ubuntu'

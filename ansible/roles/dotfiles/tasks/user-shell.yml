@@ -1,0 +1,5 @@
+---
+- name: Change user shell to Bash
+  user:
+    name: "{{ ansible_user }}"
+    shell: /bin/bash

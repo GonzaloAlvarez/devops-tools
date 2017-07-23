@@ -1,0 +1,7 @@
+---
+- name: Update all repositories for yum and perform an upgrade
+  yum:
+    name: '*'
+    state: latest
+    update_cache: yes
+  when: ansible_distribution == "Amazon" or ansible_distribution == "RedHat"

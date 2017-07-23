@@ -1,5 +1,5 @@
 ---
-- name: Purge packages
+- name: Purge APT packages
   apt: 
     pkg: "{{ item }}" 
     autoremove: yes
@@ -7,3 +7,9 @@
     state: absent
   with_items: "{{ ubuntu_purge_packages | default([]) }}"
   when: ansible_distribution == 'Ubuntu'
+- name: Purge YUM packages
+  yum:
+    pkg: "{{ item }}"
+    state: absent
+  with_items: "{{ amazon_purge_packages | default([]) }}"
+  when: ansible_distribution == 'RedHat'

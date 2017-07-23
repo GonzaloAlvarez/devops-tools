@@ -1,3 +1,5 @@
 ---
   user_tasks:
     - configure
+  root_tasks:
+    - user-shell
