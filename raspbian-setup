@@ -25,6 +25,28 @@ SUDO="$(which sudo)"
 DD="$(which dd)"
 MOUNT="$(which mount)"
 
+CONFIG_FILE="$BASE_PATH/config.yaml"
+
+function parse_config() {
+    while read line; do
+        if [[ $line =~ ^# ]]; then
+            continue
+        fi
+        VARIABLE_NAME=$(echo $line | cut -d ':' -f 1 | tr '[:lower:]' '[:upper:]')
+        VALUE=$(echo $line | cut -d ':' -f 2- | cut -d '#' -f 1 | sed -e 's/^\s*//' | tr "'" '"')
+        printf "$VARIABLE_NAME=$VALUE\n"
+    done < $1
+}
+
+function export_config() {
+    CONFIG_VARS="$(parse_config $CONFIG_FILE)"
+    while read line; do
+        eval "export $line"
+    done <<< "$CONFIG_VARS"
+}
+
+export_config
+
 if [ "$1" = "one" ]; then
     RASPBIAN_PATH="$ARMBIAN_OPIONE_PATH"
     RASPBIAN_EXTRACT_PATH="$ARMBIAN_OPIONE_PATH/extract"
@@ -73,6 +95,14 @@ if [ -z "$SDCARD_DISKID" ]; then
 fi
 MOUNT_POINT=$($MOUNT | grep "${SDCARD_DISKID%??}" | awk '{print $3}')
 touch $MOUNT_POINT/ssh
+
+cat << EOF > $MOUNT_POINT/wpa_supplicant.conf
+network={
+    ssid="$WIFI_SSID"
+    psk="$WIFI_PASS"
+    key_mgmt=WPA-PSK
+}
+EOF
 
 if [ "$1" = "zero" ]; then
     echo "dtoverlay=dwc2" >> "$MOUNT_POINT/config.txt"
