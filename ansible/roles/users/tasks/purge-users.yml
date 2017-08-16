@@ -5,6 +5,15 @@
     state: absent
     force: yes
   with_items: "{{ purge_users }}"
-  when: purge_users|length > 0
+  when: purge_users|length > 0 and user_item != ansible_user
+  loop_control:
+    loop_var: user_item
+- name: Remove connected user from the system, if required
+  user:
+    name: "{{ user_item }}"
+    state: absent
+    force: yes
+  with_items: "{{ purge_users }}"
+  when: purge_users|length > 0 and user_item == ansible_user
   loop_control:
     loop_var: user_item

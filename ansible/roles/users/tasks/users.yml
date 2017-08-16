@@ -3,7 +3,7 @@
   user:
     name: "{{ user_item }}"
     state: present
-    groups: wheel,sshusers
+    groups: wheel,sshusers,video,audio
     shell: /bin/bash
   with_items: "{{ admin_users }}"
   when: admin_users|length > 0

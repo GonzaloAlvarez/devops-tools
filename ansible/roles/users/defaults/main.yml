@@ -3,5 +3,6 @@
     - gonzalo
   purge_users:
     - admin
+    - pi
   ssh_keys:
     - "https://raw.githubusercontent.com/GonzaloAlvarez/credentials/master/SSH/GonzaloAlvarez-MasterSSH-pubkey.pem"

@@ -5,7 +5,7 @@ awscli: python awscli
 awsinfo: python awscli
 aws: python docopt boto pyflare
 getmac: node getmac
-internal-ip: node internal-ip
+internal-ip: node internal-ip-cli
 iponmap: node iponmap
 public-ip: node ipify-cli
 playbook: python ansible boto paramiko
@@ -22,6 +22,6 @@ ec2-connect: python awscli
 ec2-copy: python awscli
 gpg-setup: shell vim git gpg
 ovpn: python httpie
-test-all: shell git bash
+run-tests: shell git bash
 getmail: python git+ssh://git@github.com/wor/getmail.git
 stockanalysis: python argparse backtrader datetime matplotlib

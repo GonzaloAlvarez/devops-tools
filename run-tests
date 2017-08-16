@@ -14,3 +14,9 @@ if [ ! -f "$BATS_MAIN" ]; then
 fi
 
 PATH="$BASE_PATH:$PATH" BLIBS="$BATS_PATH/lib" $BASH $BATS_MAIN tests/*.bats
+
+echo -e "\nStarting manual tests:"
+for manual_test in $BASE_PATH/tests/*.tst; do
+    echo "Launching manual test [$manual_test]"
+    PATH="$PATH:$BASE_PATH" bash -e -x "$manual_test"
+done
