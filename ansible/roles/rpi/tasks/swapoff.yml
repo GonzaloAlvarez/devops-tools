@@ -1,0 +1,11 @@
+---
+- name: Disable swap
+  shell: dphys-swapfile swapoff
+- name: Remove swap
+  shell: dphys-swapfile uninstall
+- name: Uninstall swap program
+  apt:
+    name: dphys-swapfile
+    state: absent
+    autoremove: true
+    purge: true

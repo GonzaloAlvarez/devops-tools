@@ -3,4 +3,5 @@
     - config
     - wifi
     - sshpwdmsg
+    - swapoff
     - reboot
