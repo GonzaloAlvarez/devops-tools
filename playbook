@@ -3,38 +3,7 @@ BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $BASE_PATH/bootstrap.sh
 
 export ENV_PATH
-CONFIG_FILE="$BASE_PATH/config.yaml"
 ANSIBLE_PATH="$ENV_PATH/ansible"
-
-function decrypt_configuration() {
-    if [ ! -r "$CONFIG_FILE" ]; then
-        if [ -r "$CONFIG_FILE.enc" ]; then
-            log "Decrypting config file"
-            $ENV_PATH/bin/ansible-vault decrypt -v --ask-vault-pass --output="$CONFIG_FILE" "${CONFIG_FILE}.enc"
-        else
-            log "No configuration file found. Exiting"
-            exit 1
-        fi
-    fi
-}
-
-function parse_config() {
-    while read line; do
-        if [[ $line =~ ^# ]]; then
-            continue
-        fi
-        VARIABLE_NAME=$(echo $line | cut -d ':' -f 1 | tr '[:lower:]' '[:upper:]')
-        VALUE=$(echo $line | cut -d ':' -f 2- | cut -d '#' -f 1 | sed -e 's/^\s*//' | tr "'" '"')
-        printf "$VARIABLE_NAME=$VALUE\n"
-    done < $1
-}
-
-function export_config() {
-    CONFIG_VARS="$(parse_config $CONFIG_FILE)"
-    while read line; do
-        eval "export $line"
-    done <<< "$CONFIG_VARS"
-}
 
 function setup_workspace() {
     rm -Rf "$ANSIBLE_PATH"
@@ -147,8 +116,7 @@ function setup_vars() {
     return 1
 }
 
-decrypt_configuration
-export_config
+load_configuration
 setup_workspace
 setup_inventory "$1"
 shift

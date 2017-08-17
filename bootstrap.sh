@@ -6,12 +6,19 @@ VIRTUALENV_GIT="https://github.com/pypa/virtualenv.git"
 VIRTUALENV_PATH="$ENV_PATH/virtualenv"
 VIRTUALENV="$VIRTUALENV_PATH/virtualenv.py"
 NODE_BASE="$ENV_PATH/lib"
+CONFIG_FILE="$BASE_PATH/config.yaml"
 export GEM_HOME="$ENV_PATH/gems"
 export GEM_PATH=""
 
+# Debug and logging
+# @Provides: logging
 function log() {
     echo $@
 }
+
+# Environment base methods
+# @Depends: logging
+# @Provides: environment
 
 function env_install() {
     if [ ! -d $ENV_PATH ]; then
@@ -20,6 +27,9 @@ function env_install() {
     fi
 }
 
+# Python install and config
+# @Provides: python
+# @Depends: logging environment
 function python_base() {
     env_install
     if [ ! -d "$VIRTUALENV_PATH" ]; then
@@ -40,14 +50,64 @@ function python_install() {
     done
 }
 
+# Configuration load
+# @Provides: configuration
+# @Depends: python logging
+function decrypt_configuration() {
+    if [ ! -r "$CONFIG_FILE" ]; then
+        if [ -r "$CONFIG_FILE.enc" ]; then
+            if [ ! -x "$ANSIBLE_VALUE" ]; then
+                python_install ansible
+            fi
+            log "Decrypting config file"
+            $ENV_PATH/bin/ansible-vault decrypt -v --ask-vault-pass --output="$CONFIG_FILE" "${CONFIG_FILE}.enc"
+        else
+            log "No configuration file found. Exiting"
+            exit 1
+        fi
+    fi
+}
+
+function parse_config() {
+    while read line; do
+        if [[ $line =~ ^# ]]; then
+            continue
+        fi
+        VARIABLE_NAME=$(echo $line | cut -d ':' -f 1 | tr '[:lower:]' '[:upper:]')
+        VALUE=$(echo $line | cut -d ':' -f 2- | cut -d '#' -f 1 | sed -e 's/^\s*//' | tr "'" '"')
+        printf "$VARIABLE_NAME=$VALUE\n"
+    done < $1
+}
+
+function load_configuration() {
+    if [ ! -r "$CONFIG_FILE" ]; then
+        decrypt_configuration
+    fi
+    CONFIG_VARS="$(parse_config $CONFIG_FILE)"
+    while read line; do
+        eval "export $line"
+    done <<< "$CONFIG_VARS"
+}
+
+# Ruby install and config
+# @Provides: ruby
+# @Depends: python
 function ruby_install() {
+    if [ ! -x "$ENV_BASE/bin/gem" ]; then
+        python_base
+        $ENV_PATH/bin/pip install -q rubyenv
+        $ENV_PATH/bin/rubyenv install 2.4.1
+    fi
     mkdir -p "$GEM_HOME"
     log "Bootstraping ruby dependencies"
     for rubygem in "$@"; do
-        gem install $rubygem --quiet
+        $ENV_PATH/bin/gem install $rubygem --quiet
     done
 }
 
+# Node install and config
+# @Provides: node
+# @Depends: python
 function node_eval() {
     source $ENV_PATH/bin/activate
 }
@@ -66,6 +126,9 @@ function node_install() {
     done
 }
 
+# Install rclone
+# @Provides: rclone
+# @Depends: python
 function rclone_install() {
     python_base
     local RCLONE_FILE="$ENV_PATH/rclone/rclone-latest.zip"
@@ -85,6 +148,8 @@ function rclone_install() {
     chmod +x "$ENV_PATH/bin/rclone"
 }
 
+# Shell configuration
+# @Provides: shell
 function shell_eval() {
     for dep in "$@"; do
         DEP_LOCATION="$(which $dep)"
