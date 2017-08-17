@@ -1,0 +1,6 @@
+---
+- name: set GPU memory allocation to zero
+  lineinfile:
+    path: /boot/config.txt
+    regexp: '^gpu_mem'
+    line: 'gpu_mem=0'

@@ -4,4 +4,9 @@
     - wifi
     - sshpwdmsg
     - swapoff
+    - audiooff
+    - gpumemoff
+    - tmpfs
+    - cameraon
+    - updatefw
     - reboot

@@ -1,0 +1,6 @@
+---
+- name: disable onboard audio
+  lineinfile:
+    path: /boot/config.txt
+    regexp: '^dtparam=audio'
+    line: 'dtparam=audio=off'

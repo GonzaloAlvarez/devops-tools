@@ -1,0 +1,23 @@
+---
+- name: update tmpfs defaults
+  lineinfile:
+    dest: /etc/default/tmpfs
+    regexp: '^#?{{ item.key }}=(.*)$'
+    line: '{{ item.key }}={{ item.value }}'
+    state: present
+  with_items:
+    - { key: 'RAMLOCK', value: 'yes' }
+    - { key: 'RAMSHM', value: 'yes' }
+    - { key: 'RAMTMP', value: 'yes' }
+    - { key: 'TMPFS_SIZE', value: '10%VM' }
+    - { key: 'RUN_SIZE', value: '10M' }
+    - { key: 'LOCK_SIZE', value: '5M' }
+    - { key: 'SHM_SIZE', value: '10M' }
+    - { key: 'TMP_SIZE', value: '25M' }
+- name: Update fstab to include tmpfs
+  lineinfile:
+    dest: /etc/fstab
+    line: '{{ item }}'
+  with_items:
+    - "tmpfs   /var/log                tmpfs   size=20M,defaults,noatime,mode=0755 0 0"
+    - "tmpfs   /var/cache/apt/archives tmpfs   size=100M,defaults,noexec,nosuid,nodev,mode=0755 0 0"

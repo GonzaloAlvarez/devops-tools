@@ -1,0 +1,15 @@
+---
+- name: Enable rpi camera
+  command: raspi-config nonint do_camera 0
+  when: rpi_camera == True
+- name: Enable enough memory for camera to work
+  lineinfile:
+    path: /boot/config.txt
+    regexp: '^gpu_mem'
+    line: 'gpu_mem=128'
+- name: Disable the camera led
+  lineinfile:
+    path: /boot/config.txt
+    regexp: '^disable_camera_led'
+    line: 'disable_camera_led=1'
+    

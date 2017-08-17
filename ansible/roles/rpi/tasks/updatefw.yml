@@ -1,0 +1,14 @@
+---
+- name: Install update tool
+  apt:
+    name: rpi-update
+    state: latest
+- name: Run the firmware update tool
+  command: rpi-update
+  run_once: true
+- name: Remove the update tool
+  apt:
+    name: rpi-update
+    state: absent
+    autoremove: yes
+    purge: yes
