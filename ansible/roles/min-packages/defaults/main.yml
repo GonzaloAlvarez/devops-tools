@@ -10,6 +10,7 @@
     - procps
     - psmisc
     - dbus
+    - deborphan
   apt_purge_packages:
     - at
     - exim4

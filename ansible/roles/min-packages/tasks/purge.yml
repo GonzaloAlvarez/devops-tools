@@ -1,7 +1,28 @@
 ---
 - name: Remove packages
-  apt: pkg="{{ item }}" state=absent purge=yes
+  apt: 
+    name: "{{ item }}" 
+    state: absent 
+    purge: yes
   with_items: "{{ apt_purge_packages }}"
 - name: Clean APT Cache
   command: apt-get clean warn=no
   changed_when: False
+- name: "Check for orphan packages"
+  shell: deborphan
+  register: deborphan_output
+- name: "Remove orphan packages"
+  shell: dpkg --purge {{ item }}
+  with_items: deborphan_output.stdout_lines
+- name: "Check for rc packages"
+  shell: dpkg --list |grep "^rc" | cut -d " " -f 3
+  register: rc_packages_output
+- name: "Remove rc packages"
+  shell: dpkg --purge {{ item }}
+  with_items: rc_packages_output.stdout_lines
+- name: Remove deborphan
+  apt:
+    name: deborphan
+    autoremove: yes
+    state: absent
+    purge: yes
