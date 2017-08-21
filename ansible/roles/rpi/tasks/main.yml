@@ -1,6 +1,8 @@
 ---
-- include: "{{ item }}.yml"
+- include: "{{ task_item }}.yml"
   become: True
   become_user: root
   become_method: sudo
   with_items: "{{ rpi_tasks }}"
+  loop_control:
+    loop_var: task_item
