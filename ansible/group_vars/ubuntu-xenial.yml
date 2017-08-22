@@ -1,0 +1,4 @@
+  instance_distro_name: 'ubuntu/images/hvm-ssd/ubuntu'
+  instance_distro_release: 'xenial'
+  instance_distro_owner: '099720109477'
+  aws_ssh_user: "ubuntu"

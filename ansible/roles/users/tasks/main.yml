@@ -4,15 +4,6 @@
   become: False
   ignore_errors: true
   changed_when: false
-- name: Wait for host to be up
-  local_action:
-    wait_for
-    host={{ inventory_hostname }}
-    port=22
-    delay=5
-    timeout=300
-  when: test_user | failed 
-  become: False
 - action: setup
   when: test_user | failed
 - include: "{{ item }}.yml"

@@ -2,7 +2,7 @@
 - name: Search for a viable AMI in EC2 for the instance
   ec2_ami_find:
     owner: "{{ aws_ec2_ami_owner }}"
-    name: "{{ aws_ec2_ami_name }}"
+    name: "*{{ aws_ec2_ami_name }}"
     architecture: "{{ aws_ec2_ami_architecture }}"
     sort: creationDate
     sort_order: descending

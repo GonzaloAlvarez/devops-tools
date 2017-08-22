@@ -14,6 +14,21 @@
   become: True
   become_user: root
   become_method: sudo
+  pre_tasks:
+    - name: Wait for host to be up
+      local_action:
+        wait_for
+        host={{ inventory_hostname }}
+        port=22
+        delay=5
+        timeout=300
+      become: False
+    - name: "Update apt-get cache to install python if on Ubuntu"
+      raw: sudo apt-get update
+      when: ansible_ssh_user == 'ubuntu'
+    - name: "Ensure python is installed in Ubuntu systems"
+      raw: sudo apt-get -y install python-simplejson
+      when: ansible_ssh_user == 'ubuntu'
   roles:
     - role: 'users'
 - name: "Execute roles"
