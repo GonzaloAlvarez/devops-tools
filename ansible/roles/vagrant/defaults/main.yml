@@ -1,0 +1,23 @@
+---
+  apt_packages:
+    - bsdtar
+    - redir
+    - ruby-childprocess
+    - ruby-dev
+    - ruby-domain-name
+    - ruby-erubis
+    - ruby-ffi
+    - ruby-http-cookie
+    - ruby-i18n
+    - ruby-listen
+    - ruby-log4r
+    - ruby-mime-types
+    - ruby-net-scp
+    - ruby-net-sftp
+    - ruby-net-ssh
+    - ruby-rb-inotify
+    - ruby-rest-client
+    - ruby-sqlite3
+    - ruby-unf
+    - ruby-unf-ext
+  vagrant_deb_url: 'https://releases.hashicorp.com/vagrant/1.9.7/vagrant_1.9.7_x86_64.deb'

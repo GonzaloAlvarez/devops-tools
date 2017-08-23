@@ -1,0 +1,5 @@
+---
+  root_tasks:
+    - packages
+    - winrm
+    - install

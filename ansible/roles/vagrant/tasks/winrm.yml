@@ -1,0 +1,5 @@
+---
+- name: Install winrm gem
+  gem:
+    name: winrm
+    state: latest

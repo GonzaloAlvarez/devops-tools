@@ -1,0 +1,19 @@
+---
+- name: Download Vagrant (workaround) # https://github.com/ansible/ansible/issues/25402
+  command: wget -q -O /tmp/vagrant.deb {{ vagrant_deb_url }}
+  args:
+    creates: /tmp/vagrant.deb
+- name: Install Vagrant
+  apt:
+    deb: /tmp/vagrant.deb
+  register: install_vagrant
+- name: Install Vagrant plugins
+  command: vagrant plugin install {{ item }}
+  with_items:
+    - vagrant-address
+    - winrm
+  when: install_vagrant.changed
+- name: Remove downloaded file
+  file:
+    name: /tmp/vagrant.deb
+    state: absent
