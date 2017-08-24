@@ -1,1 +1,2 @@
   instance_type: 'm4.large'
+  ec2_extra_volume_size: 200

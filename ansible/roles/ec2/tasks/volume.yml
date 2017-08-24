@@ -1,0 +1,17 @@
+---
+- name: Create volume for big box
+  ec2_vol:
+    instance: "{{ instance_item.id }}"
+    volume_size: "{{ ec2_extra_volume_size }}"
+    volume_type: gp2
+    iops: 3000
+    state: present
+    region: "{{ aws_region }}"
+    name: "{{ project }}-{{ instance_item.id }}-volume"
+    delete_on_termination: yes
+    device_name: /dev/xvdf
+  with_items: "{{ ec2_instances }}"
+  when: ( ec2_instances|length > 0 ) and ( ec2_extra_volume_size | default(0) > 0 )
+  loop_control:
+    loop_var: instance_item
+

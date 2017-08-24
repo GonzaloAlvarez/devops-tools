@@ -7,6 +7,7 @@
     - rtables
     - sg
     - instance
+    - volume
     - eip
     - alarm
     - waitup
