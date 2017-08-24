@@ -1,0 +1,6 @@
+---
+  root_tasks:
+    - packages
+    - parted
+    - lvm
+    - move

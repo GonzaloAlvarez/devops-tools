@@ -1,0 +1,9 @@
+---
+- include: "{{ task_item }}.yml"
+  become: True
+  become_user: root
+  become_method: sudo
+  with_items: "{{ root_tasks | default([]) }}"
+  when: aws_ec2_extra_volume_size | default(0) > 0
+  loop_control:
+    loop_var: task_item

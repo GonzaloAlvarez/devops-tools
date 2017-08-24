@@ -1,6 +1,7 @@
 ---
 dependencies:
   - { role: sys-update }
+  - { role: homedrive }
   - { role: min-packages }
   - { role: timezone }
   - { role: dotfiles }

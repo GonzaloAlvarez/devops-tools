@@ -1,0 +1,26 @@
+---
+- name: Mount temporary home in /mnt
+  mount:
+    path: /mnt/newhome
+    src: /dev/vg.homedrive/lv.homedrive
+    opts: defaults
+    fstype: ext4
+    state: mounted
+- name: Move everything from the old folder to newhome
+  shell: rsync -aXS --exclude='/*/.gvfs' /home/. /mnt/newhome/.
+- name: Unmount new mountpoint
+  mount:
+    path: /mnt/newhome
+    src: /dev/vg.homedrive/lv.homedrive
+    opts: defaults
+    fstype: ext4
+    state: unmounted
+- name: Create mountpoint for new home
+  mount:
+    path: /home
+    src: /dev/vg.homedrive/lv.homedrive
+    opts: defaults
+    fstype: ext4
+    state: present
+- name: Flip the home partition
+  shell: rm -Rf /home/* && mount -a

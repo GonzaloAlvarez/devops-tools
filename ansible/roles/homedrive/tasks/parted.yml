@@ -1,0 +1,7 @@
+---
+- name: partition disk to get LVM support on it
+  parted:
+    device: /dev/{{ aws_ec2_extra_volume_id }}
+    number: 1
+    state: present
+    flags: [ lvm ]

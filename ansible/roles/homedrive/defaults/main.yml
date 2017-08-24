@@ -1,0 +1,5 @@
+---
+  apt_packages:
+    - parted
+    - lvm2
+    - rsync

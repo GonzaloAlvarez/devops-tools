@@ -1,0 +1,15 @@
+---
+- name: Create the LVM volume group
+  lvg:
+    vg: vg.homedrive
+    pvs: /dev/{{ aws_ec2_extra_volume_id }}1
+- name: Create the LVM logical volume
+  lvol:
+    vg: vg.homedrive
+    size: 100%VG
+    state: present
+    lv: lv.homedrive
+- name: Format newly created LVM drive
+  filesystem:
+    fstype: ext4
+    dev: /dev/vg.homedrive/lv.homedrive

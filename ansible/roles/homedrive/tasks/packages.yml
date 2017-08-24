@@ -1,0 +1,13 @@
+---
+- name: Install required packages
+  apt: 
+    name: "{{ item }}" 
+    state: latest
+  with_items: "{{ apt_packages | default([]) }}"
+  when: ansible_distribution | default('') == 'Debian' or ansible_distribution | default('') == 'Ubuntu'
+- name: "Update apt-get cache to install python if on Ubuntu"
+  raw: sudo apt-get update
+  when: ansible_ssh_user == 'ubuntu'
+- name: "Ensure python is installed in Ubuntu systems"
+  raw: sudo apt-get -y install python-simplejson
+  when: ansible_ssh_user == 'ubuntu'
