@@ -14,14 +14,8 @@
   become: True
   become_user: root
   become_method: sudo
-  pre_tasks:
-    - name: "Update apt-get cache to install python if on Ubuntu"
-      raw: sudo apt-get update
-      when: ansible_ssh_user == 'ubuntu'
-    - name: "Ensure python is installed in Ubuntu systems"
-      raw: sudo apt-get -y install python-simplejson
-      when: ansible_ssh_user == 'ubuntu'
   roles:
+    - { role: 'python', when: ansible_ssh_user == 'ubuntu' }
     - role: 'users'
 - name: "Execute roles"
   hosts: "tag_Project_{{ lookup('env', 'ANSIBLE_EC2_PROJECT_NAME') | default('testone') }}"
