@@ -1,8 +1,13 @@
 ---
+- name: Switch main user
+  set_fact:
+    ansible_ssh_private_key_file: "{{ main_private_key_file }}"
+    ansible_ssh_user: "{{ main_ssh_user }}"
 - name: Remove unnecessary users from the system
   user:
     name: "{{ user_item }}"
     state: absent
+    remove: yes
     force: yes
   with_items: "{{ purge_users }}"
   when: purge_users|length > 0 and user_item != ansible_user
@@ -12,6 +17,7 @@
   user:
     name: "{{ user_item }}"
     state: absent
+    remove: yes
     force: yes
   with_items: "{{ purge_users }}"
   when: purge_users|length > 0 and user_item == ansible_user
