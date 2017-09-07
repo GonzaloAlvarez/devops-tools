@@ -42,6 +42,7 @@ def _get(ctx, fid):
 def _del(ctx, fid):
     context = ctx.obj
     context.fid = fid
+    context.log.info('Removing entry with ID [%s]' % fid)
     fadm = FileManagementWorkflow()
     fadm.execute(context, DelStage)
 

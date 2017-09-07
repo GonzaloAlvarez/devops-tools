@@ -96,4 +96,8 @@ class DynamoDb(object):
         self.table.delete_item(Key={'fid': key})
 
     def get(self, key):
-        return self._unencode(self.table.get_item(Key={'fid': key})['Item'])
+        item_element = self.table.get_item(Key={'fid': key})
+        if 'Item' in item_element:
+            return self._unencode(self.table.get_item(Key={'fid': key})['Item'])
+        else:
+            return None

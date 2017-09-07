@@ -51,13 +51,14 @@ class FileManagementWorkflow(object):
             for stage in stages:
                 dag = self._build_dag({name: node_functions[name] for name in stage_nodes[stage]}, node_functions)
                 try:
+                    context.log.debug('Graph: [%s]' % ','.join(dag.topological_sort()))
                     for function_name in dag.topological_sort():
                         context.log.debug('Calling [%s] as part of stage [%s]' % (function_name, stage))
                         self._run_function(node_functions[function_name], function_name, context, attrs)
                 except StageException:
                     pass
         except EntryException as e:
-            context.log.exception('Failed on phase [%s]' % function_name)
+            context.log.error('Failed on phase [%s] with message [%s]' % (function_name, str(e)))
 
         return attrs
 
