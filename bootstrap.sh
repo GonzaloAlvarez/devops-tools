@@ -9,6 +9,7 @@ NODE_BASE="$ENV_PATH/lib"
 CONFIG_FILE="$BASE_PATH/config.yaml"
 export GEM_HOME="$ENV_PATH/gems"
 export GEM_PATH=""
+export PYTHONPATH="$PYTHONPATH:$BASE_PATH"
 
 # Debug and logging
 # @Provides: logging
