@@ -52,18 +52,19 @@ class FileManagementWorkflow(object):
                 dag = self._build_dag({name: node_functions[name] for name in stage_nodes[stage]}, node_functions)
                 try:
                     for function_name in dag.topological_sort():
+                        context.log.debug('Calling [%s] as part of stage [%s]' % (function_name, stage))
                         self._run_function(node_functions[function_name], function_name, context, attrs)
                 except StageException:
                     pass
         except EntryException as e:
-            print 'Failed on phase [%s]:' % function_name
-            print str(e)
-            traceback.print_exc()
+            context.log.exception('Failed on phase [%s]' % function_name)
 
         return attrs
 
     def execute_multiple(self, context, stages_class = AddStage):
+        counter = 0
         for filename in context.filelist:
             context.filename = filename
-            print context.filename
+            counter += 1
+            context.log.status('Processing file [%s]' % os.path.basename(filename), counter , len(context.filelist))
             self.execute(context, stages_class)

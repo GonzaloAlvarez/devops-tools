@@ -4,6 +4,7 @@ from lib.fmd.filemetadata import FileMetadata, FileMetadataStore
 from lib.fmd.workflow import FileManagementWorkflow
 from lib.conf import Configuration
 from lib.fmd.decorators import AddStage, ListStage, DelStage, GetStage
+from lib.sys.cout import CLIHandler
 
 @click.command('add')
 @click.argument('path', type=click.Path(file_okay=True), required=True)
@@ -22,6 +23,7 @@ def _list(ctx):
     output = fadm.execute(context, ListStage)
     if 'list_records' in output:
         for entry in output['list_records']:
+            context.log.info('File [%s], mime [%s], id [%s]' % (entry['filename_history'][0]['src'], entry['mime'], entry['fid']))
             print entry['fid']
 
 @click.command('get')
@@ -44,12 +46,13 @@ def _del(ctx, fid):
     fadm.execute(context, DelStage)
 
 @click.group()
-@click.option('--debug/--no-debug', default=False)
+@click.option('-v', '--verbose', default=0, count=True)
 @click.pass_context
-def main(ctx, debug):
-    ctx.obj.debug = debug
+def main(ctx, verbose):
+    ctx.obj.verbose = verbose
     config = Configuration(sys.argv[0], 'config.yaml')
     ctx.obj.configuration = config
+    CLIHandler(ctx.obj)
 
 main.add_command(_add)
 main.add_command(_get)
