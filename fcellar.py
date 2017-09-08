@@ -28,12 +28,14 @@ def _list(ctx):
 
 @click.command('get')
 @click.argument('fid', type=click.STRING, required=True)
+@click.option('--dest', type=click.Path(exists=True), required=False)
 @click.pass_context
-def _get(ctx, fid):
+def _get(ctx, fid, dest):
     context = ctx.obj
     context.fid = fid
+    context.dest = dest
     fadm = FileManagementWorkflow()
-    output = fadm.execute(context, ListStage)
+    output = fadm.execute(context, GetStage)
     print output
 
 @click.command('del')
