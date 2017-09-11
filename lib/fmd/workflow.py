@@ -55,7 +55,8 @@ class FileManagementWorkflow(object):
                     for function_name in dag.topological_sort():
                         context.log.debug('Calling [%s] as part of stage [%s]' % (function_name, stage))
                         self._run_function(node_functions[function_name], function_name, context, attrs)
-                except StageException:
+                except StageException as e:
+                    context.log.info(str(e))
                     pass
         except EntryException as e:
             context.log.error('Failed on phase [%s] with message [%s]' % (function_name, str(e)))

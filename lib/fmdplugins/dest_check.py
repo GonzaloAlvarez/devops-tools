@@ -10,5 +10,5 @@ def dest_check(context, output):
         context.dest = os.path.realpath(context.dest)
         if not os.path.isdir(context.dest):
             raise EntryException('Destination path "%s" is not a folder' % context.dest)
-        if not os.access('/path/to/folder', os.W_OK | os.X_OK):
+        if not os.access(context.dest, os.W_OK | os.X_OK):
             raise EntryException('Destination path "%s" is not writeable' % context.dest)

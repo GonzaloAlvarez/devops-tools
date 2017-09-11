@@ -36,7 +36,7 @@ def _get(ctx, fid, dest):
     context.dest = dest
     fadm = FileManagementWorkflow()
     output = fadm.execute(context, GetStage)
-    print output
+    print context.filename
 
 @click.command('del')
 @click.argument('fid', type=click.STRING, required=True)

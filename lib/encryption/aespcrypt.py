@@ -1,6 +1,6 @@
 import base64
 import json
-from hashlib import md5, sha256
+from hashlib import md5, sha256, sha1
 from Crypto.Cipher import AES
 from Crypto import Random
 
@@ -8,7 +8,7 @@ class AESPCrypt(object):
     """AES PyCrypto implementation for AES 256 bits with openssl compatibility
        and chunk file read.
        Decode with command:
-          $ openssl aes-256-cbc -d -in inputfile -out outputfile
+          $ openssl aes-256-cbc -md sha1/md5 -d -in inputfile -out outputfile
     """
     def __init__(self, password):
         self.password = password
@@ -17,7 +17,7 @@ class AESPCrypt(object):
     def derive_key_and_iv(self, password, salt, key_length, iv_length):
         d = d_i = ''
         while len(d) < key_length + iv_length:
-            d_i = md5(d_i + password + salt).digest()
+            d_i = sha1(d_i + password + salt).digest()
             d += d_i
         return d[:key_length], d[key_length:key_length+iv_length]
 
@@ -39,12 +39,12 @@ class AESPCrypt(object):
             in_file.close()
 
     def decrypt_file(self, inputfile, outputfile, key_length=32):
-        salt = in_file.read(self.bs)[len('Salted__'):]
-        key, iv = self.derive_key_and_iv(self.password, salt, key_length, self.bs)
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-        next_chunk = ''
-        finished = False
         with open(inputfile, 'rb') as in_file, open(outputfile, 'wb') as out_file:
+            salt = in_file.read(self.bs)[len('Salted__'):]
+            key, iv = self.derive_key_and_iv(self.password, salt, key_length, self.bs)
+            cipher = AES.new(key, AES.MODE_CBC, iv)
+            next_chunk = ''
+            finished = False
             while not finished:
                 chunk, next_chunk = next_chunk, cipher.decrypt(in_file.read(1024 * self.bs))
                 if len(next_chunk) == 0:

@@ -28,4 +28,5 @@ class S3Storage(object):
         s3obj.delete()
         return None
 
-
+    def download(self, fid, filename):
+        self.bucket.download_file(fid, filename)
