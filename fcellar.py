@@ -11,7 +11,7 @@ from lib.sys.cout import CLIHandler
 @click.pass_context
 def _add(ctx, path):
     context = ctx.obj
-    context.filelist= [path]
+    context.filelist= [path.rstrip('/')]
     fadm = FileManagementWorkflow()
     fadm.execute_multiple(context, AddStage)
 
@@ -24,7 +24,9 @@ def _list(ctx):
     if 'list_records' in output:
         for entry in output['list_records']:
             context.log.info('File [%s], mime [%s], id [%s]' % (entry['filename_history'][0]['src'], entry['mime'], entry['fid']))
-            print entry['fid']
+            context.log.status('%s %s' % (entry['fid'], entry['filename_history'][0]['basename']))
+    else:
+        context.log.status('Cellar is currently empty')
 
 @click.command('get')
 @click.argument('fid', type=click.STRING, required=True)
@@ -36,7 +38,7 @@ def _get(ctx, fid, dest):
     context.dest = dest
     fadm = FileManagementWorkflow()
     output = fadm.execute(context, GetStage)
-    print context.filename
+    context.log.status('File downloaded successfully: ' + context.filename)
 
 @click.command('del')
 @click.argument('fid', type=click.STRING, required=True)
@@ -47,6 +49,7 @@ def _del(ctx, fid):
     context.log.info('Removing entry with ID [%s]' % fid)
     fadm = FileManagementWorkflow()
     fadm.execute(context, DelStage)
+    context.log.status('File [%s] removed' % fid)
 
 @click.group()
 @click.option('-v', '--verbose', default=0, count=True)

@@ -39,5 +39,8 @@ class CLIHandler(object):
         context.log.exception = logging.getLogger(main_logger).exception
         context.log.status = self._status
 
-    def _status(self, message, count, total):
-        self.log.info(message + ' [%d out of %d]' % (count, total))
+    def _status(self, message, count = None, total = None):
+        if count == None:
+            print message
+        else:
+            print message + ' [%d out of %d]' % (count, total)
