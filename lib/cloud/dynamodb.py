@@ -4,17 +4,20 @@ import sys
 import hashlib
 from collections import Mapping, Set, Sequence
 from decimal import Decimal
+from lib.fmd.tabledef import TableDefinition
+from lib.encryption.aespcrypt import AESPCrypt
 
 class DynamoDb(object):
-    def __init__(self, region, access_key, secret_key):
+    def __init__(self, region, access_key, secret_key, table_definition = TableDefinition()):
         self.dynamodb = boto3.resource(
                 'dynamodb',
                 region_name = region,
                 aws_access_key_id = access_key,
                 aws_secret_access_key = secret_key)
         self.table_name = hashlib.sha256(access_key + sys.argv[0]).digest().encode('hex')[0:32]
+        self.table_definition = table_definition
         if self.table_name not in self.dynamodb.meta.client.list_tables()['TableNames']:
-            self.table = self._create_table(self.table_name, 'fid')
+            self.table = self._create_table(self.table_name, table_definition.key)
         else:
             self.table = self.dynamodb.Table(self.table_name)
 
@@ -79,9 +82,12 @@ class DynamoDb(object):
     def put(self, data):
         return self.table.put_item(Item=self._sanitize(data))
 
-    def list(self):
+    def list(self, filter_name= None):
         output = []
-        response = self.table.scan()
+        if not filter_name == None:
+            response = self.table.scan(FilterExpression = self.table_definition.filter_exprs[filter_name])
+        else:
+            response = self.table.scan()
 
         entries = response['Items']
         while response.get('LastEvaluatedKey'):
@@ -93,11 +99,32 @@ class DynamoDb(object):
         return output
 
     def remove(self, key):
-        self.table.delete_item(Key={'fid': key})
+        self.table.delete_item(Key={self.table_definition.key: key})
 
     def get(self, key):
-        item_element = self.table.get_item(Key={'fid': key})
+        item_element = self.table.get_item(Key={self.table_definition.key: key})
         if 'Item' in item_element:
-            return self._unencode(self.table.get_item(Key={'fid': key})['Item'])
+            return self._unencode(self.table.get_item(Key={self.table_definition.key: key})['Item'])
         else:
             return None
+
+
+class EncDynamoDb(DynamoDb):
+    def __init__(self, region, access_key, secret_key, enc_pass, table_definition = TableDefinition()):
+        super(EncDynamoDb, self).__init__(region, access_key, secret_key, table_definition)
+        self.enc_pass = enc_pass
+
+    def list(self, filter_expr = None):
+        output = []
+        entries = super(EncDynamoDb, self).list(filter_expr)
+        aescrypt = AESPCrypt(self.enc_pass)
+        for entry in entries:
+            output.insert(len(output), aescrypt.decrypt_dict(entry, self.table_definition.unencrypted_fields))
+        return output
+
+    def get(self, key):
+        record = super(EncDynamoDb, self).get(key)
+        aescrypt = AESPCrypt(self.enc_pass)
+        return aescrypt.decrypt_dict(record, self.table_definition.unencrypted_fields)
+
+

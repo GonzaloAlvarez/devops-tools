@@ -19,18 +19,13 @@ class CLIHandler(object):
                 datefmt='%m-%d %H:%M',
                 filename=self.tempfile,
                 filemode='w')
-        syslog_logger = SysLogHandler(address = address, facility='local1')
-        syslog_logger.setLevel(logging.DEBUG)
-        syslog_formatter = logging.Formatter('%(module)s.%(funcName)s[%(process)s]: (%(levelname)s) %(message)s')
-        syslog_logger.setFormatter(syslog_formatter)
-        logging.getLogger('internal-syslog').addHandler(syslog_logger)
-        logging.getLogger('internal-syslog').warn('Debug logfile initialized at %s' % self.tempfile)
         console_logger = logging.StreamHandler()
         console_logger.setLevel(CLIHandler.LEVELS[self.verbose])
         console_formatter = logging.Formatter('[%(levelname)s] %(message)s - |%(name)s.%(module)s|')
         console_logger.setFormatter(console_formatter)
         main_logger = 'main' if self.verbose < 3 else ''
         logging.getLogger(main_logger).addHandler(console_logger)
+        logging.getLogger(main_logger).info('Initializing logs. Full debug log can be found at [%s]' % self.tempfile)
         self.log = context.log = type('', (), {})()
         context.log.info = logging.getLogger(main_logger).info
         context.log.error = logging.getLogger(main_logger).error

@@ -1,10 +1,10 @@
 import click
 import sys
-from lib.fmd.filemetadata import FileMetadata, FileMetadataStore
 from lib.fmd.workflow import FileManagementWorkflow
 from lib.conf import Configuration
 from lib.fmd.decorators import AddStage, ListStage, DelStage, GetStage
 from lib.sys.cout import CLIHandler
+from lib.fmd.tabledef import TableDefinition
 
 @click.command('add')
 @click.argument('path', type=click.Path(file_okay=True), required=True)
@@ -16,9 +16,11 @@ def _add(ctx, path):
     fadm.execute_multiple(context, AddStage)
 
 @click.command('list')
+@click.option('--filter', 'flt', type=click.Choice(TableDefinition.filter_exprs.keys()))
 @click.pass_context
-def _list(ctx):
+def _list(ctx, flt):
     context = ctx.obj
+    context.filter = flt
     fadm = FileManagementWorkflow()
     output = fadm.execute(context, ListStage)
     if 'list_records' in output:
@@ -26,7 +28,7 @@ def _list(ctx):
             context.log.info('File [%s], mime [%s], id [%s]' % (entry['filename_history'][0]['src'], entry['mime'], entry['fid']))
             context.log.status('%s %s' % (entry['fid'], entry['filename_history'][0]['basename']))
     else:
-        context.log.status('Cellar is currently empty')
+        context.log.status('Cellar does not contain any records matching your filter or it is empty')
 
 @click.command('get')
 @click.argument('fid', type=click.STRING, required=True)
