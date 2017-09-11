@@ -3,6 +3,7 @@ import traceback
 import inspect
 import pkgutil
 import importlib
+import time
 from dag import DAG
 from lib.fmd.namedentity import NamedEntity
 from lib.fmd.decorators import AddStage
@@ -33,7 +34,9 @@ class FileManagementWorkflow(object):
             return dag
 
     def _run_function(self, function, function_name, context, attrs):
+        starttime = time.time()
         function_return = function(context, attrs)
+        context.log.debug('Function [%s] took %d ms' % (function_name, round((time.time() - starttime) * 1000, 1)))
         if function_return:
             if type(function_return) is NamedEntity:
                 if function_return.name in attrs and hasattr(attrs[function_return.name], '__iter__'):
