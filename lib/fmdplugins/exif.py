@@ -23,8 +23,8 @@ def get_exif_key(key, exif_info, tags):
 
 @Action(AddStage.DATAGATHERING)
 @DependsOn('mime')
-def exif(context, output):
-    if output['mime'].startswith('image'):
+def exif(context, data):
+    if data['mime'].startswith('image'):
         exif_info = get_exif(context.filename)
         return_tags = {}
         return_tags.update(get_exif_key('date', exif_info, ('DateTimeOriginal', 'DateTime', 'CreateDate', 'ModifyDate')))
@@ -33,7 +33,7 @@ def exif(context, output):
         return_tags.update(get_exif_key('height', exif_info, ('ExifImageHeight',)))
         return_tags.update(get_exif_key('width', exif_info, ('ExifImageWidth',)))
         return return_tags
-    if output['mime'].startswith('video'):
+    if data['mime'].startswith('video'):
         exif_info = get_exif(context.filename)
         return_tags = {}
         return_tags.update(get_exif_key('codec', exif_info, ('VideoCodec',)))
