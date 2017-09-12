@@ -6,4 +6,4 @@ class TableDefinition(object):
             'images': Attr('mime').begins_with('image'),
             'videos': Attr('mime').begins_with('video')
             }
-    unencrypted_fields = ['fid', 'size', 'mime']
+    unencrypted_fields = ['fid', 'size', 'mime', 'time']

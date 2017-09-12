@@ -113,18 +113,20 @@ class EncDynamoDb(DynamoDb):
     def __init__(self, region, access_key, secret_key, enc_pass, table_definition = TableDefinition()):
         super(EncDynamoDb, self).__init__(region, access_key, secret_key, table_definition)
         self.enc_pass = enc_pass
+        self.aescrypt = AESPCrypt(self.enc_pass)
 
     def list(self, filter_expr = None):
         output = []
         entries = super(EncDynamoDb, self).list(filter_expr)
-        aescrypt = AESPCrypt(self.enc_pass)
         for entry in entries:
-            output.insert(len(output), aescrypt.decrypt_dict(entry, self.table_definition.unencrypted_fields))
+            output.insert(len(output), self.aescrypt.decrypt_dict(entry, self.table_definition.unencrypted_fields))
         return output
 
     def get(self, key):
         record = super(EncDynamoDb, self).get(key)
-        aescrypt = AESPCrypt(self.enc_pass)
-        return aescrypt.decrypt_dict(record, self.table_definition.unencrypted_fields)
+        return self.aescrypt.decrypt_dict(record, self.table_definition.unencrypted_fields)
 
+    def put(self, data):
+        enc_record = self.aescrypt.encrypt_dict(data, self.table_definition.unencrypted_fields)
+        return super(EncDynamoDb, self).put(enc_record)
 

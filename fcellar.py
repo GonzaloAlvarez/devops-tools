@@ -7,11 +7,11 @@ from lib.sys.cout import CLIHandler
 from lib.fmd.tabledef import TableDefinition
 
 @click.command('add')
-@click.argument('path', type=click.Path(file_okay=True), required=True)
+@click.argument('path', type=click.Path(dir_okay=True, file_okay=True), required=True, nargs=-1)
 @click.pass_context
 def _add(ctx, path):
     context = ctx.obj
-    context.filelist= [path.rstrip('/')]
+    context.filelist= [path_entry.rstrip('/') for path_entry in path]
     fadm = FileManagementWorkflow()
     fadm.execute_multiple(context, AddStage)
 

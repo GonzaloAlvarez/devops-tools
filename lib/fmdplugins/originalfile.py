@@ -6,8 +6,8 @@ from lib.fmd.namedentity import NamedEntity
 def original_file(context, output):
     basename = os.path.basename(context.filename)
     dirname = os.path.dirname(context.filename)
-    atime = os.path.getatime(context.filename)
-    mtime = os.path.getmtime(context.filename)
+    atime = int(os.path.getatime(context.filename))
+    mtime = int(os.path.getmtime(context.filename))
     stat = os.lstat(context.filename)
     return NamedEntity('filename_history', [{
             'state': 'REGULAR',
