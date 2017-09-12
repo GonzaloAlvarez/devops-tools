@@ -40,6 +40,7 @@ def _get(ctx, fid, dest):
     context.dest = dest
     fadm = FileManagementWorkflow()
     output = fadm.execute(context, GetStage)
+    context.log.info(str(output))
     context.log.status('File downloaded successfully: ' + context.filename)
 
 @click.command('del')

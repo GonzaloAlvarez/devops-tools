@@ -1,3 +1,4 @@
+import time
 from lib.fmd.decorators import DependsOn, Action, AddStage
 from lib.media import ExifTool
 
@@ -15,6 +16,8 @@ def lookup_exif_tags(exif_info, tags):
 def get_exif_key(key, exif_info, tags):
     data = lookup_exif_tags(exif_info, tags)
     if data != None:
+        if key == 'date':
+            data = int(time.mktime(time.strptime(data, '%Y:%m:%d %H:%M:%S')))
         return {key:data}
     return {}
 
