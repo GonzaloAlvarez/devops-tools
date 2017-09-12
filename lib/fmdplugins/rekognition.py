@@ -10,10 +10,13 @@ def rekognition(context, data):
                 region_name = context.configuration.aws_default_region,
                 aws_access_key_id = context.configuration.aws_access_key_id,
                 aws_secret_access_key = context.configuration.aws_secret_access_key)
-        with open(context.filename, 'rb') as image:
-            result = rekognition.detect_labels(
-                    Image = {'Bytes': image.read()},
-                    MinConfidence = 85.0)
-        labels = [label['Name'] for label in result['Labels']]
-        return labels
+        try:
+            with open(context.filename, 'rb') as image:
+                result = rekognition.detect_labels(
+                        Image = {'Bytes': image.read()},
+                        MinConfidence = 85.0)
+            labels = [label['Name'] for label in result['Labels']]
+            return labels
+        except Exception as e:
+            context.log.debug('Rekognition failed for image [%s] with message %s' % (context.filename, str(e)))
     return None

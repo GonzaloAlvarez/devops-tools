@@ -17,4 +17,4 @@ def list_records(context, output):
     else:
         entries = dynamodb.list()
 
-    return entries
+    return NamedEntity('records', entries)

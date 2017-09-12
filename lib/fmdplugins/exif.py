@@ -1,6 +1,7 @@
 import time
 from lib.fmd.decorators import DependsOn, Action, AddStage
 from lib.media import ExifTool
+from lib.exceptions.workflow import EntryException
 
 def get_exif(filename):
     with ExifTool() as et:
@@ -24,21 +25,24 @@ def get_exif_key(key, exif_info, tags):
 @Action(AddStage.DATAGATHERING)
 @DependsOn('mime')
 def exif(context, data):
-    if data['mime'].startswith('image'):
-        exif_info = get_exif(context.filename)
-        return_tags = {}
-        return_tags.update(get_exif_key('date', exif_info, ('DateTimeOriginal', 'DateTime', 'CreateDate', 'ModifyDate')))
-        return_tags.update(get_exif_key('model', exif_info, ('Model',)))
-        return_tags.update(get_exif_key('make', exif_info, ('Make',)))
-        return_tags.update(get_exif_key('height', exif_info, ('ExifImageHeight',)))
-        return_tags.update(get_exif_key('width', exif_info, ('ExifImageWidth',)))
-        return return_tags
-    if data['mime'].startswith('video'):
-        exif_info = get_exif(context.filename)
-        return_tags = {}
-        return_tags.update(get_exif_key('codec', exif_info, ('VideoCodec',)))
-        return_tags.update(get_exif_key('height', exif_info, ('ImageHeight',)))
-        return_tags.update(get_exif_key('width', exif_info, ('ImageWidth',)))
-        return_tags.update(get_exif_key('framerate', exif_info, ('FrameRate',)))
-        return return_tags
+    try:
+        if data['mime'].startswith('image'):
+            exif_info = get_exif(context.filename)
+            return_tags = {}
+            return_tags.update(get_exif_key('date', exif_info, ('DateTimeOriginal', 'DateTime', 'CreateDate', 'ModifyDate')))
+            return_tags.update(get_exif_key('model', exif_info, ('Model',)))
+            return_tags.update(get_exif_key('make', exif_info, ('Make',)))
+            return_tags.update(get_exif_key('height', exif_info, ('ExifImageHeight',)))
+            return_tags.update(get_exif_key('width', exif_info, ('ExifImageWidth',)))
+            return return_tags
+        if data['mime'].startswith('video'):
+            exif_info = get_exif(context.filename)
+            return_tags = {}
+            return_tags.update(get_exif_key('codec', exif_info, ('VideoCodec',)))
+            return_tags.update(get_exif_key('height', exif_info, ('ImageHeight',)))
+            return_tags.update(get_exif_key('width', exif_info, ('ImageWidth',)))
+            return_tags.update(get_exif_key('framerate', exif_info, ('FrameRate',)))
+            return return_tags
+    except Exception as e:
+        context.log.error('Failed collecting exif information for file [%s] with message: %s' % (context.filename, str(e)))
     return None

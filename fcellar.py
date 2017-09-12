@@ -23,12 +23,6 @@ def _list(ctx, flt):
     context.filter = flt
     fadm = FileManagementWorkflow()
     output = fadm.execute(context, ListStage)
-    if 'list_records' in output:
-        for entry in output['list_records']:
-            context.log.info('File [%s], mime [%s], id [%s]' % (entry['filename_history'][0]['src'], entry['mime'], entry['fid']))
-            context.log.status('%s %s' % (entry['fid'], entry['filename_history'][0]['basename']))
-    else:
-        context.log.status('Cellar does not contain any records matching your filter or it is empty')
 
 @click.command('get')
 @click.argument('fid', type=click.STRING, required=True)
@@ -41,7 +35,7 @@ def _get(ctx, fid, dest):
     fadm = FileManagementWorkflow()
     output = fadm.execute(context, GetStage)
     context.log.info(str(output))
-    context.log.status('File downloaded successfully: ' + context.filename)
+    context.log.status(context.filename)
 
 @click.command('del')
 @click.argument('fid', type=click.STRING, required=True)

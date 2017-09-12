@@ -13,5 +13,5 @@ def duplicate(context, data):
 
     element = dynamodb.get(data['fid'])
     if element != None:
-        raise EntryException('Duplicate entry found in database.')
+        raise EntryException('Duplicate entry found in database')
     

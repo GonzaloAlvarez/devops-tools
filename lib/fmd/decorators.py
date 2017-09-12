@@ -18,6 +18,7 @@ class AddStage(object):
 
 class ListStage(object):
     DATAGATHERING = 100
+    PRESENTATION = 110
 
 
 class DelStage(object):
