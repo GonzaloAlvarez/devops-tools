@@ -91,7 +91,6 @@ class DynamoDb(object):
 
         entries = response['Items']
         while response.get('LastEvaluatedKey'):
-            print len(response['Items'])
             response = self.table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
             entries.extend(response['Items'])
 

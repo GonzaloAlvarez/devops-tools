@@ -3,6 +3,7 @@ import sys
 from lib.fmd.workflow import FileManagementWorkflow
 from lib.conf import Configuration
 from lib.fmd.decorators import AddStage, ListStage, DelStage, GetStage
+from lib.fmd.actions import AddAction
 from lib.sys.cout import CLIHandler
 from lib.fmd.tabledef import TableDefinition
 
@@ -12,8 +13,7 @@ from lib.fmd.tabledef import TableDefinition
 def _add(ctx, path):
     context = ctx.obj
     context.filelist= [path_entry.rstrip('/') for path_entry in path]
-    fadm = FileManagementWorkflow()
-    fadm.execute_multiple(context, AddStage)
+    AddAction().execute(context)
 
 @click.command('list')
 @click.option('--filter', 'flt', type=click.Choice(TableDefinition.filter_exprs.keys()))

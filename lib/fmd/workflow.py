@@ -69,10 +69,3 @@ class FileManagementWorkflow(object):
 
         return attrs
 
-    def execute_multiple(self, context, stages_class = AddStage):
-        counter = 0
-        for filename in context.filelist:
-            context.filename = filename
-            counter += 1
-            context.log.status('Processing file [%s]' % os.path.basename(filename), counter , len(context.filelist))
-            self.execute(context, stages_class)
