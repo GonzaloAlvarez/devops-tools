@@ -2,7 +2,7 @@ import os
 from lib.fmd.decorators import Action, AddStage, DependsOn
 from lib.fmd.namedentity import NamedEntity
 from lib.cloud.dynamodb import DynamoDb
-from lib.exceptions.workflow import EntryException
+from lib.exceptions.workflow import EntryException, Severity
 
 @Action(AddStage.DATAGATHERING)
 @DependsOn('fid')
@@ -13,5 +13,7 @@ def duplicate(context, data):
 
     element = dynamodb.get(data['fid'])
     if element != None:
-        raise EntryException('Duplicate entry found in database')
+        exception = EntryException('Duplicate entry found in database')
+        exception.severity = Severity.LOW
+        raise exception
     

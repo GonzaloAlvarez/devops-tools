@@ -3,12 +3,14 @@ import tempfile
 import logging
 import sys
 import os
+from progress.bar import ChargingBar
 
 class CLIHandler(object):
     LEVELS = [logging.WARN, logging.INFO, logging.DEBUG, logging.DEBUG]
 
     def __init__(self, context):
         self.verbose = context.verbose
+        self.pbtotal = 0
         if sys.platform == 'darwin':
             address = '/var/run/syslog'
         else:
@@ -38,4 +40,11 @@ class CLIHandler(object):
         if count == None:
             print message
         else:
-            print message + ' [%d out of %d]' % (count, total)
+            if self.verbose > 0:
+                print message + ' [%d out of %d]' % (count, total)
+            else:
+                if ( count == 1 and total != None and total > 1 ) or total != self.pbtotal:
+                    self.progressbar = ChargingBar('Processing', max=total, suffix='%(percent)d%% [%(index)d/%(max)d]', width=48)
+                    self.pbtotal = total
+                if count > 1:
+                    self.progressbar.next()

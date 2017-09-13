@@ -7,7 +7,7 @@ import time
 from dag import DAG
 from lib.fmd.namedentity import NamedEntity
 from lib.fmd.decorators import AddStage
-from lib.exceptions.workflow import StageException, EntryException
+from lib.exceptions.workflow import StageException, EntryException, Severity
 
 class FileManagementWorkflow(object):
     def _build_world(self, stages):
@@ -62,7 +62,10 @@ class FileManagementWorkflow(object):
                     context.log.info(str(e))
                     pass
         except EntryException as e:
-            context.log.error('Failed on phase [%s] with message [%s]' % (function_name, str(e)))
+            if e.severity == Severity.HIGH:
+                context.log.error('Failed on phase [%s] with message [%s]' % (function_name, str(e)))
+            else:
+                context.log.info('Failed on phase [%s] with low severity message [%s]' %(function_name, str(e)))
 
         return attrs
 
