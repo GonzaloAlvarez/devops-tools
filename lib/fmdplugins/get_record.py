@@ -15,6 +15,8 @@ def get_record(context, output):
         raise EntryException('Attribute "fid" not provided')
 
     record = dynamodb.get(context.fid)
+    if record == None:
+        raise EntryException('File with fid [%s] not found in the database' % context.fid)
     context.basename = None
     if 'filename_history' in record:
         context.basename = record['filename_history'][0]['basename']

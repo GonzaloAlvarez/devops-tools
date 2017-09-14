@@ -124,6 +124,8 @@ class EncDynamoDb(DynamoDb):
 
     def get(self, key):
         record = super(EncDynamoDb, self).get(key)
+        if record == None:
+            return None
         return self.aescrypt.decrypt_dict(record, self.table_definition.unencrypted_fields)
 
     def put(self, data):

@@ -1,4 +1,5 @@
 import click
+import json
 import sys
 from lib.fmd.workflow import FileManagementWorkflow
 from lib.conf import Configuration
@@ -26,7 +27,7 @@ def _list(ctx, flt):
 
 @click.command('get')
 @click.argument('fid', type=click.STRING, required=True)
-@click.option('--dest', type=click.Path(exists=True), required=False)
+@click.option('--dest', type=click.Path(exists=True), required=False, nargs='+')
 @click.pass_context
 def _get(ctx, fid, dest):
     context = ctx.obj
@@ -34,7 +35,7 @@ def _get(ctx, fid, dest):
     context.dest = dest
     fadm = FileManagementWorkflow()
     output = fadm.execute(context, GetStage)
-    context.log.info(str(output))
+    context.log.info(json.dumps(output['record'], sort_keys=True, indent=4))
     context.log.status(context.filename)
 
 @click.command('del')
