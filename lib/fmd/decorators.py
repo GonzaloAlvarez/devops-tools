@@ -28,3 +28,6 @@ class DelStage(object):
 class GetStage(object):
     DATAGATHERING = 400
     RETRIEVING = 410
+
+class ShowStage(object):
+    DATAGATHERING = 500

@@ -4,7 +4,7 @@ import sys
 from lib.fmd.workflow import FileManagementWorkflow
 from lib.conf import Configuration
 from lib.fmd.decorators import AddStage, ListStage, DelStage, GetStage
-from lib.fmd.actions import AddAction
+from lib.fmd.actions import AddAction, ShowAction, GetAction, ListAction
 from lib.sys.cout import CLIHandler
 from lib.fmd.tabledef import TableDefinition
 
@@ -22,21 +22,27 @@ def _add(ctx, path):
 def _list(ctx, flt):
     context = ctx.obj
     context.filter = flt
-    fadm = FileManagementWorkflow()
-    output = fadm.execute(context, ListStage)
+    ListAction().execute(context)
 
 @click.command('get')
 @click.argument('fid', type=click.STRING, required=True)
-@click.option('--dest', type=click.Path(exists=True), required=False, nargs='+')
+@click.option('--dest', type=click.Path(exists=True), required=False)
+@click.option('--filter', 'flt', type=click.Choice(TableDefinition.filter_exprs.keys()))
 @click.pass_context
-def _get(ctx, fid, dest):
+def _get(ctx, fid, dest, flt):
     context = ctx.obj
     context.fid = fid
     context.dest = dest
-    fadm = FileManagementWorkflow()
-    output = fadm.execute(context, GetStage)
-    context.log.info(json.dumps(output['record'], sort_keys=True, indent=4))
-    context.log.status(context.filename)
+    context.filter = flt
+    GetAction().execute(context)
+
+@click.command('show')
+@click.argument('fid', type=click.STRING, required=True)
+@click.pass_context
+def _show(ctx, fid):
+    context = ctx.obj
+    context.fid = fid
+    ShowAction().execute(context)
 
 @click.command('del')
 @click.argument('fid', type=click.STRING, required=True)
@@ -62,6 +68,7 @@ main.add_command(_add)
 main.add_command(_get)
 main.add_command(_del)
 main.add_command(_list)
+main.add_command(_show)
 
 if __name__ =='__main__':
     main(obj=type('', (), {})())

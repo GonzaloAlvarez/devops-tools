@@ -84,14 +84,19 @@ class DynamoDb(object):
 
     def list(self, filter_name= None):
         output = []
-        if not filter_name == None:
-            response = self.table.scan(FilterExpression = self.table_definition.filter_exprs[filter_name])
+        filter_expr = None
+        if filter_name:
+            filter_expr = self.table_definition.filter_exprs[filter_name]
+            response = self.table.scan(FilterExpression = filter_expr)
         else:
             response = self.table.scan()
 
         entries = response['Items']
         while response.get('LastEvaluatedKey'):
-            response = self.table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
+            if filter_expr:
+                response = self.table.scan(ExclusiveStartKey=response['LastEvaluatedKey'], FilterExpression = filter_expr)
+            else:
+                response = self.table.scan(ExclusiveStartKey=response['LastEvaluatedKey'])
             entries.extend(response['Items'])
 
         for item in entries:

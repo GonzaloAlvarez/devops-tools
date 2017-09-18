@@ -1,9 +1,9 @@
 from lib.fmd.namedentity import NamedEntity
-from lib.fmd.decorators import Action, ListStage, GetStage
+from lib.fmd.decorators import Action, ShowStage, GetStage
 from lib.cloud.dynamodb import DynamoDb, EncDynamoDb
 from lib.exceptions.workflow import EntryException
 
-@Action(GetStage.DATAGATHERING)
+@Action(GetStage.DATAGATHERING, ShowStage.DATAGATHERING)
 def get_record(context, output):
     output = []
     dynamodb = EncDynamoDb(context.configuration.aws_default_region,
@@ -17,7 +17,4 @@ def get_record(context, output):
     record = dynamodb.get(context.fid)
     if record == None:
         raise EntryException('File with fid [%s] not found in the database' % context.fid)
-    context.basename = None
-    if 'filename_history' in record:
-        context.basename = record['filename_history'][0]['basename']
     return NamedEntity('record', record)
