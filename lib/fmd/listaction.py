@@ -14,7 +14,7 @@ class ListAction(object):
         fadm = FileManagementWorkflow()
         data = fadm.execute(context, ListStage)
         totalsize = 0
-        if 'records' in data:
+        if 'records' in data and len(data['records']) > 0:
             for entry in data['records']:
                 original_filename = entry['filename_history'][0]['basename']
                 base_mime = entry['mime'].split('/')[0]

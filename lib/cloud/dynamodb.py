@@ -1,20 +1,16 @@
-import boto3
 import decimal
 import sys
-import hashlib
 from collections import Mapping, Set, Sequence
 from decimal import Decimal
 from lib.fmd.tabledef import TableDefinition
 from lib.encryption.aespcrypt import AESPCrypt
+from lib.cloud.baseaws import BaseAws
 
-class DynamoDb(object):
-    def __init__(self, region, access_key, secret_key, table_definition = TableDefinition()):
-        self.dynamodb = boto3.resource(
-                'dynamodb',
-                region_name = region,
-                aws_access_key_id = access_key,
-                aws_secret_access_key = secret_key)
-        self.table_name = hashlib.sha256(access_key + sys.argv[0]).digest().encode('hex')[0:32]
+class DynamoDb(BaseAws):
+    def __init__(self, configuration, table_definition = TableDefinition()):
+        super(DynamoDb, self).__init__(configuration)
+        self.dynamodb = self.resource('dynamodb')
+        self.table_name = self.resource_name
         self.table_definition = table_definition
         if self.table_name not in self.dynamodb.meta.client.list_tables()['TableNames']:
             self.table = self._create_table(self.table_name, table_definition.key)
@@ -115,9 +111,9 @@ class DynamoDb(object):
 
 
 class EncDynamoDb(DynamoDb):
-    def __init__(self, region, access_key, secret_key, enc_pass, table_definition = TableDefinition()):
-        super(EncDynamoDb, self).__init__(region, access_key, secret_key, table_definition)
-        self.enc_pass = enc_pass
+    def __init__(self, configuration, table_definition = TableDefinition()):
+        super(EncDynamoDb, self).__init__(configuration, table_definition)
+        self.enc_pass = self.configuration.master_pass
         self.aescrypt = AESPCrypt(self.enc_pass)
 
     def list(self, filter_expr = None):

@@ -6,10 +6,7 @@ from lib.exceptions.workflow import EntryException
 @Action(GetStage.DATAGATHERING, ShowStage.DATAGATHERING)
 def get_record(context, output):
     output = []
-    dynamodb = EncDynamoDb(context.configuration.aws_default_region,
-        context.configuration.aws_access_key_id,
-        context.configuration.aws_secret_access_key,
-        context.configuration.master_pass)
+    dynamodb = EncDynamoDb(context.configuration)
 
     if not hasattr(context, 'fid'):
         raise EntryException('Attribute "fid" not provided')

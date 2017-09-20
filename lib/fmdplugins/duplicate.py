@@ -7,9 +7,7 @@ from lib.exceptions.workflow import EntryException, Severity
 @Action(AddStage.DATAGATHERING)
 @DependsOn('fid')
 def duplicate(context, data):
-    dynamodb = DynamoDb(context.configuration.aws_default_region,
-        context.configuration.aws_access_key_id,
-        context.configuration.aws_secret_access_key)
+    dynamodb = DynamoDb(context.configuration)
 
     element = dynamodb.get(data['fid'])
     if element != None:

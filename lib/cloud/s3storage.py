@@ -1,19 +1,15 @@
 import sys
-import boto3
-import hashlib
+from lib.cloud.baseaws import BaseAws
 
-class S3Storage(object):
-    def __init__(self, region, access_key, secret_key):
-        self.s3 = boto3.resource(
-                's3',
-                region_name = region,
-                aws_access_key_id = access_key,
-                aws_secret_access_key = secret_key)
-        self.bucket_name = hashlib.sha256(access_key + sys.argv[0]).digest().encode('hex')[0:30]
+class S3Storage(BaseAws):
+    def __init__(self, configuration):
+        super(S3Storage, self).__init__(configuration)
+        self.s3 = self.resource('s3')
+        self.bucket_name = self.resource_name
         if self.s3.Bucket(self.bucket_name) in self.s3.buckets.all():
             self.bucket = self.s3.Bucket(self.bucket_name)
         else:
-            self.bucket = self.s3.create_bucket(Bucket = self.bucket_name, CreateBucketConfiguration={'LocationConstraint': region})
+            self.bucket = self.s3.create_bucket(Bucket = self.bucket_name, CreateBucketConfiguration={'LocationConstraint': self.region})
 
     def store(self, filename, fid):
         with open(filename, 'rb') as in_file:

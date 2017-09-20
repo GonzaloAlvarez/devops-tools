@@ -5,9 +5,7 @@ from lib.cloud.s3storage import S3Storage
 @Action(AddStage.PROCESSING)
 @DependsOn('compress', 'encrypt')
 def store(context, data):
-    s3storage = S3Storage(context.configuration.aws_default_region,
-            context.configuration.aws_access_key_id,
-            context.configuration.aws_secret_access_key)
+    s3storage = S3Storage(context.configuration)
     file_url = s3storage.store(context.filename,
             data['fid'])
     return NamedEntity('filename_history', [{

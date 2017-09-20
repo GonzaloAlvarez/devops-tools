@@ -6,10 +6,7 @@ from lib.exceptions.workflow import EntryException
 @Action(ListStage.DATAGATHERING)
 def list_records(context, output):
     output = []
-    dynamodb = EncDynamoDb(context.configuration.aws_default_region,
-        context.configuration.aws_access_key_id,
-        context.configuration.aws_secret_access_key,
-        context.configuration.master_pass)
+    dynamodb = EncDynamoDb(context.configuration)
 
     if hasattr(context, 'filter'):
         context.log.debug('Using filter [%s]' % context.filter)

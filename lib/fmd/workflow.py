@@ -46,7 +46,7 @@ class FileManagementWorkflow(object):
             else:
                 attrs.update({function_name: function_return})
 
-    def execute(self, context, stages_class = AddStage):
+    def execute(self, context, stages_class = AddStage, override_functions=None):
         attrs = {}
         stages = sorted([value for name, value in vars(stages_class).iteritems() if not name.startswith('_')])
         node_functions, stage_nodes = self._build_world(stages)
@@ -55,7 +55,8 @@ class FileManagementWorkflow(object):
                 dag = self._build_dag({name: node_functions[name] for name in stage_nodes[stage]}, node_functions)
                 try:
                     context.log.debug('Graph: [%s]' % ','.join(dag.topological_sort()))
-                    for function_name in dag.topological_sort():
+                    function_names = dag.topological_sort() if override_functions == None else override_functions
+                    for function_name in function_names:
                         context.log.debug('Calling [%s] as part of stage [%s]' % (function_name, stage))
                         self._run_function(node_functions[function_name], function_name, context, attrs)
                 except StageException as e:

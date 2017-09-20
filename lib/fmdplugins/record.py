@@ -6,8 +6,5 @@ from lib.cloud.dynamodb import EncDynamoDb
 @Action(AddStage.PROCESSING)
 @DependsOn('store')
 def record(context, data):
-    dynamodb = EncDynamoDb(context.configuration.aws_default_region,
-        context.configuration.aws_access_key_id,
-        context.configuration.aws_secret_access_key,
-        context.configuration.master_pass)
+    dynamodb = EncDynamoDb(context.configuration)
     dynamodb.put(data)

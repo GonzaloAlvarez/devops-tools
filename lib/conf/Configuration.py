@@ -6,6 +6,8 @@ class Configuration:
         self.streamFile = open(self.confFileName, 'r')
         self.confDict = yaml.safe_load(self.streamFile)
         self.__dict__.update(self.confDict)
+        self.env = {}
+        self.env.update({key.lower(): os.environ[key] for key in os.environ})
 
     def addArguments(self, arguments):
         for key in arguments:

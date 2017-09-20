@@ -6,9 +6,7 @@ import tempfile
 
 @Action(GetStage.RETRIEVING)
 def download(context, data):
-    s3storage = S3Storage(context.configuration.aws_default_region,
-            context.configuration.aws_access_key_id,
-            context.configuration.aws_secret_access_key)
+    s3storage = S3Storage(context.configuration)
 
     new_file, tempfilename = tempfile.mkstemp()
     context.filename = tempfilename

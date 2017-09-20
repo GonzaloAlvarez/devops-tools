@@ -17,6 +17,7 @@ class GetAction(object):
                 context.log.status('Processing fid [%s]' % os.path.basename(fid), counter , len(context.fidlist))
                 fadm.execute(context, GetStage)
         else:
+            context.fidlist = [context.fid]
             output = fadm.execute(context, GetStage)
             context.log.status(context.filename)
 
