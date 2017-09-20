@@ -9,8 +9,7 @@ from lib.exceptions.workflow import EntryException, Severity
 def duplicate(context, data):
     dynamodb = DynamoDb(context.configuration)
 
-    element = dynamodb.get(data['fid'])
-    if element != None:
+    if dynamodb.exists(data['fid']):
         exception = EntryException('Duplicate entry found in database')
         exception.severity = Severity.LOW
         raise exception

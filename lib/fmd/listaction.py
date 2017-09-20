@@ -27,7 +27,9 @@ class ListAction(object):
                 else:
                     context.log.status('%s' % entry['fid'])
             if context.verbose > 0:
-                context.log.status('Total size of files: %s ' % ListAction.sizeof_fmt(totalsize))
+                context.log.status('Summary:')
+                context.log.status(' - Count of files: %d' % len(data['records']))
+                context.log.status(' - Size of files: %s ' % ListAction.sizeof_fmt(totalsize))
         else:
             context.log.status('Cellar does not contain any records matching your filter or it is empty')
 

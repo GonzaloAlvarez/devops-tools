@@ -10,7 +10,7 @@ class Singleton:
     inherited from. Other than that, there are no restrictions that apply
     to the decorated class.
 
-    To get the singleton instance, use the `Instance` method. Trying
+    To get the singleton instance, use the `instance` method. Trying
     to use `__call__` will result in a `TypeError` being raised.
 
     """
@@ -32,7 +32,7 @@ class Singleton:
             return self._instance
 
     def __call__(self):
-        raise TypeError('Singletons must be accessed through `Instance()`.')
+        raise TypeError('Singletons must be accessed through `instance()`.')
 
     def __instancecheck__(self, inst):
         return isinstance(inst, self._decorated)
