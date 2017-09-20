@@ -35,6 +35,7 @@ class CLIHandler(object):
         context.log.warn = logging.getLogger(main_logger).warning
         context.log.exception = logging.getLogger(main_logger).exception
         context.log.status = self._status
+        context.log.finish = self._finish
 
     def _status(self, message, count = None, total = None):
         if count == None:
@@ -43,8 +44,16 @@ class CLIHandler(object):
             if self.verbose > 0:
                 print message + ' [%d out of %d]' % (count, total)
             else:
-                if ( count == 1 and total != None and total > 1 ) or total != self.pbtotal:
+                if ( count == 1 and total != None and total > 1 ) or ( total != self.pbtotal and total > 1):
                     self.progressbar = ChargingBar('Processing', max=total, suffix='%(percent)d%% [%(index)d/%(max)d]', width=48)
                     self.pbtotal = total
+                    self.progressbar.goto(count-1)
                 if count > 1:
                     self.progressbar.next()
+
+    def _finish(self, message = 'Finished'):
+        if self.verbose <= 0:
+            self.progressbar.finish()
+            self.progressbar.clearln()
+        else:
+            print message

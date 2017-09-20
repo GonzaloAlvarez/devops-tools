@@ -11,4 +11,5 @@ class AddAction(object):
             counter += 1
             context.log.status('Processing file [%s]' % os.path.basename(filename), counter , len(context.filelist))
             fadm.execute(context, AddStage)
+        context.log.finish()
 
