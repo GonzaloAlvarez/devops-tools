@@ -3,3 +3,4 @@
     - python
     - python-pip
     - python-virtualenv
+    - python-dev
