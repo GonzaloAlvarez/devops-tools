@@ -1,6 +1,7 @@
 import os
 from lib.fmd.workflow import FileManagementWorkflow
 from lib.fmd.decorators import GetStage, ListStage
+from lib.file.tmpfile import TemporaryFile
 
 class GetAction(object):
     def execute(self, context):
@@ -16,6 +17,7 @@ class GetAction(object):
                 counter += 1
                 context.log.status('Processing fid [%s]' % os.path.basename(fid), counter , len(context.fidlist))
                 fadm.execute(context, GetStage)
+                TemporaryFile.instance().cleanup()
         else:
             context.fidlist = [context.fid]
             output = fadm.execute(context, GetStage)
