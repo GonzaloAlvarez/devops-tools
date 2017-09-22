@@ -1,0 +1,7 @@
+---
+- name: Install required Node packages
+  npm: 
+    name: "{{ item }}" 
+    global: yes
+    state: latest
+  with_items: "{{ node_packages | default([]) }}"
