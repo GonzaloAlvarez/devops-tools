@@ -57,11 +57,14 @@ def _del(ctx, fid):
 
 @click.group()
 @click.option('-v', '--verbose', default=0, count=True)
+@click.option('-t', '--tag', default=None, required=False)
 @click.pass_context
-def main(ctx, verbose):
+def main(ctx, verbose, tag):
     ctx.obj.verbose = verbose
     config = Configuration(sys.argv[0], 'config.yaml')
     ctx.obj.configuration = config
+    if tag != None:
+        ctx.obj.configuration.aws_tag = tag
     CLIHandler(ctx.obj)
 
 main.add_command(_add)

@@ -82,7 +82,7 @@ function copy_instance() {
     fi
     EC2_DNS_NAME="$(echo "$INSTANCES_PLAIN_DETAILS" | head -n $LINE | tail -n 1 | cut -d ' ' -f 2)"
     echo "Copying [$FILE] to [$EC2_DNS_NAME]"
-    $SCP -o StrictHostKeyChecking=no -P 443 "$FILE" $EC2_DNS_NAME:/tmp $@
+    $SCP -o StrictHostKeyChecking=no -P $SSH_REMOTE_PORT "$FILE" $EC2_DNS_NAME:/tmp $@
 }
 
 function tunnel_instance() {
@@ -116,7 +116,8 @@ function tunnel_instance() {
     echo "Trying to open 127.0.0.1:$LOCAL_PORT [http://127.0.0.1:$LOCAL_PORT] connected to $EC2_DNS_NAME:$REMOTE_PORT"
     echo "Use Crtl-C to end"
 
-    $SSH -N -L $LOCAL_PORT:127.0.0.1:$REMOTE_PORT -o StrictHostKeyChecking=no $EC2_DNS_NAME
+    $SSH -N -L $LOCAL_PORT:127.0.0.1:$REMOTE_PORT -p $SSH_REMOTE_PORT -o StrictHostKeyChecking=no $EC2_DNS_NAME
+    return $?
 }
 
 load_configuration

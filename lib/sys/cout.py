@@ -39,7 +39,7 @@ class CLIHandler(object):
 
     def _status(self, message, count = None, total = None):
         if count == None:
-            print message
+            print message.encode('utf-8')
         else:
             if self.verbose > 0:
                 print message + ' [%d out of %d]' % (count, total)
@@ -52,8 +52,8 @@ class CLIHandler(object):
                     self.progressbar.next()
 
     def _finish(self, message = 'Finished'):
-        if self.verbose <= 0:
+        if self.verbose <= 0 and hasattr(self, 'progressbar'):
             self.progressbar.finish()
             self.progressbar.clearln()
         else:
-            print message
+            print message.encode('utf-8')
