@@ -1,0 +1,11 @@
+---
+- name: Add Drive apt key
+  apt_key:
+    keyserver: 'keyserver.ubuntu.com'
+    id: '7086E9CC7EC3233B'
+    state: present
+  become: true
+- name: Add drive apt respository
+  apt_repository:
+    repo: 'deb http://shaggytwodope.github.io/repo ./'
+    update_cache: yes

@@ -1,0 +1,8 @@
+---
+- name: Install required packages
+  apt: 
+    name: "{{ item }}" 
+    state: latest
+    update_cache: yes
+  with_items: "{{ apt_packages | default([]) }}"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
