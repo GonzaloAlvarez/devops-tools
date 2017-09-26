@@ -7,6 +7,11 @@
     vpc_subnet_id: "{{ aws_vpc_subnet.subnet.id }}"
     group: "{{ project }}-secgroup"
     exact_count: "{{ instance_item.0.count }}"
+    volumes:
+      - device_name: "/dev/{{ aws_ec2_main_volume | default('xvda') }}"
+        volume_type: gp2
+        volume_size: "{{ aws_ec2_main_volume_size | default(25) }}"
+        delete_on_termination: true
     assign_public_ip: yes
     wait: yes
     image: "{{ aws_ec2_image }}"

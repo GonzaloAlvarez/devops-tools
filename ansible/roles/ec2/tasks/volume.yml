@@ -9,7 +9,7 @@
     region: "{{ aws_region }}"
     name: "{{ project }}-{{ instance_item.id }}-volume"
     delete_on_termination: yes
-    device_name: /dev/{{ aws_ec2_extra_volume_id }}
+    device_name: /dev/{{ aws_ec2_extra_volume_id | default('xvdf') }}
   with_items: "{{ ec2_instances }}"
   when: ( ec2_instances|length > 0 ) and ( aws_ec2_extra_volume_size | default(0) > 0 )
   loop_control:

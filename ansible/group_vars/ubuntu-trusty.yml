@@ -2,3 +2,4 @@
   instance_distro_release: 'trusty'
   instance_distro_owner: '099720109477'
   aws_ssh_user: "ubuntu"
+  aws_ec2_main_volume: "sda1"
