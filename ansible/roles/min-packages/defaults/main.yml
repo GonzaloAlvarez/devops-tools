@@ -11,6 +11,7 @@
     - psmisc
     - dbus
     - deborphan
+    - screen
   apt_purge_packages:
     - at
     - exim4
