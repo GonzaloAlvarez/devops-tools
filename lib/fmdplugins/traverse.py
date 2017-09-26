@@ -7,6 +7,8 @@ def traverse(context,  output):
     if os.path.isdir(context.filename):
         for dirName, subdirList, fileList in os.walk(context.filename):
             for filename in fileList:
-                context.filelist.append(os.path.join(dirName, filename))
+                if not filename.startswith('.'):
+                    context.filelist.append(os.path.join(dirName, filename))
+        context.filetree.append({'key': context.filename, 'path': ''})
         context.filename = context.filelist.pop()
 

@@ -12,3 +12,4 @@ def unzip(context,  output):
         with zipfile.ZipFile(context.filename) as zf:
             zf.extractall(tempdir)
         context.filelist.append(tempdir)
+        context.filetree.append({'key': tempdir, 'path': context.filename + '!'})

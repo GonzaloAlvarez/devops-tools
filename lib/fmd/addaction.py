@@ -7,6 +7,7 @@ class AddAction(object):
     def execute(self, context):
         counter = 0
         fadm = FileManagementWorkflow()
+        context.filetree = []
         for filename in context.filelist:
             context.filename = filename
             counter += 1
