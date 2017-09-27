@@ -20,6 +20,8 @@ class TemporaryFile(object):
 
     def cleanup(self):
         for entry in self._stack:
+            if 'descriptor' in entry and isinstance(entry['descriptor'], int):
+                os.close(entry['descriptor'])
             if 'descriptor' in entry and callable(getattr(entry['descriptor'], 'close', None)):
                 entry['descriptor'].close()
             if 'filename' in entry:
