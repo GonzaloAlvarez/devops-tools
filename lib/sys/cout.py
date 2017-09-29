@@ -1,4 +1,4 @@
-from logging.handlers import SysLogHandler
+from logging.handlers import SysLogHandler, RotatingFileHandler
 import tempfile
 import logging
 import sys
@@ -16,18 +16,23 @@ class CLIHandler(object):
         else:
             address = '/dev/log'
         tempfile_handle, self.tempfile = tempfile.mkstemp(prefix=os.path.basename(sys.argv[0]))
-        logging.basicConfig(level=logging.DEBUG,
-                format='%(asctime)s %(name)s.%(module)s.%(funcName)s: [%(levelname)s] %(message)s',
-                datefmt='%m-%d %H:%M',
-                filename=self.tempfile,
-                filemode='w')
+        file_logger = RotatingFileHandler(self.tempfile, mode='a', maxBytes=5*1024*1024,
+                                          backupCount=2, encoding=None, delay=0)
+        file_logger_formatter = logging.Formatter('%(asctime)s %(name)s.%(module)s.%(funcName)s: [%(levelname)s] %(message)s')
+        file_logger.setFormatter(file_logger_formatter)
+        file_logger.setLevel(logging.DEBUG)
+        logging.getLogger().addHandler(file_logger)
+        logging.getLogger().setLevel(logging.DEBUG)
+
         console_logger = logging.StreamHandler()
         console_logger.setLevel(CLIHandler.LEVELS[self.verbose])
         console_formatter = logging.Formatter('[%(levelname)s] %(message)s - |%(name)s.%(module)s|')
         console_logger.setFormatter(console_formatter)
         main_logger = 'main' if self.verbose < 3 else ''
         logging.getLogger(main_logger).addHandler(console_logger)
+        logging.getLogger(main_logger).setLevel(CLIHandler.LEVELS[self.verbose])
         logging.getLogger(main_logger).info('Initializing logs. Full debug log can be found at [%s]' % self.tempfile)
+
         self.log = context.log = type('', (), {})()
         context.log.info = logging.getLogger(main_logger).info
         context.log.error = logging.getLogger(main_logger).error
