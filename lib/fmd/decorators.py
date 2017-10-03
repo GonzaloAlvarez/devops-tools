@@ -11,23 +11,28 @@ def Action(*stages):
     return action_wrapper
 
 class AddStage(object):
-    PRECONDITION = 1
-    DATAGATHERING = 2
-    PROCESSING = 3
+    SETUP = 1
+    PRECONDITION = 2
+    DATAGATHERING = 3
+    PROCESSING = 4
 
 
 class ListStage(object):
-    DATAGATHERING = 100
-    PRESENTATION = 110
+    SETUP = 100
+    DATAGATHERING = 110
+    PRESENTATION = 120
 
 
 class DelStage(object):
-    PROCESSING = 300
+    SETUP = 300
+    PROCESSING = 310
 
 
 class GetStage(object):
-    DATAGATHERING = 400
-    RETRIEVING = 410
+    SETUP = 400
+    DATAGATHERING = 410
+    RETRIEVING = 420
 
 class ShowStage(object):
-    DATAGATHERING = 500
+    SETUP = 500
+    DATAGATHERING = 510

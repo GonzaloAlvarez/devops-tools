@@ -1,6 +1,6 @@
 dnsupdate: python ipgetter docopt pyyaml boto pyflare
 mediasorter: python click python-magic Pillow python-magic
-fcellar: python click python-magic py-dag pycrypto boto3 progress xxhash pyyaml
+fcellar: python click python-magic py-dag pycrypto boto3 progress xxhash pyyaml cachetools
 ghi: ruby ghi
 awscli: python awscli
 awsinfo: python awscli

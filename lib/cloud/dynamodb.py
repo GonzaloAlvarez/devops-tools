@@ -1,5 +1,6 @@
 import decimal
 import sys
+from cachetools import cached, LRUCache
 from collections import Mapping, Set, Sequence
 from decimal import Decimal
 from lib.fmd.tabledef import TableDefinition
@@ -7,22 +8,7 @@ from lib.encryption.aespcrypt import AESPCrypt
 from lib.cloud.baseaws import BaseAws
 from lib.lang.singleton import Singleton
 
-@Singleton
-class KeyCache(object):
-    _cache = None
-    def set(self, elements):
-        self._cache = []
-        self._cache.extend(elements)
-
-    def invalidate(self):
-        self._cache = None
-
-    def get(self, key, get_function):
-        if self._cache == None:
-            self.set(get_function())
-        if key in self._cache:
-            return key
-        return None
+_DynamoDb__ddb_cache = LRUCache(maxsize=100)
 
 class DynamoDb(BaseAws):
     def __init__(self, configuration, table_definition = TableDefinition()):
@@ -30,7 +16,6 @@ class DynamoDb(BaseAws):
         self.dynamodb = self.resource('dynamodb')
         self.table_name = self.resource_name
         self.table_definition = table_definition
-        self.cache = KeyCache.instance()
         if self.table_name not in self.dynamodb.meta.client.list_tables()['TableNames']:
             self.table = self._create_table(self.table_name, table_definition.key)
         else:
@@ -95,7 +80,7 @@ class DynamoDb(BaseAws):
             return obj
 
     def put(self, data):
-        self.cache.invalidate()
+        _DynamoDb__ddb_cache.clear()
         return self.table.put_item(Item=self._sanitize(data))
 
     def list(self, filter_name= None):
@@ -119,14 +104,13 @@ class DynamoDb(BaseAws):
             output.insert(len(output), self._unencode(item))
         return output
 
-    def remove(self, key):
-        self.cache.invalidate()
-        self.table.delete_item(Key={self.table_definition.key: key})
+    @cached(__ddb_cache)
+    def list_keys(self, filter_name = None):
+        return [entry[self.table_definition.key] for entry in self.list(filter_name)]
 
-    def exists(self, key):
-        if self.cache.get(key, lambda: [entry['fid'] for entry in self.list()]):
-            return True
-        return False
+    def remove(self, key):
+        _DynamoDb__ddb_cache.clear()
+        self.table.delete_item(Key={self.table_definition.key: key})
 
     def get(self, key):
         item_element = self.table.get_item(Key={self.table_definition.key: key})
