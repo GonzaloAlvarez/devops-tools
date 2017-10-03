@@ -9,6 +9,7 @@ def input_validation(context,  output):
     """Resolving symbolic links for files as inputs, and use the actual file moving forward
     """
     attrs = {}
+    context.filename = os.path.abspath(context.filename)
     if not os.path.isfile(context.filename):
         raise EntryException('The file "%s" is not a valid regular file or it does not exists.' % context.filename)
     if os.path.islink(context.filename):

@@ -13,7 +13,7 @@ from lib.fmd.tabledef import TableDefinition
 @click.pass_context
 def _add(ctx, path):
     context = ctx.obj
-    context.filelist= [path_entry.rstrip('/') for path_entry in path]
+    context.filelist = [path_entry.rstrip('/') for path_entry in path]
     AddAction().execute(context)
 
 @click.command('list')

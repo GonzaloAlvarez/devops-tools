@@ -134,27 +134,3 @@ class DynamoDb(BaseAws):
             return self._unencode(self.table.get_item(Key={self.table_definition.key: key})['Item'])
         else:
             return None
-
-class EncDynamoDb(DynamoDb):
-    def __init__(self, configuration, table_definition = TableDefinition()):
-        super(EncDynamoDb, self).__init__(configuration, table_definition)
-        self.enc_pass = self.configuration.master_pass
-        self.aescrypt = AESPCrypt(self.enc_pass)
-
-    def list(self, filter_expr = None):
-        output = []
-        entries = super(EncDynamoDb, self).list(filter_expr)
-        for entry in entries:
-            output.insert(len(output), self.aescrypt.decrypt_dict(entry, self.table_definition.unencrypted_fields))
-        return output
-
-    def get(self, key):
-        record = super(EncDynamoDb, self).get(key)
-        if record == None:
-            return None
-        return self.aescrypt.decrypt_dict(record, self.table_definition.unencrypted_fields)
-
-    def put(self, data):
-        enc_record = self.aescrypt.encrypt_dict(data, self.table_definition.unencrypted_fields)
-        return super(EncDynamoDb, self).put(enc_record)
-
