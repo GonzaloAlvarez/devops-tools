@@ -9,11 +9,13 @@ from lib.sys.cout import CLIHandler
 from lib.fmd.tabledef import TableDefinition
 
 @click.command('add')
+@click.option('--labels', type=click.STRING, required=False, default='')
 @click.argument('path', type=click.Path(dir_okay=True, file_okay=True), required=True, nargs=-1)
 @click.pass_context
-def _add(ctx, path):
+def _add(ctx, labels, path):
     context = ctx.obj
     context.filelist = [path_entry.rstrip('/') for path_entry in path]
+    context.labels = list(set([label.strip() for label in labels]))
     AddAction().execute(context)
 
 @click.command('list')
@@ -57,14 +59,11 @@ def _del(ctx, fid):
 
 @click.group()
 @click.option('-v', '--verbose', default=0, count=True)
-@click.option('-t', '--tag', default=None, required=False)
 @click.pass_context
-def main(ctx, verbose, tag):
+def main(ctx, verbose):
     ctx.obj.verbose = verbose
     config = Configuration(sys.argv[0], 'config.yaml')
     ctx.obj.configuration = config
-    if tag != None:
-        ctx.obj.configuration.aws_tag = tag
     CLIHandler(ctx.obj)
 
 main.add_command(_add)

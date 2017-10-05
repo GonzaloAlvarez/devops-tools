@@ -2,7 +2,7 @@ import boto3
 import hashlib
 
 class BaseAws(object):
-    DEFAULT_TAG = 'prod'
+    DEFAULT_TAG = ''
     def __init__(self, configuration):
         self.configuration = configuration
         self.region = configuration.aws_default_region

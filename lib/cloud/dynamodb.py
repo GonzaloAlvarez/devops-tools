@@ -8,14 +8,15 @@ from lib.encryption.aespcrypt import AESPCrypt
 from lib.cloud.baseaws import BaseAws
 from lib.lang.singleton import Singleton
 
-_DynamoDb__ddb_cache = LRUCache(maxsize=100)
+_DynamoDb__ddb_keys_cache = LRUCache(maxsize=100)
+_DynamoDb__ddb_get_cache = LRUCache(maxsize=100)
 
 class DynamoDb(BaseAws):
-    def __init__(self, configuration, table_definition = TableDefinition()):
+    def __init__(self, configuration):
         super(DynamoDb, self).__init__(configuration)
         self.dynamodb = self.resource('dynamodb')
         self.table_name = self.resource_name
-        self.table_definition = table_definition
+        self.table_definition = TableDefinition(configuration)
         if self.table_name not in self.dynamodb.meta.client.list_tables()['TableNames']:
             self.table = self._create_table(self.table_name, table_definition.key)
         else:
@@ -80,7 +81,7 @@ class DynamoDb(BaseAws):
             return obj
 
     def put(self, data):
-        _DynamoDb__ddb_cache.clear()
+        self._invalidate_cache()
         return self.table.put_item(Item=self._sanitize(data))
 
     def list(self, filter_name= None):
@@ -104,14 +105,18 @@ class DynamoDb(BaseAws):
             output.insert(len(output), self._unencode(item))
         return output
 
-    @cached(__ddb_cache)
+    @cached(__ddb_keys_cache)
     def list_keys(self, filter_name = None):
         return [entry[self.table_definition.key] for entry in self.list(filter_name)]
 
+    def _invalidate_cache(self):
+        _DynamoDb__ddb_keys_cache.clear()
+
     def remove(self, key):
-        _DynamoDb__ddb_cache.clear()
+        self._invalidate_cache()
         self.table.delete_item(Key={self.table_definition.key: key})
 
+    @cached(__ddb_get_cache)
     def get(self, key):
         item_element = self.table.get_item(Key={self.table_definition.key: key})
         if 'Item' in item_element:

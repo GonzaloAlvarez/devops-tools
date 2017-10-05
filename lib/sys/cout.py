@@ -5,6 +5,9 @@ import sys
 import os
 from progress.bar import ChargingBar
 
+class CursorVisibleChargingBar(ChargingBar):
+    hide_cursor = False
+
 class CLIHandler(object):
     LEVELS = [logging.WARN, logging.INFO, logging.DEBUG, logging.DEBUG]
 
@@ -50,7 +53,7 @@ class CLIHandler(object):
                 print message + ' [%d out of %d]' % (count, total)
             else:
                 if ( count == 1 and total != None and total > 1 ) or ( total != self.pbtotal and total > 1):
-                    self.progressbar = ChargingBar('Processing', max=total, suffix='%(percent)d%% [%(index)d/%(max)d]', width=48)
+                    self.progressbar = CursorVisibleChargingBar('Processing', max=total, suffix='%(percent)d%% [%(index)d/%(max)d]', width=48)
                     self.pbtotal = total
                     self.progressbar.goto(count-1)
                 if count > 1:
