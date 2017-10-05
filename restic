@@ -1,0 +1,25 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+
+RESTIC="$ENV_PATH/bin/restic"
+RESTIC_URL="https://github.com/restic/restic/releases/download/v0.7.3/restic_0.7.3_darwin_amd64.bz2"
+PASSWORD_FILE="$ENV_PATH/maste_pass"
+if [ ! -f "$RESTIC" ]; then
+    if [[ "$OSTYPE" == "linux-gnu" ]]; then
+        RESTIC_URL="https://github.com/restic/restic/releases/download/v0.7.3/restic_0.7.3_linux_amd64.bz2"
+    fi
+    $CURL -L -o "$ENV_PATH/restic.bz2" "$RESTIC_URL"
+    $BUNZIP2 "$ENV_PATH/restic.bz2"
+    mv "$ENV_PATH/restic" "$ENV_PATH/bin/restic"
+    chmod +x "$ENV_PATH/bin/restic"
+fi
+load_configuration
+echo "$MASTER_PASS" > "$PASSWORD_FILE"
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    BUCKET_NAME="$(echo "$AWS_ACCESS_KEY_ID" | md5)"
+else
+    BUCKET_NAME="$(echo "$AWS_ACCESS_KEY_ID" | md5sum)"
+fi
+
+$ENV_PATH/bin/restic -p "$PASSWORD_FILE" -r "s3:s3.amazonaws.com/$BUCKET_NAME" "$@"
