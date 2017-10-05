@@ -11,6 +11,7 @@ if [ ! -f "$RESTIC" ]; then
     fi
     $CURL -L -o "$ENV_PATH/restic.bz2" "$RESTIC_URL"
     $BUNZIP2 "$ENV_PATH/restic.bz2"
+    mkdir -p "$ENV_PATH/bin"
     mv "$ENV_PATH/restic" "$ENV_PATH/bin/restic"
     chmod +x "$ENV_PATH/bin/restic"
 fi
