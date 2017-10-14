@@ -1,0 +1,19 @@
+---
+- name: add distribution-specific variables
+  include_vars: "{{ ansible_distribution }}.yml"
+
+- name: add Debian Wheezy workaround
+  include_vars: "{{ ansible_distribution }}-{{ ansible_distribution_release }}.yml"
+  when: (ansible_distribution == "Debian") and (ansible_distribution_release == "wheezy")
+
+- name: install unattended-upgrades
+  apt:
+    pkg: unattended-upgrades
+    state: present
+
+- name: install update-notifier-common
+  apt:
+    pkg: update-notifier-common
+    state: present
+  ignore_errors: true
+

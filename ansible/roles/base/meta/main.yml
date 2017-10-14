@@ -5,3 +5,4 @@ dependencies:
   - { role: min-packages }
   - { role: timezone }
   - { role: dotfiles }
+  - { role: unattended-upgrades, when: nohup is defined }

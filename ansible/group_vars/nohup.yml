@@ -1,1 +1,2 @@
   aws_ec2_terminate_alarm: 'false'
+  nohup: true

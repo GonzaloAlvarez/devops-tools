@@ -8,3 +8,5 @@
   ansible_ssh_user: "{{ main_ssh_user }}"
   raspberry_ssh_user: "pi"
   raspberry_ssh_pass: "raspberry"
+  unattended_mail: "{{ lookup('env', 'EMAIL_RECIPIENT') | default(false) }}"
+
