@@ -1,3 +1,6 @@
 ---
 - name: Install sslh (debian)
-  apt: name=sslh state=present
+  apt: 
+    name: sslh 
+    state: present
+    install_recommends: no

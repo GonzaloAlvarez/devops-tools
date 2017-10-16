@@ -1,0 +1,10 @@
+---
+  root_tasks:
+    - variables
+    - setup
+    - configure
+    - secure-installation
+    - databases
+    - users
+    - replication
+

@@ -20,3 +20,7 @@
     - procmail
     - exim4-config
     - exim4-daemon-light
+    - apache2 
+    - apache2-bin 
+    - apache2-data 
+    - apache2-utils
