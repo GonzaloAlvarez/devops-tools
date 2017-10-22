@@ -1,0 +1,4 @@
+---
+- name: Start the nginx service
+  service: name={{ nginx_service_name }} state=started enabled=yes
+  when: nginx_daemon_mode == "on"

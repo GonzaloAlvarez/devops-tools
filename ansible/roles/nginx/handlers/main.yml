@@ -1,0 +1,33 @@
+---
+- name: restart nginx
+  debug: msg="checking config first"
+  become: True
+  changed_when: True
+  notify:
+    - check nginx configuration
+    - restart nginx - after config check
+
+- name: reload nginx
+  debug: msg="checking config first"
+  become: True
+  changed_when: True
+  notify:
+    - check nginx configuration
+    - reload nginx - after config check
+
+- name: check nginx configuration
+  command: "{{ nginx_binary_name }} -t"
+  become: True
+  register: result
+  changed_when: "result.rc != 0"
+  check_mode: no
+
+- name: restart nginx - after config check
+  service: name={{ nginx_service_name }} state=restarted
+  become: True
+  when: nginx_daemon_mode == "on"
+
+- name: reload nginx - after config check
+  service: name={{ nginx_service_name }} state=reloaded
+  become: True
+  when: nginx_daemon_mode == "on"

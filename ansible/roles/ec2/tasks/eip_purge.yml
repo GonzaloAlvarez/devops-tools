@@ -9,7 +9,7 @@
 - name: Remove EIPs
   ec2_eip:
     region: "{{ aws_region }}"
-    instance_id: "{{ instance_item.id }}"
+    device_id: "{{ instance_item.id }}"
     state: absent
     release_on_disassociation: yes
   with_items: "{{ ec2_instance_facts.instances }}"
