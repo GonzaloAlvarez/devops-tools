@@ -1,0 +1,5 @@
+---
+  root_tasks:
+    - repositories
+    - packages
+  user_tasks: []

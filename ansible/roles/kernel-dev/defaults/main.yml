@@ -1,0 +1,8 @@
+---
+  apt_packages:
+    - bc
+    - ncurses-dev 
+    - build-essential
+      
+  kernel_branch_version: '4.x'
+  kernel_version: '4.4.3'
