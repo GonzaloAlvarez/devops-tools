@@ -1,0 +1,47 @@
+---
+# APT packages are installed both in ubuntu and in debian systems
+  apt_packages:
+    - device-tree-compiler
+  debian_packages:
+    - gcc-arm-linux-gnueabihf
+  ubuntu_packages:
+    - gcc-arm-linux-gnueabi
+# key repos attrs:
+# - url:
+#   keyserver:
+#   id:
+  debian_key_repos:
+    - url: 'http://emdebian.org/tools/debian/emdebian-toolchain-archive.key'
+# repos attrs:
+# sudo apt-get install crossbuild-essential-armhf
+# - url:
+#   distro:
+#   branch:
+  debian_repos:
+    - url: 'http://emdebian.org/tools/debian/'
+
+  qemu_arm_workdir: "{{ ansible_env.HOME }}/qemu-armbian"  
+  armbian_image_url: "https://dl.armbian.com/orangepizero/Debian_jessie_default.7z"
+
+  qemu_ssh_port: 10022
+  screen_command_list:
+    - "screen" 
+    - "-S armbian" 
+    - "-d"
+    - "-m"
+   
+  qemu_command_list:
+    - "qemu-system-arm"
+    - "-nographic"
+    - "-kernel {{ qemu_arm_workdir }}/zImage" 
+    - "-m 512"
+    - "-M vexpress-a9"
+    - "-no-reboot"
+    - "-serial mon:stdio"
+    - "-sd {{ qemu_arm_workdir }}/armbian.img"
+    - '-append "root=/dev/mmcblk0p1 loglevel=10 console=ttyAMA0,115200 enforcing=0"'
+    - "-net user,hostfwd=tcp::{{ qemu_ssh_port }}-:22"
+    - "-net nic"
+
+  screen_qemu_command_list: "{{ screen_command_list + qemu_command_list }}"
+  screen_qemu_command: "{{ screen_qemu_command_list | join(' ') }}"

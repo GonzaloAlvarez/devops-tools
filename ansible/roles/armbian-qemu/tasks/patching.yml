@@ -1,0 +1,9 @@
+---
+- name: Copy patch file
+  copy:
+    src: files/armbian.patch
+    dest: "{{ ansible_env.HOME }}/armbian.patch"
+- name: Patch kernel
+  shell: patch -p 1 ../armbian.patch
+  args:
+    chdir: "{{ ansible_env.HOME }}/linux-{{ kernel_version }}"

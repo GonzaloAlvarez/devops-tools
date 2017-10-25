@@ -1,0 +1,19 @@
+---
+- name: Install required packages for Debian-like systems
+  apt: 
+    name: "{{ item }}" 
+    state: latest
+  with_items: "{{ apt_packages | default([]) }}"
+  when: ansible_distribution | default('') == 'Debian' or ansible_distribution | default('') == 'Ubuntu'
+- name: Install required packages for Ubuntu systems
+  apt: 
+    name: "{{ item }}" 
+    state: latest
+  with_items: "{{ ubuntu_packages | default([]) }}"
+  when: ansible_distribution | default('') == 'Ubuntu'
+- name: Install required packages for Debian systems
+  apt: 
+    name: "{{ item }}" 
+    state: latest
+  with_items: "{{ debian_packages | default([]) }}"
+  when: ansible_distribution | default('') == 'Debian'

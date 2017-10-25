@@ -1,0 +1,39 @@
+---
+- name: Create temporary folder for the download
+  tempfile:
+    state: directory
+    suffix: armbian
+  register: tempfolder
+
+- name: Download the armbian release
+  get_url:
+    url: "{{ armbian_image_url }}"
+    dest: "{{ tempfolder.path }}/armbian.7z"
+
+- name: Unpack Armbian
+  command: 7z e "{{ tempfolder.path }}/armbian.7z"
+  args:
+    chdir: "{{ tempfolder.path }}"
+
+- name: Find image file
+  find:
+    paths: "{{ tempfolder.path }}"
+    patterns: "*.img"
+  register: armbian_image
+
+- name: Copy image to final destination
+  copy:
+    src: "{{ armbian_image.files[0].path }}"
+    dest: "{{ qemu_arm_workdir }}/armbian.img"
+    remote_src: yes
+
+- name: Make copy of image as original
+  copy:
+    src: "{{ qemu_arm_workdir }}/armbian.img"
+    dest: "{{ qemu_arm_workdir }}/armbian-orig.img"
+    remote_src: yes
+
+- name: Remove temporary folder
+  file:
+    path: "{{ tempfolder.path }}"
+    state: absent

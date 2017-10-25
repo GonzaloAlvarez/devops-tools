@@ -1,0 +1,5 @@
+---
+- name: Copy the config file
+  copy:
+    src: files/config
+    dest: "{{ ansible_env.HOME }}/linux-{{ kernel_version }}/.config"

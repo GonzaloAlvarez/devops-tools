@@ -1,0 +1,6 @@
+---
+allow_duplicates: yes
+dependencies:
+  - qemu
+  - kernel-dev
+  - 7zip

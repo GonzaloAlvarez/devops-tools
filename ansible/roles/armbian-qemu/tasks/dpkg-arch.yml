@@ -1,0 +1,6 @@
+---
+- name: Add arm architectures
+  command: dpkg --add-architecture armhf
+- name: Update cache
+  apt:
+    update_cache: yes

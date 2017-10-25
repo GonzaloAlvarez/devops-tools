@@ -1,0 +1,14 @@
+---
+  root_tasks:
+    - repositories
+    - dpkg-arch
+    - packages
+  user_tasks:
+    - config
+    - patching
+    - build
+    - get-armbian
+    - launch
+
+  kernel_branch_version: '3.x'
+  kernel_version: '3.4.113'

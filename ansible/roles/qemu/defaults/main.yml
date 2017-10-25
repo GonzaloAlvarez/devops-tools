@@ -1,20 +1,17 @@
 ---
 # APT packages are installed both in ubuntu and in debian systems
-  apt_packages: []
+  apt_packages:
+    - qemu
   debian_packages: []
   ubuntu_packages: []
 # key repos attrs:
 # - url:
 #   keyserver:
 #   id:
-  apt_key_repos: []
   debian_key_repos: []
-  ubuntu_key_repos: []
 # repos attrs:
 # sudo apt-get install crossbuild-essential-armhf
 # - url:
 #   distro:
 #   branch:
-  apt_repos: []
   debian_repos: []
-  ubuntu_repos: []

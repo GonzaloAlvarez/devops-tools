@@ -4,5 +4,10 @@
     - ncurses-dev 
     - build-essential
       
+  debian_packages: []
+  ubuntu_packages: []
+  debian_key_repos: []
+  debian_repos: []
+
   kernel_branch_version: '4.x'
   kernel_version: '4.4.3'

@@ -1,6 +1,8 @@
 ---
 # APT packages are installed both in ubuntu and in debian systems
-  apt_packages: []
+  apt_packages:
+    - p7zip-full
+
   debian_packages: []
   ubuntu_packages: []
 # key repos attrs:

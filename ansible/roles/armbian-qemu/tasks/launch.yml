@@ -1,0 +1,14 @@
+---
+- name: Check if QEmu is already running
+  command: "nc -z localhost {{ qemu_ssh_port }}"
+  ignore_errors: true
+  register: qemu_port_running
+- name: Launch QEmu for Armbian
+  command: "{{ screen_qemu_command }}"
+  when: qemu_port_running|failed
+
+- name: Create command for relauching
+  copy:
+    content: "#!/bin/bash\n{{ screen_qemu_command }}"
+    dest: "{{ qemu_arm_workdir }}/qemu_start.sh"
+    mode: 0755

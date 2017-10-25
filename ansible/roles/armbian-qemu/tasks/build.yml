@@ -1,0 +1,64 @@
+---
+- name: Make oldconfig for Debian Systems
+  command: make oldconfig
+  args:
+    chdir: "{{ ansible_env.HOME }}/linux-{{ kernel_version }}"
+  environment:
+    ARCH: 'arm'
+    CROSS_COMPILE: 'arm-linux-gnueabihf-'
+    QEMU_AUDIO_DRV: 'none'
+  when: ansible_distribution | default('') == 'Debian'
+- name: Make oldconfig for Ubuntu systems
+  command: make oldconfig
+  args:
+    chdir: "{{ ansible_env.HOME }}/linux-{{ kernel_version }}"
+  environment:
+    ARCH: 'arm'
+    CROSS_COMPILE: 'arm-linux-gnueabi-'
+    QEMU_AUDIO_DRV: 'none'
+  when: ansible_distribution | default('') == 'Ubuntu'
+- name: Make kernel for Debian systems
+  command: make -j 4 all
+  args:
+    chdir: "{{ ansible_env.HOME }}/linux-{{ kernel_version }}"
+  environment:
+    ARCH: 'arm'
+    CROSS_COMPILE: 'arm-linux-gnueabihf-'
+    QEMU_AUDIO_DRV: 'none'
+  when: ansible_distribution | default('') == 'Debian'
+- name: Make kernel for Ubuntu systems
+  command: make -j 4 all
+  args:
+    chdir: "{{ ansible_env.HOME }}/linux-{{ kernel_version }}"
+  environment:
+    ARCH: 'arm'
+    CROSS_COMPILE: 'arm-linux-gnueabi-'
+    QEMU_AUDIO_DRV: 'none'
+  when: ansible_distribution | default('') == 'Ubuntu'
+
+- name: Make working folder for Image
+  file:
+    path: "{{ qemu_arm_workdir }}"
+    state: directory
+    mode: 0755
+
+- name: Moving the image from the final path there
+  copy:
+    src: "{{ ansible_env.HOME }}/linux-{{ kernel_version }}/arch/arm/boot/zImage"
+    dest: "{{ qemu_arm_workdir }}/zImage"
+    remote_src: yes
+
+- name: Remove the whole linux kernel package
+  file:
+    path: "{{ ansible_env.HOME }}/linux-{{ kernel_version }}"
+    state: absent
+
+- name: Remove the kernel source package
+  file:
+    path: "{{ ansible_env.HOME }}/linux-kernel-source.tar.gz"
+    state: absent
+
+- name: Remove patch file
+  file:
+    path: "{{ ansible_env.HOME }}/armbian.patch"
+    state: absent
