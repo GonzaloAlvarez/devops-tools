@@ -1,0 +1,31 @@
+---
+# APT packages are installed both in ubuntu and in debian systems
+  apt_packages:
+    - fail2ban
+
+  debian_packages: []
+  ubuntu_packages: []
+# key repos attrs:
+# - url:
+#   keyserver:
+#   id:
+  apt_key_repos: []
+  debian_key_repos: []
+  ubuntu_key_repos: []
+# repos attrs:
+# sudo apt-get install crossbuild-essential-armhf
+# - url:
+#   distro:
+#   branch:
+  apt_repos: []
+  debian_repos: []
+  ubuntu_repos: []
+
+# Ban time in seconds
+  fail2ban_bantime: 600
+
+# Interval of seconds in which X max retry is allowed
+  fail2ban_findtime: 600
+
+# Max retry possible into "findtime" interval before ban
+  fail2ban_maxretry: 4

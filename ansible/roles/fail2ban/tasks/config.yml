@@ -1,0 +1,9 @@
+---
+- name: Configuring fail2ban "bantime" parameters
+  ini_file: dest=/etc/fail2ban/jail.conf section=DEFAULT option=bantime value="{{ fail2ban_bantime }}"
+
+- name: Configuring fail2ban "findtime" parameters
+  ini_file: dest=/etc/fail2ban/jail.conf section=DEFAULT option=findtime value="{{ fail2ban_findtime }}"
+
+- name: Configuring fail2ban "maxretry" parameters
+  ini_file: dest=/etc/fail2ban/jail.conf section=DEFAULT option=maxretry value="{{ fail2ban_maxretry }}"
