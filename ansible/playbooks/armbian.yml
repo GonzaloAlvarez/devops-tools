@@ -1,0 +1,70 @@
+- name: Try to connect
+  hosts: all
+  gather_facts: no
+  vars:
+    ansible_ssh_user: "root"
+    ansible_ssh_pass: "{{ lookup('env', 'MASTER_PASS') }}"
+    armbian_new_pass: "{{ lookup('env', 'MASTER_PASS') }}"
+    armbian_default_pass: "1234"
+  tasks:
+    - name: set python interpreter
+      set_fact:
+        ansible_python_interpreter: "{{ lookup('env', 'ENV_PATH') }}/bin/python"
+      delegate_to: 127.0.0.1
+    - name: Try connecting with the root account
+      expect:
+        timeout: 20
+        command: "ssh -o User={{ ansible_ssh_user }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o Port={{ ansible_port | default(22) }} {{ inventory_hostname }} /bin/true"
+        responses:
+          '.*password: ': "{{ ansible_ssh_pass }}"
+      delegate_to: 127.0.0.1
+      ignore_errors: true
+      changed_when: False
+      register: root_account
+    - name: set ssh pass
+      set_fact:
+        ansible_ssh_pass: "{{ armbian_default_pass }}"
+      delegate_to: 127.0.0.1
+      when: root_account | failed
+    - name: Try connecting with the root account and new password
+      expect:
+        timeout: 20
+        command: "ssh -o User={{ ansible_ssh_user }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o Port={{ ansible_port | default(22) }} {{ inventory_hostname }} /bin/true"
+        responses:
+          '.*password: ': "{{ ansible_ssh_pass }}"
+      delegate_to: 127.0.0.1
+      ignore_errors: true
+      changed_when: False
+      when: root_account | failed
+      register: root_account
+    - name: change root password
+      expect:
+        timeout: 20
+        command: "ssh -o User={{ ansible_ssh_user }} -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o Port={{ ansible_port | default(22) }} {{ inventory_hostname }}"
+        responses:
+          '.*password: ': 
+            - "{{ ansible_ssh_pass }}"
+            - "{{ ansible_ssh_pass }}"
+            - "{{ armbian_new_pass }}"
+            - "{{ armbian_new_pass }}"
+          'Please provide a username \(eg. your forename\):': "\x03"
+      delegate_to: 127.0.0.1
+      when: root_account | failed
+    - name: restore python interpreter
+      set_fact:
+        ansible_python_interpreter: "/usr/bin/python"
+      delegate_to: 127.0.0.1
+- name: "Add minimal user configurations"
+  hosts: all
+  vars:
+    ansible_ssh_user: "root"
+    ansible_ssh_pass: "{{ lookup('env', 'MASTER_PASS') }}"
+  gather_facts: False
+  roles:
+    - role: 'users'
+- name: "Execute base configuration"
+  hosts: all
+  gather_facts: True
+  roles:
+    - role: 'base'
+

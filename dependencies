@@ -9,7 +9,7 @@ getmac: node getmac
 internal-ip: node internal-ip-cli
 iponmap: node iponmap
 public-ip: node ipify-cli
-playbook: python ansible boto paramiko boto3
+playbook: python ansible boto paramiko boto3 pexpect
 raspbian-setup: env
 speed-test: node speed-test
 vtop: node vtop
