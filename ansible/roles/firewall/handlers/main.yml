@@ -1,0 +1,4 @@
+---
+- name: restart firewall
+  become: True
+  service: name=firewall state=restarted

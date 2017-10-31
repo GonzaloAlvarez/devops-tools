@@ -7,3 +7,4 @@ dependencies:
   - { role: dotfiles }
   - { role: unattended-upgrades, when: nohup is defined }
   - { role: fail2ban }
+  - { role: firewall }

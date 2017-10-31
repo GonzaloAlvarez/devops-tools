@@ -1,0 +1,21 @@
+---
+# APT packages are installed both in ubuntu and in debian systems
+  apt_packages:
+    - iptables
+  debian_packages: []
+  firewall_state: started
+  firewall_enabled_at_boot: true
+
+  firewall_allowed_tcp_ports:
+  - "22"
+  - "443"
+  firewall_allowed_udp_ports: []
+  firewall_forwarded_tcp_ports: []
+  firewall_forwarded_udp_ports: []
+  firewall_additional_rules: []
+  firewall_ip6_additional_rules: []
+  firewall_log_dropped_packets: true
+
+# Set to true to ensure other firewall management software is disabled.
+  firewall_disable_firewalld: true
+  firewall_disable_ufw: true

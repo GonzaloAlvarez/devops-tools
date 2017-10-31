@@ -6,6 +6,7 @@
   with_items: "{{ root_tasks | default([]) }}"
   loop_control:
     loop_var: task_item
-- name: Trigger handler
-  command: /bin/true
-  notify: fail2ban reload
+- include: "{{ task_item }}.yml"
+  with_items: "{{ user_tasks | default([]) }}"
+  loop_control:
+    loop_var: task_item

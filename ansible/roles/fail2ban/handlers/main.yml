@@ -1,3 +1,4 @@
 ---
 - name: fail2ban reload
+  become: True
   service: name=fail2ban state=restarted
