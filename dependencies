@@ -26,4 +26,4 @@ getmail: python git+ssh://git@github.com/wor/getmail.git
 stockanalysis: python argparse backtrader datetime matplotlib
 restic: shell curl bunzip2
 ansible-cli: python ansible boto paramiko
-piscreen: python luma.oled
+piscreen: python luma.oled psutil
