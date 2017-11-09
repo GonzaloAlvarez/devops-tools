@@ -1,0 +1,8 @@
+auto {{ hostapd_interface }}
+iface {{ hostapd_interface }} inet static
+    pre-up  nmcli radio wifi off || :
+    pre-up  rfkill unblock wifi
+    address {{ hostapd_if_address }}
+    netmask {{ hostapd_if_netmask }}
+    network {{ hostapd_if_network }}
+    broadcast {{ hostapd_if_broadcast }}

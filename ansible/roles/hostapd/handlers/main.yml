@@ -1,0 +1,9 @@
+---
+- name: restart hostapd
+  become: True
+  service: 
+    name: hostapd 
+    state: restarted
+- name: restart wlan
+  become: true
+  shell: "ifdown {{ hostapd_interface }} && ifup {{ hostapd_interface }}"

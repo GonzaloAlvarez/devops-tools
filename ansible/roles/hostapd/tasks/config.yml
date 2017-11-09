@@ -1,0 +1,35 @@
+---
+- name: provide config
+  template:
+    src: hostapd.conf.j2
+    dest: /etc/hostapd/hostapd.conf
+
+- name: enable configuration under defaults
+  lineinfile:
+    dest: /etc/default/hostapd
+    regexp: '^#?DAEMON_CONF=".*"'
+    line: 'DAEMON_CONF="/etc/hostapd/hostapd.conf"'
+
+- name: configure the wireless interface
+  template:
+    src: network-wlan-hostapd.cfg.j2
+    dest: /etc/network/interfaces.d/10-wlan-hostapd.cfg
+    mode: 0644
+
+- name: enable wifi configuration
+  lineinfile:
+    dest: /etc/network/interfaces
+    line: 'source /etc/network/interfaces.d/10-wlan-hostapd.cfg'
+    state: present
+  notify: restart wlan
+
+- meta: flush_handlers
+
+- name: enable service
+  service:
+    name: hostapd
+    state: started
+    enabled: yes
+  changed_when: true
+  notify: restart hostapd
+

@@ -2,3 +2,4 @@
   root_tasks:
     - apt
     - yum
+    - reboot

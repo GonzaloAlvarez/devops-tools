@@ -1,0 +1,25 @@
+---
+- name: Check if reboot is required
+  shell: "if [[ -e /var/run/reboot-required ]]; then echo 'required'; else echo 'no'; fi"
+  args:
+    executable: /bin/bash
+  register: reboot_required
+
+- name: Reboot
+  shell: "sleep 2 && shutdown -r now 'Ansible updates triggered'"
+  async: 1
+  poll: 0
+  when: reboot_required is defined and reboot_required.stdout == 'required'
+  ignore_errors: true
+
+- name: Wait until SSH becomes ready...
+  local_action:
+    module: wait_for
+    port: "{{ ansible_port | default(22) }}"
+    host: "{{ inventory_hostname }}"
+    search_regex: OpenSSH
+    delay: 10
+    timeout: 320
+  when: reboot_required is defined and reboot_required.stdout == 'required'
+  ignore_erros: true
+  become: false

@@ -1,0 +1,17 @@
+---
+# APT packages are installed both in ubuntu and in debian systems
+  apt_packages:
+    - hostapd
+    - rfkill
+    - network-manager
+  debian_packages: []
+  ubuntu_packages: []
+
+  hostapd_ssid: "WLAN_QR"
+  hostapd_passphrase: "{{ lookup('env', 'MASTER_PASS') }}"
+  hostapd_interface: "wlan0"
+  hostapd_channel: "5"
+  hostapd_if_address: 10.2.0.1
+  hostapd_if_netmask: 255.255.0.0
+  hostapd_if_network: 10.2.0.0
+  hostapd_if_broadcast: 10.2.255.255
