@@ -12,8 +12,9 @@
 - name: "Execute base configuration"
   hosts: all
   gather_facts: True
-  include_vars:
-    - rpi-defaults.yml
+  vars:
+    unattended_origins_patterns:
+      - 'origin=Raspbian,codename=${distro_codename},label=Raspbian' 
   roles:
     - role: 'base'
     - role: 'rpi'

@@ -1,7 +1,7 @@
 ---
 - name: Enable rpi camera
   command: raspi-config nonint do_camera 0
-  when: rpi_camera == True
+  when: rpi_camera | default(False) == True
 - name: Enable enough memory for camera to work
   lineinfile:
     path: /boot/config.txt

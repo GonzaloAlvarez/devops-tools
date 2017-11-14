@@ -83,7 +83,7 @@ if [ -z "$SDCARD_DISKID" ]; then
 fi
 echo "SD Card in [$SDCARD_DISKID][${SDCARD_DISKID%??}]"
 $SUDO $DISKUTIL unmount $SDCARD_DISKID
-$SUDO $DD bs=1m if=$RASPBIAN_IMAGEFILE of=/dev/r${SDCARD_DISKID%??}
+$SUDO $DD bs=1m if=$RASPBIAN_IMAGEFILE of=/dev/${SDCARD_DISKID%??}
 for DISKFORMAT in Windows_FAT_32 DOS_FAT_32 Windows_FAT_16 Windows_NTFS Linux; do
     SDCARD_DISKID=$($DISKUTIL list | grep "$DISKFORMAT" | tr ' ' '\n' | grep -e 'disk[0-9]')
     if [ ! -z "$SDCARD_DISKID" ]; then
