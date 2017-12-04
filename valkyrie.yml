@@ -1,0 +1,13 @@
+gdrive_settings:
+  client_config_backend: 'settings'
+  client_config:
+    client_id: '685060610851-8slaicq1l7tgc0bt4l1s58fe957prmi1.apps.googleusercontent.com'
+  save_credentials: True
+  save_credentials_backend: 'file'
+  oauth_scope:
+    - "https://www.googleapis.com/auth/drive"
+gdrive_secret_url: 'https://console.developers.google.com/apis/credentials/oauthclient/685060610851-8slaicq1l7tgc0bt4l1s58fe957prmi1.apps.googleusercontent.com?project=api-project-685060610851'
+gauth_settings_filename: 'valkyrie_settings.yaml'
+gauth_credentials_filename: 'valkyrie_gdrive.dat'
+keepass_filename: 'Passwords.kdbx'
+password_key_filename: 'valkyrie_key_secret.yml'
