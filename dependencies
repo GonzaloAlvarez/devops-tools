@@ -28,3 +28,6 @@ restic: shell curl bunzip2
 ansible-cli: python ansible boto paramiko
 piscreen: python luma.oled psutil
 howdoi: python howdoi
+surveillance: shell ffmpeg
+valkyrie: python PyDrive click pyyaml pykeepass pycrypto
+platformio: python platformio

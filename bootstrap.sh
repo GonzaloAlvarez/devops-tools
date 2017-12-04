@@ -174,6 +174,7 @@ function install_dependencies() {
     DEPENDENCIES_LINE="$(grep "^${EXECUTABLE_NAME}:" "$DEPENDENCIES_FILE" | head -n 1)"
     FRAMEWORK="$(echo "$DEPENDENCIES_LINE" | cut -d ' ' -f 2)"
     FRAMEWORK_DEPENDENCIES="$(echo "$DEPENDENCIES_LINE" | cut -d ' ' -f 3-)"
+    export ENV_PATH
     if [ ! -f "$ENV_PATH/$EXECUTABLE_NAME.installed" ]; then
         ${FRAMEWORK}_install $FRAMEWORK_DEPENDENCIES
         touch "$ENV_PATH/$EXECUTABLE_NAME.installed"
