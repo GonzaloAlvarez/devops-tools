@@ -1,0 +1,33 @@
+#!/bin/bash
+BASE_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $BASE_PATH/bootstrap.sh
+$BASE_PATH/valkyrie init
+$BASE_PATH/valkyrie decode -f shell "$(basename $0)" > "$ENV_PATH/$(basename $0).secrets"
+source "$ENV_PATH/$(basename $0).secrets"
+
+# Variables
+OUTPUT_FOLDER="$ENV_PATH/$(basename $0).tmp"
+
+VIDEO_LENGTH=20
+
+rm -Rf "$OUTPUT_FOLDER"
+mkdir -p "$OUTPUT_FOLDER"
+
+FFMPEG="$FFMPEG -hide_banner -nostats -loglevel 0"
+
+IFS="|" read -a deviceurls <<<$DEVICE_URL
+VIDEO_FILES=()
+for url in $deviceurls
+do
+    video_host="$(echo $url | sed -e "s/[^/]*\/\/\([^@]*@\)\?\([^:/]*\).*/\2/")"
+    output_video="$OUTPUT_FOLDER/cam-$video_host-$(date '+%d.%m.%Y-%H:%M:%S').mp4"
+    VIDEO_FILES+=($output_video)
+    $FFMPEG -y -re -rtsp_transport tcp -i "$url" -ss 1 -t $VIDEO_LENGTH -c:v libx264 -pix_fmt yuv420p -preset ultrafast -vf "format=gray,format=yuv422p,scale=320:-1,setpts=0.25*PTS" -r 1 -an "$output_video" &
+done
+wait
+for file in "${VIDEO_FILES[@]}"
+do
+    echo "$file"
+    $BASE_PATH/awscli s3 cp "$file" "s3://casa.surveillance" --expires "$(gdate -d '+5 days' --utc +'%Y-%m-%dT%H:%M:%SZ')" --acl authenticated-read
+done
+#rm -Rf "$OUTPUT_FOLDER"
