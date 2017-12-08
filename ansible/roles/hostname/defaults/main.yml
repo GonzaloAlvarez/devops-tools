@@ -1,0 +1,9 @@
+---
+# APT packages are installed both in ubuntu and in debian systems
+  apt_packages: []
+  debian_packages: 
+    - dbus
+  ubuntu_packages: []
+
+  hostname_name: "{{ hostname | default(inventory_hostname) }}"
+

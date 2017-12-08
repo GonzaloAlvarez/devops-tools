@@ -1,0 +1,16 @@
+---
+- name: check if we are in an EC2 box
+  uri:
+    url: "http://169.254.169.254/latest/meta-data/public-hostname"
+    return_content: yes
+    timeout: 2
+  register: ec2_public_hostname
+
+- name: if we are in an EC2 box, set the hostname
+  set_fact:
+    hostname: "{{ ec2_public_hostname.content }}"
+  when: ec2_public_hostname.status == 200
+
+- name: setting the hostname for the host
+  hostname:
+    name: "{{ hostname_name }}"
