@@ -31,3 +31,4 @@ howdoi: python howdoi
 surveillance: shell ffmpeg
 valkyrie: python PyDrive click pyyaml pykeepass pycrypto
 platformio: python platformio
+youtube-dl: python youtube-dl
