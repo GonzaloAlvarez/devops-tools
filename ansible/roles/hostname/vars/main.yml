@@ -1,6 +1,5 @@
 ---
   root_tasks:
-    - repositories
     - packages
     - hostname
   user_tasks: []
