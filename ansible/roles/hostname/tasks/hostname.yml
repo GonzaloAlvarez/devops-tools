@@ -5,6 +5,7 @@
     return_content: yes
     timeout: 2
   register: ec2_public_hostname
+  ignore_errors: true
 
 - name: if we are in an EC2 box, set the hostname
   set_fact:
