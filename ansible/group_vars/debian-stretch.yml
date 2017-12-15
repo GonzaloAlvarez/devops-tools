@@ -1,1 +1,2 @@
   instance_distro_release: 'stretch'
+  aws_ec2_main_volume_prefix: ''
