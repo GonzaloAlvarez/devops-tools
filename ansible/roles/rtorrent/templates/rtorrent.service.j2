@@ -1,0 +1,14 @@
+[Unit]
+Description=rTorrent service
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/screen -dmS {{ rtorrent_screen_name }} /usr/bin/rtorrent
+ExecStop=/usr/bin/screen -S {{ rtorrent_screen_name }} -X quit
+User={{ rtorrent_user }}
+Group=media
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,22 @@
+---
+# APT packages are installed both in ubuntu and in debian systems
+  apt_packages:
+    - rtorrent
+    - screen
+
+  debian_packages: []
+  ubuntu_packages: []
+
+  rtorrent_user: rtorrent
+  rtorrent_data_dir: /var/lib/rtorrent
+  rtorrent_download_dir: "/var/media/download/rtorrent"
+  rtorrent_session_dir: "{{ rtorrent_data_dir }}/session"
+  rtorrent_watch_dir: "{{ rtorrent_data_dir }}/watch"
+  rtorrent_port: 49164
+  rtorrent_dht_port: 6881
+  rtorrent_scgi_host: 127.0.0.1
+  rtorrent_scgi_port: 5000
+  rtorrent_umask: "002"
+  rtorrent_pid_file: /var/run/rtorrent.pid
+  rtorrent_log_file: /var/log/rtorrent.log
+  rtorrent_screen_name: rtorrent

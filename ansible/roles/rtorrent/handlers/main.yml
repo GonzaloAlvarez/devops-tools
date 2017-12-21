@@ -1,0 +1,6 @@
+---
+- name: restart rtorrent
+  service: name=rtorrent state=restarted
+  become: True
+  become_user: root
+  become_method: sudo

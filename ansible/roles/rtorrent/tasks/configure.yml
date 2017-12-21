@@ -1,0 +1,72 @@
+---
+- name: create media group
+  group:
+    name: media
+    state: present
+
+- name: create {{ rtorrent_user }} user
+  user: 
+    name: "{{ rtorrent_user }}"
+    home: "{{ rtorrent_data_dir }}"
+    system: yes 
+    shell: "/bin/bash"
+
+- name: create rtorrent directories
+  file: 
+    path: "{{ item.path }}"
+    owner: "{{ rtorrent_user }}" 
+    group: "{{ item.group|default(rtorrent_user) }}"
+    mode: "{{ item.mode|default('755') }}"
+    state: directory
+  with_items:
+    - path: "{{ rtorrent_session_dir }}"
+    - path: "{{ rtorrent_download_dir }}"
+      group: media
+      mode: 2775
+    - path: "{{ rtorrent_watch_dir }}"
+      mode: 775
+
+- name: create log file
+  file: 
+    path: "{{ rtorrent_log_file }}" 
+    owner: "{{ rtorrent_user }}" 
+    group: "{{ rtorrent_user }}" 
+    state: touch
+
+- name: copy rtorrent config
+  template: 
+    src: "rtorrent.rc.j2" 
+    dest: "{{ rtorrent_data_dir }}/.rtorrent.rc" 
+    owner: "{{ rtorrent_user }}" 
+    group: "{{ rtorrent_user }}"
+
+- name: create rtorrent service
+  template:
+    src: rtorrent.service.j2
+    dest: /etc/systemd/system/rtorrent.service
+    owner: root
+    group: root
+    mode: 0644
+  when: "ansible_service_mgr == 'systemd'"
+  notify: restart rtorrent
+
+- name: create rtorrent init
+  template: 
+    src: "rtorrent.init.j2" 
+    dest: "/etc/init.d/rtorrent" 
+    owner: root
+    group: root
+    mode: 755
+  when: "ansible_service_mgr != 'systemd'"
+  notify: restart rtorrent
+
+- name: enable rtorrent service
+  service: 
+    name: "rtorrent"
+    enabled: yes
+
+- name: create rtorrent default config
+  template: 
+    src: "rtorrent.default.j2" 
+    dest: "/etc/default/rtorrent"
+  notify: restart rtorrent

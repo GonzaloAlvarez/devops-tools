@@ -1,0 +1,6 @@
+---
+- name: Install required repositories for Ubuntu systems
+  apt_repository: 
+    repo: "ppa:jalaziz/rtorrent"
+    state: present
+  when: ansible_distribution | default('') == 'Ubuntu'
