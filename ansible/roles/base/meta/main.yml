@@ -4,6 +4,7 @@ dependencies:
   - { role: homedrive }
   - { role: min-packages }
   - { role: hostname }
+  - { role: cfdns }
   - { role: timezone }
   - { role: dotfiles }
   - { role: unattended-upgrades, when: nohup is defined }
