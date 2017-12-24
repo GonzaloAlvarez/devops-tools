@@ -18,7 +18,7 @@
           Project: "{{ project }}"
           Vpn: "Client"
   aws_ec2_instance_count: "{{ aws_ec2_instances | default(1) | sum(attribute='count') }}"
-  aws_ec2_instance_type: "{{ instance_type | default('t2.nano') }}"
+  aws_ec2_instance_type: "{{ instance_type | default('t2.micro') }}"
   aws_ec2_image: "ami-2a34e94a"
   aws_ec2_ami_owner: "{{ instance_distro_owner | default('379101102735') }}"
   aws_ec2_ami_name: "{{ instance_distro_name | default('debian') }}-{{ instance_distro_release | default('jessie') }}-*"
