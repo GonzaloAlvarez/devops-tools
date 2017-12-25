@@ -1,0 +1,30 @@
+---
+# APT packages are installed both in ubuntu and in debian systems
+  apt_packages:
+    - openssl
+  debian_packages: []
+  ubuntu_packages: []
+
+  cfdns_zone: "{{ lookup('env', 'CF_DNS_ZONE') | default('gon.al') }}"
+  cfdns_record: "{{ lookup('env', 'CF_DNS_HOST') | default('server') }}"
+  cfdns_login_email: "{{ lookup('env', 'CF_API_EMAIL') }}"
+  cfdns_login_apitoken: "{{ lookup('env', 'CF_API_KEY') }}"  
+  
+  letsencrypt_cert_cn: "{{ cfdns_record }}.{{ cfdns_zone }}"
+  letsencrypt_cert_remaining_days: 10
+  letsencrypt_cert_dir: "/etc/ssl/{{ letsencrypt_cert_cn }}"
+
+  letsencrypt_dhparam_filename: "dhparam.pem"
+  letsencrypt_csr_filename: "{{ letsencrypt_cert_cn }}.csr"
+  letsencrypt_crt_filename: "{{ letsencrypt_cert_cn }}.crt"
+  letsencrypt_reqkey_filename: "{{ letsencrypt_cert_cn }}.key"
+
+  letsencrypt_production: no
+  letsencrypt_email: "{{ lookup('env', 'CF_API_EMAIL') }}"
+  letsencrypt_key_size: 2048
+  letsencrypt_key_directory: /etc/ssl/lets_encrypt
+  letsencrypt_key_filename: letsencrypt_account.key
+  letsencrypt_acme_directory: "{{ 'https://acme-v01.api.letsencrypt.org/directory' if letsencrypt_production else 'https://acme-staging.api.letsencrypt.org/directory' }}"
+
+  intermediate_filename: "{{ letsencrypt_cert_cn }}.intermediate.crt"
+  fullchain_filename: "{{ letsencrypt_cert_cn }}.fullchain.pem"

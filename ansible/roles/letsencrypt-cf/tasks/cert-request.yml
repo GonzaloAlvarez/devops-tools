@@ -1,0 +1,179 @@
+---
+- name: check if the certificate directory exists
+  stat:
+    path: "{{ letsencrypt_cert_dir }}"
+  register: letsencrypt_cert_dir_stat
+
+- name: "create the {{ letsencrypt_cert_dir }} directory"
+  file:
+    path: "{{ letsencrypt_cert_dir }}"
+    state: directory
+    owner: root
+    mode: 0755
+
+- name: Generate DHParams file
+  command: "openssl dhparam -out \"{{ letsencrypt_cert_dir + '/' + letsencrypt_dhparam_filename }}\" {{ letsencrypt_key_size }}"
+  args:
+    creates: "{{ letsencrypt_cert_dir + '/' + letsencrypt_dhparam_filename }}"
+
+- name: set the DHParams file permissions
+  file:
+    path: "{{ letsencrypt_cert_dir + '/' + letsencrypt_dhparam_filename }}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Sets DHParam fact
+  set_fact:
+    ssl_dhparam_file: "{{ letsencrypt_cert_dir + '/' + letsencrypt_dhparam_filename }}"
+
+- name: generate the private key
+  command: "openssl genrsa -out \"{{ letsencrypt_cert_dir + '/' + letsencrypt_reqkey_filename }}\" {{ letsencrypt_key_size }}"
+  args:
+    creates: "{{ letsencrypt_cert_dir + '/' + letsencrypt_reqkey_filename }}"
+
+- name: set the private key file permissions
+  file:
+    path: "{{ letsencrypt_cert_dir + '/' + letsencrypt_reqkey_filename }}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: set fact for private key
+  set_fact:
+    ssl_privatekey_file: "{{ letsencrypt_cert_dir + '/' + letsencrypt_reqkey_filename }}"
+
+- name: check if the CSR exists
+  stat:
+    path: "{{ letsencrypt_cert_dir + '/' + letsencrypt_csr_filename }}"
+  register: csr_stat
+
+- name: create the OpenSSL configuration file for the CSR
+  template:
+    src: openssl-request.conf.j2
+    dest: "{{ letsencrypt_cert_dir }}/openssl-request.conf"
+    owner: root
+    mode: 0600
+  when: not csr_stat.stat.exists
+
+- name: generate the CSR
+  command: |
+    openssl req -new -sha256 -subj "/CN={{ letsencrypt_cert_cn }}" 
+    -config "{{ letsencrypt_cert_dir }}/openssl-request.conf"  
+    -key "{{ letsencrypt_cert_dir + '/' + letsencrypt_reqkey_filename }}" 
+    -out "{{ letsencrypt_cert_dir + '/' + letsencrypt_csr_filename }}"
+  args:
+    creates: "{{ letsencrypt_cert_dir + '/' + letsencrypt_csr_filename }}"
+
+- name: set the CSR file permissions
+  file:
+    path: "{{ letsencrypt_cert_dir + '/' + letsencrypt_csr_filename }}"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: delete the OpenSSL configuration file for the CSR
+  file:
+    path: "{{ letsencrypt_cert_dir }}/openssl-request.conf"
+    state: absent
+
+- name: "create the {{ letsencrypt_key_directory }} directory"
+  file:
+    path: "{{ letsencrypt_key_directory }}"
+    owner: root
+    mode: 0700
+    state: directory
+
+- name: generate the Lets Encrypt account key
+  command: "openssl genrsa -out \"{{ letsencrypt_key_directory + '/' + letsencrypt_key_filename }}\" {{ letsencrypt_key_size }}"
+  args:
+    creates: "{{ letsencrypt_key_directory + '/' + letsencrypt_key_filename }}"
+
+- name: set the Lets Encrypt account key file permissions
+  file:
+    path: "{{ letsencrypt_key_directory + '/' + letsencrypt_key_filename }}"
+    owner: root
+    mode: 0600
+
+- name: initiate the Lets Encrypt challenge
+  letsencrypt:
+    acme_directory: "{{ letsencrypt_acme_directory }}"
+    challenge: dns-01
+    agreement: 'https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf'
+    account_key: "{{ letsencrypt_key_directory + '/' + letsencrypt_key_filename }}"
+    csr: "{{ letsencrypt_cert_dir + '/' + letsencrypt_csr_filename }}"
+    dest: "{{ letsencrypt_cert_dir + '/' + letsencrypt_crt_filename }}"
+    account_email: "{{ letsencrypt_email }}"
+    remaining_days: "{{ letsencrypt_cert_remaining_days }}"
+  register: letsencrypt_challenge
+
+- name: Create DNS Record  
+  cloudflare_dns:
+    domain: "{{ cfdns_zone }}"
+    record: "_acme-challenge.{{ item.key }}"
+    type: TXT
+    value: "\"{{ item.value['dns-01']['resource_value'] }}\""
+    state: present
+    solo: true
+    account_email: "{{ cfdns_login_email }}"
+    account_api_token: "{{ cfdns_login_apitoken }}"
+  with_dict: "{{ letsencrypt_challenge['challenge_data'] | default({}) }}"
+  when: letsencrypt_challenge['challenge_data'] is defined
+
+- name: validate the Lets Encrypt challenge
+  letsencrypt:
+    acme_directory: "{{ letsencrypt_acme_directory }}"
+    challenge: dns-01
+    agreement: 'https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf'
+    account_key: "{{ letsencrypt_key_directory + '/' + letsencrypt_key_filename }}"
+    csr: "{{ letsencrypt_cert_dir + '/' + letsencrypt_csr_filename }}"
+    dest: "{{ letsencrypt_cert_dir + '/' + letsencrypt_crt_filename }}"
+    account_email: "{{ letsencrypt_email }}"
+    data: "{{ letsencrypt_challenge }}"
+  register: letsencrypt_validation
+  retries: 3
+  delay: 10
+  until: letsencrypt_validation | success
+  when: letsencrypt_challenge['challenge_data'] is defined
+
+- name: Delete DNS Record  
+  cloudflare_dns:
+    domain: "{{ cfdns_zone }}"
+    record: "_acme-challenge.{{ item.key }}"
+    type: TXT
+    value: "\"{{ item.value['dns-01']['resource_value'] }}\""
+    state: absent
+    account_email: "{{ cfdns_login_email }}"
+    account_api_token: "{{ cfdns_login_apitoken }}"
+  with_dict: "{{ letsencrypt_challenge['challenge_data'] | default({}) }}"
+  when: letsencrypt_challenge['challenge_data'] is defined
+
+- name: download the Lets Encrypt intermediate CA
+  get_url:
+    url: https://letsencrypt.org/certs/lets-encrypt-x3-cross-signed.pem
+    dest: "{{ letsencrypt_cert_dir + '/' + intermediate_filename }}"
+    owner: root
+    group: root
+    mode: 0600
+
+- name: get content of the certificate
+  command: "cat {{ letsencrypt_cert_dir }}/{{ letsencrypt_crt_filename }}"
+  register: certificate_content
+  changed_when: false
+
+- name: get content of the intermediate CA
+  command: "cat {{ letsencrypt_cert_dir }}/{{ intermediate_filename }}"
+  register: intermediate_content
+  changed_when: false
+
+- name: create a file with the certificate and intermediate CA concatenated
+  copy:
+    content: "{{ certificate_content['stdout'] + '\n' + intermediate_content['stdout'] + '\n' }}"
+    dest: "{{ letsencrypt_cert_dir + '/' + fullchain_filename }}"
+    owner: root
+    group: root
+    mode: 0644
+
+- name: set fact for fullchain certificate
+  set_fact:
+    ssl_fullchaincert_file: "{{ letsencrypt_cert_dir + '/' + fullchain_filename }}"
