@@ -6,3 +6,5 @@ hass_longitude: '-122.35'
 hass_latitude: '47.6'
 hass_unit_system: 'metric'
 hass_time_zone: 'America/Los_Angeles'
+hass_api_password: "{{ lookup('env', 'MASTER_PASS') | default('abc123')}}"
+hass_server_port: "8123"
