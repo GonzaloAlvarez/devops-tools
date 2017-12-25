@@ -1,0 +1,6 @@
+---
+- name: restart rsyslog to adapt timezone
+  service: name=rsyslog state=restarted
+  become: True
+  become_user: root
+  become_method: sudo

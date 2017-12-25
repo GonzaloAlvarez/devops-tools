@@ -2,3 +2,4 @@
 - name: "Setting timezone to {{ system_timezone }}"
   timezone:
     name: "{{ system_timezone }}"
+  notify: restart rsyslog to adapt timezone
