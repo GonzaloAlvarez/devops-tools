@@ -110,6 +110,12 @@ function setup_vars() {
                 cat "$BASE_PATH/ansible/group_vars/$varfile.yml" >> "$ANSIBLE_PATH/group_vars/all.yml"
             fi
         done
+        ( 
+            cd $BASE_PATH/ansible/group_vars
+            cat $ANSIBLE_PATH/group_vars/all.yml | awk '$1=="include" && NF>=2 { system("cat "$2".yml"); next } {print}' > $ANSIBLE_PATH/group_vars/all_alt.yml 
+            rm -f $ANSIBLE_PATH/group_vars/all.yml
+            mv $ANSIBLE_PATH/group_vars/all_alt.yml $ANSIBLE_PATH/group_vars/all.yml
+        )
         IFS=$OIFS
         return 0
     fi
