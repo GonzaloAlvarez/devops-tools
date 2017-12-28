@@ -1,0 +1,10 @@
+{
+    "mongodb_uri": "mongodb://{{ pritunl_mongodb_host }}:{{ pritunl_mongodb_port }}/pritunl",
+    "log_path": "{{ pritunl_log_path }}",
+    "static_cache": true,
+    "temp_path": "/tmp/pritunl",
+    "bind_addr": "0.0.0.0",
+    "www_path": "/usr/share/pritunl/www",
+    "local_address_interface": "auto",
+    "port": {{ pritunl_port }}
+}

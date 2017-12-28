@@ -1,0 +1,5 @@
+include debian-stretch
+  instance_type: 'm4.large'
+include nohup
+include ssl-prod
+

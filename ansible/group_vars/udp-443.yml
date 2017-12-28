@@ -1,0 +1,3 @@
+  aws_ec2_outside_proto: "all"
+  firewall_allowed_udp_ports:
+    - "443"

@@ -1,0 +1,37 @@
+---
+  pritunl_port: 9433
+  pritunl_mongodb_host: "localhost"  
+  pritunl_mongodb_port: 27017
+  pritunl_log_path: "/var/log/pritunl.log"
+
+  pritunl_settings:
+    - "app.reverse_proxy true"
+    - "app.server_ssl false"
+    - "app.server_port {{ pritunl_port }}"
+    - "app.redirect_server false"
+
+# APT packages are installed both in ubuntu and in debian systems
+  apt_packages:
+    - dirmngr
+    - mongodb 
+    - pritunl
+  debian_packages: []
+  ubuntu_packages: []
+# key repos attrs:
+# - url:
+#   keyserver:
+#   id:
+  apt_key_repos: 
+    - keyserver: keyserver.ubuntu.com
+      id: 7568D9BB55FF9E5287D586017AE645C0CF8E292A
+  debian_key_repos: []
+  ubuntu_key_repos: []
+# repos attrs:
+# sudo apt-get install crossbuild-essential-armhf
+# - url:
+#   distro:
+#   branch:
+  apt_repos:
+    - url: "http://repo.pritunl.com/stable/apt"
+  debian_repos: []
+  ubuntu_repos: []

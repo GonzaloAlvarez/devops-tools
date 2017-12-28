@@ -1,0 +1,8 @@
+---
+- name: restart pritunl
+  service:
+    name: pritunl
+    state: restarted
+    enabled: yes
+  become: True
+  changed_when: True

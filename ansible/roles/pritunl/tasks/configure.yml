@@ -1,0 +1,12 @@
+---
+- name: copy template for configuration
+  template:
+    src: pritunl.conf.j2
+    dest: "/etc/pritunl.conf"
+    owner: root
+    mode: 0644
+
+- name: execute configurations
+  command: "pritunl set {{ item }}"
+  with_items: "{{ pritunl_settings }}"
+  notify: restart pritunl

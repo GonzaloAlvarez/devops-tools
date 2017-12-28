@@ -1,0 +1,44 @@
+---
+- name: Install required repository keys for Debian-like systems
+  apt_key: 
+    url: "{{ item.url | default(omit) }}" 
+    keyserver: "{{ item.keyserver | default(omit) }}"
+    id: "{{ item.id | default(omit) }}"
+    state: present
+  with_items: "{{ apt_key_repos | default([]) }}"
+  when: ansible_distribution | default('') == 'Debian' or ansible_distribution | default('') == 'Ubuntu'
+- name: Install required repository keys for Ubuntu systems
+  apt_key: 
+    url: "{{ item.url | default(omit) }}" 
+    keyserver: "{{ item.keyserver | default(omit) }}"
+    id: "{{ item.id | default(omit) }}"
+    state: present
+  with_items: "{{ ubuntu_key_repos | default([]) }}"
+  when: ansible_distribution | default('') == 'Ubuntu'
+- name: Install required repository keys for Debian systems
+  apt_key: 
+    url: "{{ item.url | default(omit) }}" 
+    keyserver: "{{ item.keyserver | default(omit) }}"
+    id: "{{ item.id | default(omit) }}"
+    state: present
+  with_items: "{{ debian_key_repos | default([]) }}"
+  when: ansible_distribution | default('') == 'Debian'
+
+- name: Install required repositories for Debian-like systems
+  apt_repository: 
+    repo: deb {{ item.url }} {{ item.distro | default(ansible_distribution_release) | lower }} {{ item.branch | default('main') }}
+    state: present
+  with_items: "{{ apt_repos | default([]) }}"
+  when: ansible_distribution | default('') == 'Debian' or ansible_distribution | default('') == 'Ubuntu'
+- name: Install required repositories for Ubuntu systems
+  apt_repository: 
+    repo: deb {{ item.url }} {{ item.distro | default(ansible_distribution_release) | lower }} {{ item.branch | default('main') }}
+    state: present
+  with_items: "{{ ubuntu_repos | default([]) }}"
+  when: ansible_distribution | default('') == 'Ubuntu'
+- name: Install required repositoriesfor Debian systems
+  apt_repository: 
+    repo: deb {{ item.url }} {{ item.distro | default(ansible_distribution_release) | lower }} {{ item.branch | default('main') }}
+    state: present
+  with_items: "{{ debian_repos | default([]) }}"
+  when: ansible_distribution | default('') == 'Debian'
