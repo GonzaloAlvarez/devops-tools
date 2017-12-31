@@ -8,11 +8,10 @@ SCP=$(which scp)
 RSYNC=$(which rsync)
 
 function get_instance_details() {
-    QUERY_PARAM="Reservations[].Instances[].[PublicDnsName,Tags[?Key=='Name'].Value[],InstanceType,PublicIpAddress]"
-    FILTER_PARAM="Name=instance-state-name,Values=running"
-    PYTHON_SCRIPT="import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1].format(x[0],x[1][0],x[2],x[3]) for x in j]); print l"
+    QUERY_PARAM="Reservations[].Instances[].[PublicDnsName,Tags[?Key=='Name'].Value[],InstanceType,PublicIpAddress,InstanceId,State]"
+    FILTER_PARAM="Name=instance-state-name,Values=running,stopped"
     INSTANCES_DETAILS=$($ENV_PATH/bin/aws ec2 describe-instances --query $QUERY_PARAM --filters $FILTER_PARAM)
-    echo $INSTANCES_DETAILS | $ENV_PATH/bin/python -c 'import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1].format(i+1,x[0],x[1][0],x[2],x[3]) for i,x in enumerate(j)]); print l' "{} {} {} {} {}"
+    echo $INSTANCES_DETAILS | $ENV_PATH/bin/python -c 'import sys, json; j=json.load(sys.stdin); l="\n".join([sys.argv[1].format(i+1,x[0],x[1][0],x[2],x[3],x[4],x[5]["Name"]) for i,x in enumerate(j)]); print l' "{} {} {} {} {} {} {}"
 }
 
 function connect_instance() {
@@ -120,6 +119,30 @@ function tunnel_instance() {
     return $?
 }
 
+function show_limits() {
+    $ENV_PATH/bin/aws gamelift describe-ec2-instance-limits --query 'EC2InstanceLimits[].{EC2InstanceType:EC2InstanceType,CurrentInstances:CurrentInstances,InstanceLimit:InstanceLimit}' --output text | sort  -k3 -n
+}
+
+function stop_instance() {
+    LINE=1
+    if [ 0$1 -gt 0 ]; then
+        LINE=$1
+        shift
+    fi
+    EC2_INSTANCE_ID="$(echo "$INSTANCES_PLAIN_DETAILS" | head -n $LINE | tail -n 1 | cut -d ' ' -f 6)"
+    $ENV_PATH/bin/aws ec2 stop-instances --instance-ids "$EC2_INSTANCE_ID"
+}
+
+function start_instance() {
+    LINE=1
+    if [ 0$1 -gt 0 ]; then
+        LINE=$1
+        shift
+    fi
+    EC2_INSTANCE_ID="$(echo "$INSTANCES_PLAIN_DETAILS" | head -n $LINE | tail -n 1 | cut -d ' ' -f 6)"
+    $ENV_PATH/bin/aws ec2 start-instances --instance-ids "$EC2_INSTANCE_ID"
+}
+
 load_configuration
 INSTANCES_PLAIN_DETAILS="$(get_instance_details)"
 
@@ -128,4 +151,7 @@ INSTANCES_PLAIN_DETAILS="$(get_instance_details)"
 [[ "$1" == "sync" ]] && shift && sync_folder_instance $@ && exit $?
 [[ "$1" == "copy" ]] && shift && copy_instance $@ && exit $?
 [[ "$1" == "tunnel" ]] && shift && tunnel_instance $@ && exit $?
+[[ "$1" == "limits" ]] && shift && show_limits $@ && exit $?
+[[ "$1" == "stop" ]] && shift && stop_instance $@ && exit $?
+[[ "$1" == "start" ]] && shift && start_instance $@ && exit $?
 list_instances
