@@ -7,6 +7,7 @@ VIRTUALENV_PATH="$ENV_PATH/virtualenv"
 VIRTUALENV="$VIRTUALENV_PATH/virtualenv.py"
 NODE_BASE="$ENV_PATH/lib"
 CONFIG_FILE="$BASE_PATH/config.yaml"
+BREW_PYTHON="/usr/local/Frameworks/Python.framework/Versions/Current/bin/python"
 export GEM_HOME="$ENV_PATH/gems"
 export GEM_PATH=""
 export PYTHONPATH="$PYTHONPATH:$BASE_PATH"
@@ -35,7 +36,12 @@ function python_base() {
     env_install
     if [ ! -d "$VIRTUALENV_PATH" ]; then
         log "Installing virtualenv"
-        PYTHON=$(which python)
+        if [ -x $BREW_PYTHON ]; then
+            # https://github.com/ansible/ansible/issues/33417
+            PYTHON="$BREW_PYTHON"
+        else
+            PYTHON=$(which python)
+        fi
         GIT=$(which git)
         $GIT clone --depth 1 -q "$VIRTUALENV_GIT" "$VIRTUALENV_PATH"
         log "Executing virtualenv"
@@ -96,7 +102,7 @@ function load_configuration() {
 function ruby_install() {
     if [ ! -x "$ENV_BASE/bin/gem" ]; then
         python_base
-        $ENV_PATH/bin/pip install -q rubyenv
+        $ENV_PATH/bin/pip install -q rubyenv future six
         $ENV_PATH/bin/rubyenv install 2.4.1
     fi
     mkdir -p "$GEM_HOME"

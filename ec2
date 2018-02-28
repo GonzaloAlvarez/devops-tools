@@ -66,6 +66,24 @@ function sync_folder_instance() {
     fi
 }
 
+function pull_instance() {
+    LINE=1
+    if [[ $1 =~ ^-?[0-9]+$ ]]; then
+        LINE=$1
+        shift
+        if [ -r "$1" ]; then
+            FILE="$1"
+            shift
+        fi
+    elif [ "$1" ]; then
+        FILE="$1"
+        shift
+    fi
+    EC2_DNS_NAME="$(echo "$INSTANCES_PLAIN_DETAILS" | head -n $LINE | tail -n 1 | cut -d ' ' -f 2)"
+    echo "Copying [$FILE] from [$EC2_DNS_NAME]"
+    $SCP -o StrictHostKeyChecking=no -P $SSH_REMOTE_PORT "$EC2_DNS_NAME:$FILE" /tmp $@
+}
+
 function copy_instance() {
     LINE=1
     if [[ $1 =~ ^-?[0-9]+$ ]]; then
@@ -150,6 +168,7 @@ INSTANCES_PLAIN_DETAILS="$(get_instance_details)"
 [[ "$1" == "list" ]] && shift && list_instances $@ && exit $?
 [[ "$1" == "sync" ]] && shift && sync_folder_instance $@ && exit $?
 [[ "$1" == "copy" ]] && shift && copy_instance $@ && exit $?
+[[ "$1" == "pull" ]] && shift && pull_instance $@ && exit $?
 [[ "$1" == "tunnel" ]] && shift && tunnel_instance $@ && exit $?
 [[ "$1" == "limits" ]] && shift && show_limits $@ && exit $?
 [[ "$1" == "stop" ]] && shift && stop_instance $@ && exit $?

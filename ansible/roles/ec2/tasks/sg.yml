@@ -1,6 +1,7 @@
 ---
 - name: Get my current IP address
   ipify_facts:
+    api_url: 'http://api.ipify.org'
 - name: Set variables with list of ports to use
   set_fact:
     aws_ec2_group_local_rule: 
